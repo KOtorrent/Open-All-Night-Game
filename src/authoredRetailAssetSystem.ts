@@ -5,7 +5,8 @@ const MARKET_BASE = 'https://raw.githubusercontent.com/intellicia-public/parasto
 
 /**
  * Runtime bridge for real authored retail models. Primitive gameplay geometry remains collision /
- * fallback. Unvalidated decorative imports are opt-in until their scale/orientation is approved.
+ * fallback. Only visually approved replacements are enabled by default; everything else is opt-in
+ * behind ?experimentalAssets=1 until scale, silhouette and placement have been checked in-game.
  */
 export class AuthoredRetailAssetSystem {
   private readonly registry: AssetRegistry;
@@ -32,17 +33,17 @@ export class AuthoredRetailAssetSystem {
       return;
     }
 
+    // Default graphics baseline: only the three imports that already read correctly enough to keep
+    // testing. The shelf packs and decorative fixtures stay out of the normal scene until approved.
     const jobs: Promise<void>[] = [
       this.replaceRegister(),
       this.replaceCoolerVisual(),
-      this.addShelfHeroSamples(),
       this.addEntryRug()
     ];
 
-    // These models were the mystery objects seen in the milestone playtest. Keep the source and
-    // placements available for future tuning, but do not ship them into the default scene until
-    // each one has been visually validated.
-    if (params.get('experimentalAssets') === '1') jobs.push(this.addRetailAccents());
+    if (params.get('experimentalAssets') === '1') {
+      jobs.push(this.addShelfHeroSamples(), this.addRetailAccents());
+    }
 
     await Promise.allSettled(jobs);
   }
@@ -75,6 +76,17 @@ export class AuthoredRetailAssetSystem {
     }
   }
 
+  private async addEntryRug(): Promise<void> {
+    try {
+      const rug = await this.registry.instantiate('authored-entry-rug', this.app.root, {
+        position: new pc.Vec3(0, 0.025, 9.75), rotation: new pc.Vec3(0, 0, 0), scale: 1.15
+      });
+      rug.name = 'AuthoredEntryRug';
+    } catch (error) {
+      console.warn('Authored entry rug unavailable; continuing without it.', error);
+    }
+  }
+
   private async addShelfHeroSamples(): Promise<void> {
     try {
       const left = await this.registry.instantiate('authored-shelf-boxes', this.app.root, {
@@ -86,18 +98,7 @@ export class AuthoredRetailAssetSystem {
       });
       right.name = 'AuthoredShelfSampleBags';
     } catch (error) {
-      console.warn('Authored shelf samples unavailable; continuing without them.', error);
-    }
-  }
-
-  private async addEntryRug(): Promise<void> {
-    try {
-      const rug = await this.registry.instantiate('authored-entry-rug', this.app.root, {
-        position: new pc.Vec3(0, 0.025, 9.75), rotation: new pc.Vec3(0, 0, 0), scale: 1.15
-      });
-      rug.name = 'AuthoredEntryRug';
-    } catch (error) {
-      console.warn('Authored entry rug unavailable; continuing without it.', error);
+      console.warn('Experimental shelf samples unavailable; continuing without them.', error);
     }
   }
 
