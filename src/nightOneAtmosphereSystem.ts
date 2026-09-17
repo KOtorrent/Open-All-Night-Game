@@ -21,7 +21,8 @@ export class NightOneAtmosphereSystem {
     this.app = app;
     this.state = state;
     this.ui = ui;
-    this.fixture = app.root.findByName('StoreLight-2') ?? app.root.findByName('StoreLight-1') ?? undefined;
+    const fixtureNode = app.root.findByName('StoreLight-2') ?? app.root.findByName('StoreLight-1');
+    this.fixture = fixtureNode instanceof pc.Entity ? fixtureNode : undefined;
     if (this.fixture?.light) this.originalIntensity = this.fixture.light.intensity;
   }
 
