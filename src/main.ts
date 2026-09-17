@@ -12,6 +12,7 @@ import { LateCustomerSystem } from './lateCustomerSystem';
 import { JennaSystem } from './jennaSystem';
 import { DaleSystem } from './daleSystem';
 import { MarcusSystem } from './marcusSystem';
+import { CustomerRouteSafetySystem } from './customerRouteSafetySystem';
 import { PumpSevenSystem } from './pumpSevenSystem';
 import { WindowWatcherSystem } from './windowWatcherSystem';
 import { StorePhoneSystem } from './storePhoneSystem';
@@ -48,7 +49,7 @@ if (!canvas) throw new Error('Missing application canvas');
 const app = new pc.Application(canvas);
 app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
 app.setCanvasResolution(pc.RESOLUTION_AUTO);
-app.scene.ambientLight = new pc.Color(0.045, 0.05, 0.055);
+app.scene.ambientLight = new pc.Color(0.095, 0.102, 0.105);
 app.start();
 
 const resize = () => app.resizeCanvas(canvas.width, canvas.height);
@@ -71,8 +72,6 @@ new StaffDetailSystem(app);
 const performanceProfile = applyPerformanceProfile(app);
 if (performanceProfile.low) console.info(`OPEN ALL NIGHT low-performance profile enabled (${performanceProfile.reason})`);
 
-// Authored retail and character models load asynchronously and gracefully fall back to primitive
-// gameplay geometry if remote sources are unavailable. Collision and logic therefore stay stable.
 const authoredAssets = new AuthoredRetailAssetSystem(app);
 void authoredAssets.start();
 const authoredCharacters = new AuthoredCharacterSystem(app);
@@ -92,12 +91,11 @@ const playerAvatar = new PlayerAvatar(app, player);
 const frontDoor = new FrontDoorSystem(app, player);
 const interactionPolish = new InteractionPolishSystem(app, world, state);
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
-// Register wrappers are intentionally constructed in story order so each later customer can
-// fall back to the previous transaction handler without duplicating checkout logic.
 const jenna = new JennaSystem(app, world, state, ui);
 const lateCustomer = new LateCustomerSystem(app, world, state, ui);
 const dale = new DaleSystem(app, world, state, ui);
 const marcus = new MarcusSystem(app, world, state, ui);
+const customerRouteSafety = new CustomerRouteSafetySystem([nightOne, jenna, lateCustomer, dale, marcus]);
 const receipts = new ReceiptSystem(app, world, state);
 const transactions = new TransactionFeedbackSystem(state);
 const achievements = new AchievementSystem(state);
@@ -134,6 +132,7 @@ app.on('update', (dt: number) => {
   lateCustomer.update(safeDt);
   dale.update(safeDt);
   marcus.update(safeDt);
+  customerRouteSafety.update();
   authoredCharacters.update();
   receipts.update();
   transactions.update();
