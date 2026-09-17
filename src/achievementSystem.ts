@@ -18,6 +18,8 @@ const CHORE_IDS = [
   'closing-coffee'
 ];
 
+const NIGHT1_CUSTOMER_SALES = ['first-sale', 'jenna-sale', 'late-sale', 'dale-sale', 'marcus-sale'];
+
 /**
  * Steam-independent achievement foundation. Unlock state is local for now; the same IDs can later
  * be mirrored to Steamworks without changing gameplay systems.
@@ -34,6 +36,12 @@ export class AchievementSystem {
       title: 'FIRST DAY',
       description: 'Finish your first shift at Case’s.',
       test: (state) => state.isComplete('night1-clock-out')
+    },
+    {
+      id: 'REGULAR',
+      title: 'REGULAR',
+      description: 'Serve every ordinary customer during Night 1.',
+      test: (state) => NIGHT1_CUSTOMER_SALES.every((id) => state.isComplete(id))
     },
     {
       id: 'DALE_WAS_FINE',
@@ -65,22 +73,13 @@ export class AchievementSystem {
 
     this.toast = document.createElement('div');
     this.toast.style.cssText = [
-      'position:fixed',
-      'left:50%',
-      'top:72px',
-      'transform:translate(-50%,-8px)',
-      'min-width:310px',
-      'max-width:460px',
-      'padding:11px 14px',
-      'background:rgba(9,10,9,.94)',
-      'border:1px solid rgba(214,190,101,.42)',
+      'position:fixed', 'left:50%', 'top:72px', 'transform:translate(-50%,-8px)',
+      'min-width:310px', 'max-width:460px', 'padding:11px 14px',
+      'background:rgba(9,10,9,.94)', 'border:1px solid rgba(214,190,101,.42)',
       'box-shadow:0 8px 28px rgba(0,0,0,.55)',
       'font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace',
-      'color:#ddd4a5',
-      'z-index:30',
-      'opacity:0',
-      'transition:opacity .18s ease,transform .18s ease',
-      'pointer-events:none'
+      'color:#ddd4a5', 'z-index:30', 'opacity:0',
+      'transition:opacity .18s ease,transform .18s ease', 'pointer-events:none'
     ].join(';');
     document.body.appendChild(this.toast);
   }
@@ -96,7 +95,6 @@ export class AchievementSystem {
   private unlock(def: AchievementDef): void {
     this.unlocked.add(def.id);
     this.save();
-
     if (this.hideTimer !== undefined) window.clearTimeout(this.hideTimer);
     this.toast.innerHTML = `
       <div style="font-size:10px;letter-spacing:1.6px;color:#b19a52;margin-bottom:3px">ACHIEVEMENT UNLOCKED</div>
@@ -116,9 +114,7 @@ export class AchievementSystem {
       const raw = localStorage.getItem('open-all-night-achievements');
       if (!raw) return;
       const values = JSON.parse(raw) as unknown;
-      if (Array.isArray(values)) {
-        for (const value of values) if (typeof value === 'string') this.unlocked.add(value);
-      }
+      if (Array.isArray(values)) for (const value of values) if (typeof value === 'string') this.unlocked.add(value);
     } catch {
       localStorage.removeItem('open-all-night-achievements');
     }
