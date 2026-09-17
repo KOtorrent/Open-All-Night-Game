@@ -9,6 +9,7 @@ import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
 import { CctvSystem } from './cctvSystem';
+import { RestroomSystem } from './restroomSystem';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -44,6 +45,7 @@ const chores = new ChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
 const power = new PowerSystem(app, world, state, ui);
 new CctvSystem(app, world, ui, player, camera);
+const restroom = new RestroomSystem(app, world, state, ui);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
@@ -52,6 +54,7 @@ app.on('update', (dt: number) => {
   nightOne.update(safeDt);
   chores.update();
   power.update(safeDt);
+  restroom.update(safeDt);
   ambience.update(camera);
 });
 
