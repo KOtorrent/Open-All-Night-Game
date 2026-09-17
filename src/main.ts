@@ -11,6 +11,7 @@ import { NightOneDirector } from './nightOneDirector';
 import { LateCustomerSystem } from './lateCustomerSystem';
 import { DaleSystem } from './daleSystem';
 import { PumpSevenSystem } from './pumpSevenSystem';
+import { ReceiptSystem } from './receiptSystem';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
@@ -67,6 +68,7 @@ const nightOne = new NightOneDirector(app, world, state, ui, camera);
 // fall back to the previous transaction handler without duplicating register logic.
 const lateCustomer = new LateCustomerSystem(app, world, state, ui);
 const dale = new DaleSystem(app, world, state, ui);
+const receipts = new ReceiptSystem(app, world, state);
 const chores = new ChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
 const power = new PowerSystem(app, world, state, ui);
@@ -86,6 +88,7 @@ app.on('update', (dt: number) => {
   nightOne.update(safeDt);
   lateCustomer.update(safeDt);
   dale.update(safeDt);
+  receipts.update();
   chores.update();
   power.update(safeDt);
   restroom.update(safeDt);
