@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, exterior forecourt, and a real shift-ending loop.
+Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, exterior forecourt, a second mundane customer transaction, and a real shift-ending loop.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -27,6 +27,12 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Register transaction foundation with auto-calculated change
 - Register prompt changes contextually: clock in / ring up items / use register
 - First customer visibly places a drink and candy bar on the counter before checkout
+- Second ordinary late-night traveler after 1:10 AM:
+  - chimes in normally after the Silent Customer beat resolves
+  - walks a different shopping route
+  - places water, chips and a lottery slip on the counter
+  - uses the same register transaction path without bypassing earlier checkout logic
+  - leaves a mundane-but-eerie line before departing
 - Night clerk notebook interaction with the three initial Night 1 rules
 - Front-right coffee station and brew task
 - Four stocked aisle fixtures
@@ -89,16 +95,16 @@ When the next human test is worthwhile:
 3. Confirm Pump 5 fuel request appears, console interaction works, and the car is visible outside.
 4. Skip to 12:35 AM and verify delivery truck / manifest / six-carton stock loop.
 5. Check Camera 6 during the delivery to confirm it now watches the exterior loading area.
-6. Use time skip near 5:55 AM and verify the time-clock task and 6:00 AM Night 1 completion.
-7. Continue spot-checking first customer, freezer flicker, Silent Customer, chores, power event and restroom knock.
+6. Resolve the Silent Customer, skip to 1:10 AM, and verify the second ordinary traveler shops, places three items, rings up, and leaves normally.
+7. Use time skip near 5:55 AM and verify the time-clock task and 6:00 AM Night 1 completion.
+8. Continue spot-checking first customer, freezer flicker, chores, power event and restroom knock.
 
 ## Next milestone
 1. Continue building Night 1 in large batches rather than micro-iterations.
 2. Start real GLB/PBR hero-prop replacement through AssetRegistry: POS/register, shelf fixture, coffee machine, ATM, gas pump, cooler, restroom fixtures, trash/dumpster and customer models.
-3. Add another ordinary customer beat and richer checkout variety.
-4. Add delivery/fuel audio and modest animation polish.
-5. Add Night 1 completion persistence / transition shell once the current retail loop is stable.
-6. Improve authored materials/textures while preserving the current lighting mood.
+3. Add delivery/fuel audio and modest animation polish.
+4. Add Night 1 completion persistence / transition shell once the current retail loop is stable.
+5. Improve authored materials/textures while preserving the current lighting mood.
 
 ## Standing rules
 - Commit every meaningful milestone.
