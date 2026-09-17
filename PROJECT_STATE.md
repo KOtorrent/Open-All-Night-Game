@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, multiple ordinary customers, Pump 7 foreshadowing, exterior forecourt, and a complete shift-ending loop.
+Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, multiple ordinary customers, Pump 7 foreshadowing, authored-retail asset integration, exterior forecourt, and a complete shift-ending loop.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -41,6 +41,11 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Freezer Flicker anomaly with Rule 1 zone checking and violation feedback
 - Silent Customer anomaly with no entrance chime and dangerous TALK temptation
 - Timed Night 1 chores: Aisle 1 restock, Aisle 3 spill cleanup, counter trash
+- Late-shift closing work:
+  - 4:35 AM face up Aisle 2
+  - 5:02 AM wipe checkout counter
+  - 5:28 AM top off coffee station for morning
+- Additional restrained atmosphere beats including passing headlights, fluorescent sputter, shelf shift, and a 4:47 AM door chime with nobody entering
 - Rear breaker box and timed partial-power outage with reset task
 - Rear staff area split into enclosed manager office, stock/utility zone, and separate restroom/cooler side
 - Manager office uses one side doorway and has dedicated brighter lighting
@@ -65,18 +70,26 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
   - 6:00 AM completion persistence
   - Night 1 summary overlay reporting rule outcomes, jobs completed, and Dale status
 - Generated ambient audio: interior refrigeration/fluorescent hum and exterior wind/road hiss
-- Reusable GLB/container AssetRegistry ready for authored model replacement
+- Expanded reusable GLB/container AssetRegistry with shared in-flight loading, batch preload and placement support
+- Authored-retail visual layer now attempts real Kenney Mini Market models for:
+  - cash register/POS
+  - standing cooler bank
+  - boxed-product shelf sample
+  - bagged-product shelf sample
+- Primitive gameplay geometry stays as collision/fallback; authored visuals only replace/hide placeholders after successful model loading
+- `?assets=0` disables the authored-retail layer for troubleshooting
+- Asset provenance documented in `docs/ASSET_SOURCES.md`; current raw-GitHub loading is temporary and must be vendored before shipping
 - GitHub Actions build/typecheck validation on PR updates
 
 ## Testing strategy
 Codespaces browser play is resource-constrained. Do not human-test every commit. CI handles compile/type safety and human playtests happen at milestone boundaries.
 
-For milestone testing use `?dev=1` to jump between events. Codespaces automatically uses the lower-cost render profile. Add `?low=0` only when deliberately checking full-quality lighting.
+For milestone testing use `?dev=1` to jump between events. Codespaces automatically uses the lower-cost render profile. Add `?low=0` only when deliberately checking full-quality lighting. Add `?assets=0` only when isolating model-loading issues.
 
 ## Next milestone
-1. Continue Night 1 in coherent batches rather than micro-iterations.
-2. Begin real CC0 GLB/PBR hero-prop replacement through AssetRegistry: POS/register, shelves, cooler, coffee machine, ATM, gas pump, restroom fixtures and customers.
-3. Add another layer of retail polish: receipts, product variety, customer idle behavior and better transaction feedback.
+1. Visually validate the first authored GLB replacements at the next milestone playtest and correct scale/orientation once, then expand that pipeline to ATM, coffee machine, gas pumps, restroom fixtures and customer models.
+2. Continue Night 1 in coherent batches rather than micro-iterations.
+3. Add more customer idle/body-language polish and better register feedback.
 4. Add modest animation/audio polish to fuel and delivery beats.
 5. Improve authored materials/textures while preserving the current dark convenience-store mood.
 6. Only start Night 2 after Night 1 gameplay and art pipeline are convincingly proven.
