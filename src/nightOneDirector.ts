@@ -59,6 +59,7 @@ export class NightOneDirector {
   private customer?: CustomerActor;
   private silentVisitor?: CustomerActor;
   private silentInteractable?: Interactable;
+  private checkoutItems: pc.Entity[] = [];
   private regularSpawned = false;
   private anomalyStarted = false;
   private anomalyTimer = 0;
@@ -106,6 +107,10 @@ export class NightOneDirector {
     if (!register) return;
     const normalAction = register.onInteract;
     register.onInteract = () => {
+      // First press at the register must always perform the player's own clock-in.
+      // A waiting customer can never steal the same interaction and get rung up simultaneously.
+      if (!this.state.isComplete('clock-in')) return normalAction();
+
       if (this.customer?.phase === 'waiting' && !this.customer.served) {
         this.customer.served = true;
         this.customer.phase = 'leaving';
@@ -116,6 +121,7 @@ export class NightOneDirector {
         ];
         this.customer.waypoint = 0;
         this.state.complete('first-sale');
+        this.clearCheckoutItems();
         this.playRegisterBeep();
         return '2 items — $6.47. Cash $10.00. Change $3.53.  "Thanks. See you tomorrow."';
       }
@@ -159,12 +165,43 @@ export class NightOneDirector {
       } else {
         c.phase = 'waiting';
         c.root.setEulerAngles(0, 180, 0);
-        this.ui.showMessage('The customer sets two items on the counter.', 2600);
+        this.spawnCheckoutItems();
+        this.ui.showMessage('The customer sets a drink and a candy bar on the counter.', 2800);
       }
       return;
     }
 
     this.moveActor(c, dt);
+  }
+
+  private spawnCheckoutItems(): void {
+    if (this.checkoutItems.length) return;
+
+    const bottleRoot = new pc.Entity('Checkout-Drink');
+    const bottle = makeMat(new pc.Color(0.08, 0.34, 0.31), 0.34);
+    const cap = makeMat(new pc.Color(0.72, 0.14, 0.06), 0.28);
+    addPrimitive(bottleRoot, 'BottleBody', 'cylinder', new pc.Vec3(0, 0.17, 0), new pc.Vec3(0.20, 0.34, 0.20), bottle);
+    addPrimitive(bottleRoot, 'BottleNeck', 'cylinder', new pc.Vec3(0, 0.39, 0), new pc.Vec3(0.10, 0.14, 0.10), bottle);
+    addPrimitive(bottleRoot, 'BottleCap', 'cylinder', new pc.Vec3(0, 0.49, 0), new pc.Vec3(0.12, 0.06, 0.12), cap);
+    bottleRoot.setPosition(-4.25, 1.39, 8.18);
+    this.app.root.addChild(bottleRoot);
+
+    const candyRoot = new pc.Entity('Checkout-Candy');
+    const wrapper = makeMat(new pc.Color(0.58, 0.055, 0.035), 0.22);
+    const stripe = makeMat(new pc.Color(0.86, 0.70, 0.20), 0.18);
+    const bar = addPrimitive(candyRoot, 'CandyBar', 'box', new pc.Vec3(0, 0.035, 0), new pc.Vec3(0.52, 0.07, 0.22), wrapper);
+    bar.setLocalEulerAngles(0, -11, 0);
+    const stripeMesh = addPrimitive(candyRoot, 'CandyStripe', 'box', new pc.Vec3(0, 0.075, 0), new pc.Vec3(0.20, 0.012, 0.225), stripe);
+    stripeMesh.setLocalEulerAngles(0, -11, 0);
+    candyRoot.setPosition(-3.74, 1.39, 8.12);
+    this.app.root.addChild(candyRoot);
+
+    this.checkoutItems.push(bottleRoot, candyRoot);
+  }
+
+  private clearCheckoutItems(): void {
+    for (const item of this.checkoutItems) item.destroy();
+    this.checkoutItems.length = 0;
   }
 
   private spawnSilentVisitor(): void {
