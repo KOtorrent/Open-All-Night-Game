@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, multiple ordinary customers, Pump 7 foreshadowing, authored retail/character integration, exterior forecourt, achievements foundation, and a complete shift-ending loop.
+Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, multiple ordinary customers, optional office lore, Pump 7/CAM 4 foreshadowing, authored retail/character integration, exterior forecourt, achievements foundation, and a complete shift-ending loop.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -19,37 +19,34 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Readable in-world signage for all four aisles, coffee, employees-only, restroom and Case’s front branding
 - Register transaction foundation with visible merchandise, auto-calculated change and POS-style sale-complete overlay
 - Physical receipts accumulate after Earl, Jenna, traveler, Dale and Marcus transactions
-- Ordinary customers:
-  - opening customer / Earl-style first sale
-  - 12:55 AM Jenna — tired local parent buying milk, aspirin and crackers
-  - 1:10 AM late-night traveler
-  - 2:05 AM Dale — intentionally suspicious and completely harmless forever
-  - 3:42 AM Marcus — normal road worker buying coffee/chips/gum
-- Authored character replacement system watches gameplay actor roots and swaps primitive NPC visuals for real GLBs while preserving movement/interactions/CCTV behavior
+- Ordinary customers: opening customer/Earl, Jenna, late-night traveler, Dale, Marcus
+- Dale remains intentionally suspicious and completely harmless forever
+- Authored character replacement system swaps primitive NPC visuals for real GLBs while preserving movement/interactions/CCTV behavior
 - Authored character variants currently mapped for Earl, Silent Customer, Jenna, traveler, Dale and Marcus
 - `?characters=0` disables authored character replacement; `?assets=0` disables all current authored layers
 - Night clerk notebook with initial three Night 1 rules
 - Freezer Flicker rule event, Silent Customer rule event, 2:00 AM Bathroom Knock rule event
 - Timed chores: Aisle 1 restock, Aisle 3 spill cleanup, counter trash
+- Additional mid-shift chores: 2:34 AM cooler temperature log and 4:02 AM lottery pack count
 - Late-shift chores: 4:35 face Aisle 2, 5:02 wipe counter, 5:28 prep coffee station
 - Pump 5 authorization with visible vehicle and departure
 - Overnight delivery truck / manifest / six-carton stocking loop
 - Pump 7 unattended sedan foreshadow at 3:08 AM, gone at 3:28 AM
-- 1:24 AM counter-phone atmosphere event: optional answer interaction hears only matching refrigeration hum and a click; not a rule/fail state
+- 1:24 AM counter-phone atmosphere event: optional answer hears matching refrigeration hum and a click
+- Optional CAM 4-only figure between 3:33 and 3:44 AM; exists only in the CCTV camera view, disappears after being watched, no rule/fail state
 - 4:25 AM optional Window Watcher visual scare outside the front-right glass; non-failing and not a rule
 - Restrained atmosphere beats: passing headlights, fluorescent sputter, shelf shift, false 4:47 AM entrance chime
+- Manager office now contains three optional lore surfaces:
+  - employee roster seeding Daniel and older L. CASE night-shift history
+  - incident folder mentioning Pump 7 resets with no visible vehicle
+  - old management terminal flagging Pump 7 manual review and Camera 4 image-delay complaints
 - Rear breaker / timed partial power failure
 - Eight-camera CCTV; Camera 4 covers aisles 3–4, Camera 6 rear loading exterior, player body visible on camera
 - Generated interior refrigeration/fluorescent hum and exterior wind/road ambience
-- Employee time clock, 5:55 reminder, 6:00 Night 1 completion and expanded shift summary showing rules, customers, assigned work, Dale status and phone response
-- Local achievement foundation ready for later Steamworks mirroring:
-  - FIRST DAY
-  - REGULAR
-  - DALE WAS FINE
-  - TRUST ISSUES
-  - EMPLOYEE OF THE MONTH
+- Employee time clock, 5:55 reminder, 6:00 Night 1 completion and expanded summary showing rules, customers, work, office records, CAM 4, Dale and phone response
+- Local achievement foundation ready for later Steamworks mirroring: FIRST DAY, REGULAR, DALE WAS FINE, TRUST ISSUES, EMPLOYEE OF THE MONTH
 - Expanded reusable GLB/container AssetRegistry with shared in-flight loading, batch preload and placement support
-- Authored retail visual layer attempts real Kenney Mini Market models for register/POS, standing cooler bank, boxed-product shelf and bagged-product shelf
+- Authored retail layer now attempts real Kenney Mini Market models for register, cooler bank, boxed/bagged shelves, bread display, fruit display, bottle return, two endcaps, chest freezer and entry rug
 - Primitive gameplay geometry remains collision/fallback and is hidden only after authored replacements load successfully
 - Asset provenance documented in `docs/ASSET_SOURCES.md`; raw-GitHub model loading is an integration bridge and must be vendored before Steam shipping
 - GitHub Actions build/typecheck validation on PR updates
@@ -61,10 +58,10 @@ At the next milestone playtest use `?dev=1` to jump among events. Codespaces aut
 
 ## Next milestone
 1. Human-validate authored retail + character GLB scale/orientation and correct once based on screenshots.
-2. Expand real-asset replacement to ATM, coffee machine, pumps, restroom fixtures, office furniture and more retail props.
+2. Expand authored replacement toward ATM, coffee machine, pumps, restroom fixtures and office furniture when verified source models are available.
 3. Improve customer motion/idle presentation after authored characters are visually confirmed.
-4. Add more diegetic transaction/retail feedback and environmental texture identity.
-5. Keep Night 1 gameplay coherent and polished before beginning Night 2.
+4. Add more environmental texture/material identity while preserving the current dark convenience-store mood.
+5. Keep Night 1 coherent and polished before beginning Night 2.
 
 ## Standing rules
 - Commit every meaningful milestone.
