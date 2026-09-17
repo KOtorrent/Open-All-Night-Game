@@ -3,14 +3,16 @@ import type { GameUI } from './ui';
 interface SaveData {
   gameMinutes: number;
   completed: string[];
+  dynamicTasks: Array<{ id: string; text: string }>;
 }
 
 export class GameState {
   private readonly ui: GameUI;
   private gameMinutes = 22 * 60 + 55;
   private completed = new Set<string>();
+  private dynamicTasks: Array<{ id: string; text: string }> = [];
   private autosaveTimer = 0;
-  private readonly tasks = [
+  private readonly baseTasks = [
     { id: 'clock-in', text: 'Clock in at the register' },
     { id: 'coffee', text: 'Start a fresh pot of coffee' },
     { id: 'notebook', text: 'Read the night clerk notebook' }
@@ -34,6 +36,10 @@ export class GameState {
     this.ui.setClock(this.formatClock(this.gameMinutes));
   }
 
+  getGameMinutes(): number {
+    return this.gameMinutes;
+  }
+
   complete(id: string): boolean {
     if (this.completed.has(id)) return false;
     this.completed.add(id);
@@ -46,8 +52,27 @@ export class GameState {
     return this.completed.has(id);
   }
 
+  addTask(id: string, text: string): void {
+    if (this.baseTasks.some((task) => task.id === id) || this.dynamicTasks.some((task) => task.id === id)) {
+      this.refreshUI();
+      return;
+    }
+    this.dynamicTasks.push({ id, text });
+    this.save();
+    this.refreshUI();
+  }
+
+  resetSave(): void {
+    this.gameMinutes = 22 * 60 + 55;
+    this.completed.clear();
+    this.dynamicTasks = [];
+    localStorage.removeItem('open-all-night-poc-save');
+    this.refreshUI();
+  }
+
   private refreshUI(): void {
-    this.ui.setTasks(this.tasks.map((task) => ({ text: task.text, done: this.completed.has(task.id) })));
+    const tasks = [...this.baseTasks, ...this.dynamicTasks];
+    this.ui.setTasks(tasks.map((task) => ({ text: task.text, done: this.completed.has(task.id) })));
     this.ui.setClock(this.formatClock(this.gameMinutes));
   }
 
@@ -62,7 +87,11 @@ export class GameState {
   }
 
   private save(): void {
-    const data: SaveData = { gameMinutes: this.gameMinutes, completed: [...this.completed] };
+    const data: SaveData = {
+      gameMinutes: this.gameMinutes,
+      completed: [...this.completed],
+      dynamicTasks: this.dynamicTasks
+    };
     localStorage.setItem('open-all-night-poc-save', JSON.stringify(data));
   }
 
@@ -73,6 +102,11 @@ export class GameState {
       const data = JSON.parse(raw) as Partial<SaveData>;
       if (typeof data.gameMinutes === 'number') this.gameMinutes = data.gameMinutes;
       if (Array.isArray(data.completed)) this.completed = new Set(data.completed);
+      if (Array.isArray(data.dynamicTasks)) {
+        this.dynamicTasks = data.dynamicTasks.filter((task): task is { id: string; text: string } =>
+          typeof task?.id === 'string' && typeof task?.text === 'string'
+        );
+      }
     } catch {
       localStorage.removeItem('open-all-night-poc-save');
     }
