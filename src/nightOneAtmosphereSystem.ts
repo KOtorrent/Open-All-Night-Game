@@ -13,6 +13,7 @@ export class NightOneAtmosphereSystem {
   private flickerDone = false;
   private roadPassDone = false;
   private shelfKnockDone = false;
+  private falseChimeDone = false;
   private fixture?: pc.Entity;
   private originalIntensity = 0;
   private flickerTimer = 0;
@@ -52,6 +53,14 @@ export class NightOneAtmosphereSystem {
       this.ui.showMessage('Something shifts on a shelf somewhere behind you.', 2600);
       this.tapSound();
     }
+
+    if (!this.falseChimeDone && minute >= 28 * 60 + 47) {
+      this.falseChimeDone = true;
+      this.playDoorChime();
+      window.setTimeout(() => {
+        this.ui.showMessage('Nobody comes through the door.', 2600);
+      }, 950);
+    }
   }
 
   private sweepRoadLight(): void {
@@ -76,20 +85,30 @@ export class NightOneAtmosphereSystem {
     step();
   }
 
+  private playDoorChime(): void {
+    this.tone(660, 0.07, 0.05, 0);
+    this.tone(880, 0.11, 0.04, 0.09);
+  }
+
   private tapSound(): void {
+    this.tone(88, 0.12, 0.018, 0, 'square');
+  }
+
+  private tone(frequency: number, duration: number, volume: number, delay: number, type: OscillatorType = 'sine'): void {
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ctx = new AudioCtx();
       const oscillator = ctx.createOscillator();
       const gain = ctx.createGain();
-      oscillator.type = 'square';
-      oscillator.frequency.value = 88;
-      gain.gain.value = 0.018;
+      oscillator.type = type;
+      oscillator.frequency.value = frequency;
+      gain.gain.value = volume;
       oscillator.connect(gain);
       gain.connect(ctx.destination);
-      oscillator.start();
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
-      oscillator.stop(ctx.currentTime + 0.13);
+      const start = ctx.currentTime + delay;
+      oscillator.start(start);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.stop(start + duration + 0.02);
       oscillator.addEventListener('ended', () => void ctx.close());
     } catch {
       // Atmosphere audio must never block gameplay.
