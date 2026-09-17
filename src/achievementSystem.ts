@@ -13,6 +13,8 @@ const CHORE_IDS = [
   'take-trash',
   'delivery-manifest',
   'delivery-stocked',
+  'cooler-temp-log',
+  'lottery-count',
   'closing-faceup',
   'closing-counter',
   'closing-coffee'
