@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import type { BuiltWorld, Interactable } from './gameTypes';
+import type { BuiltWorld } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
 
@@ -50,8 +50,6 @@ export class RestroomSystem {
     private readonly state: GameState,
     private readonly ui: GameUI
   ) {
-    // IMPORTANT: the manager office is authored exclusively by staffAreaBuilder.
-    // This system owns only the restroom so the two rooms can never overlap/duplicate again.
     this.buildRestroom();
   }
 
@@ -78,66 +76,69 @@ export class RestroomSystem {
   }
 
   private buildRestroom(): void {
-    const wall = mat(new pc.Color(0.34, 0.37, 0.36), 0, 0.15);
-    const tile = mat(new pc.Color(0.44, 0.46, 0.43), 0, 0.30);
-    const ceramic = mat(new pc.Color(0.82, 0.82, 0.74), 0, 0.52);
-    const steel = mat(new pc.Color(0.36, 0.38, 0.37), 0.7, 0.44);
-    const doorMat = mat(new pc.Color(0.17, 0.18, 0.17), 0.2, 0.23);
+    const wall = mat(new pc.Color(0.36, 0.39, 0.38), 0, 0.15);
+    const tile = mat(new pc.Color(0.46, 0.49, 0.46), 0, 0.30);
+    const ceramic = mat(new pc.Color(0.84, 0.84, 0.78), 0, 0.52);
+    const steel = mat(new pc.Color(0.38, 0.40, 0.39), 0.7, 0.44);
+    const doorMat = mat(new pc.Color(0.16, 0.17, 0.17), 0.2, 0.23);
 
-    // Dedicated room on the right side of the stock area. There is a full stock/utility gap
-    // between this room and the manager office on the far left.
+    // The restroom is now a fully enclosed room BEHIND the employee divider, with its only door
+    // on the west wall facing the stock corridor. There is no restroom opening visible from the
+    // sales floor anymore, so it cannot read as a second employee doorway or overlap the office.
     const cx = -1.25;
     const frontZ = -8.55;
     const backZ = -11.82;
     const leftX = -2.45;
     const rightX = -0.05;
+    const doorZ = -9.62;
 
     box(this.app, 'RestroomFloor', new pc.Vec3(cx, 0.015, -10.18), new pc.Vec3(2.40, 0.08, 3.28), tile);
     box(this.app, 'RestroomCeiling', new pc.Vec3(cx, 3.08, -10.18), new pc.Vec3(2.40, 0.12, 3.28), wall);
-    box(this.app, 'RestroomLeftWall', new pc.Vec3(leftX, 1.55, -10.18), new pc.Vec3(0.16, 3.10, 3.28), wall);
     box(this.app, 'RestroomRightWall', new pc.Vec3(rightX, 1.55, -10.18), new pc.Vec3(0.16, 3.10, 3.28), wall);
     box(this.app, 'RestroomBackWall', new pc.Vec3(cx, 1.55, backZ), new pc.Vec3(2.40, 3.10, 0.16), wall);
+    box(this.app, 'RestroomFrontWall', new pc.Vec3(cx, 1.55, frontZ), new pc.Vec3(2.40, 3.10, 0.16), wall);
 
-    // Front wall is split around ONE doorway and includes a header so there is no see-through gap.
-    box(this.app, 'RestroomFrontWallL', new pc.Vec3(-2.04, 1.55, frontZ), new pc.Vec3(0.66, 3.10, 0.16), wall);
-    box(this.app, 'RestroomFrontWallR', new pc.Vec3(-0.46, 1.55, frontZ), new pc.Vec3(0.66, 3.10, 0.16), wall);
-    box(this.app, 'RestroomDoorHeader', new pc.Vec3(cx, 2.82, frontZ), new pc.Vec3(0.92, 0.56, 0.16), wall);
+    // West/left wall split around ONE side-facing doorway.
+    box(this.app, 'RestroomLeftWallFront', new pc.Vec3(leftX, 1.55, -8.83), new pc.Vec3(0.16, 3.10, 0.56), wall);
+    box(this.app, 'RestroomLeftWallBack', new pc.Vec3(leftX, 1.55, -10.95), new pc.Vec3(0.16, 3.10, 1.74), wall);
+    box(this.app, 'RestroomDoorHeader', new pc.Vec3(leftX, 2.82, doorZ), new pc.Vec3(0.16, 0.56, 0.98), wall);
 
-    this.door = box(this.app, 'RestroomDoor', new pc.Vec3(cx, 1.38, -8.48), new pc.Vec3(0.90, 2.70, 0.11), doorMat);
-    cylinder(this.app, 'RestroomKnob', new pc.Vec3(-0.93, 1.35, -8.40), new pc.Vec3(0.09, 0.09, 0.09), steel).setEulerAngles(90, 0, 0);
+    this.door = box(this.app, 'RestroomDoor', new pc.Vec3(-2.39, 1.38, doorZ), new pc.Vec3(0.11, 2.70, 0.92), doorMat);
+    cylinder(this.app, 'RestroomKnob', new pc.Vec3(-2.30, 1.35, -9.32), new pc.Vec3(0.09, 0.09, 0.09), steel).setEulerAngles(0, 0, 90);
 
-    cylinder(this.app, 'RestroomToiletBase', new pc.Vec3(-1.70, 0.28, -11.00), new pc.Vec3(0.52, 0.48, 0.65), ceramic);
-    cylinder(this.app, 'RestroomToiletBowl', new pc.Vec3(-1.70, 0.52, -10.84), new pc.Vec3(0.60, 0.20, 0.78), ceramic);
-    box(this.app, 'RestroomToiletTank', new pc.Vec3(-1.70, 0.78, -11.31), new pc.Vec3(0.72, 0.78, 0.30), ceramic);
-    box(this.app, 'RestroomSink', new pc.Vec3(-0.72, 0.90, -9.60), new pc.Vec3(0.72, 0.16, 0.52), ceramic);
-    cylinder(this.app, 'RestroomSinkPedestal', new pc.Vec3(-0.72, 0.46, -9.60), new pc.Vec3(0.28, 0.76, 0.28), ceramic);
-    cylinder(this.app, 'RestroomFaucet', new pc.Vec3(-0.72, 1.08, -9.76), new pc.Vec3(0.07, 0.22, 0.07), steel);
-    box(this.app, 'RestroomMirror', new pc.Vec3(-0.14, 1.78, -9.60), new pc.Vec3(0.05, 0.95, 0.78), steel);
+    // Fixtures intentionally remain on the far/right and rear walls so nothing clips into the
+    // manager office or protrudes into the stock corridor.
+    cylinder(this.app, 'RestroomToiletBase', new pc.Vec3(-1.58, 0.28, -11.02), new pc.Vec3(0.52, 0.48, 0.65), ceramic);
+    cylinder(this.app, 'RestroomToiletBowl', new pc.Vec3(-1.58, 0.52, -10.84), new pc.Vec3(0.60, 0.20, 0.78), ceramic);
+    box(this.app, 'RestroomToiletTank', new pc.Vec3(-1.58, 0.78, -11.31), new pc.Vec3(0.72, 0.78, 0.30), ceramic);
+    box(this.app, 'RestroomSink', new pc.Vec3(-0.62, 0.90, -10.02), new pc.Vec3(0.72, 0.16, 0.52), ceramic);
+    cylinder(this.app, 'RestroomSinkPedestal', new pc.Vec3(-0.62, 0.46, -10.02), new pc.Vec3(0.28, 0.76, 0.28), ceramic);
+    cylinder(this.app, 'RestroomFaucet', new pc.Vec3(-0.62, 1.08, -10.18), new pc.Vec3(0.07, 0.22, 0.07), steel);
+    box(this.app, 'RestroomMirror', new pc.Vec3(-0.14, 1.78, -10.02), new pc.Vec3(0.05, 0.95, 0.78), steel);
 
-    // Bright enough to read clearly but still colder than the manager office.
     const light = new pc.Entity('RestroomCeilingLight');
     light.addComponent('light', {
       type: 'omni',
-      color: new pc.Color(0.80, 0.88, 0.86),
-      intensity: 0.78,
-      range: 4.0,
+      color: new pc.Color(0.82, 0.90, 0.88),
+      intensity: 0.88,
+      range: 4.2,
       castShadows: false
     });
     light.setPosition(cx, 2.72, -10.0);
     this.app.root.addChild(light);
 
-    addCollider(this.world, leftX, -10.18, 0.16, 3.28, 'Restroom left wall');
     addCollider(this.world, rightX, -10.18, 0.16, 3.28, 'Restroom right wall');
     addCollider(this.world, cx, backZ, 2.40, 0.16, 'Restroom back wall');
-    addCollider(this.world, -2.04, frontZ, 0.66, 0.16, 'Restroom front wall L');
-    addCollider(this.world, -0.46, frontZ, 0.66, 0.16, 'Restroom front wall R');
-    addCollider(this.world, cx, frontZ + 0.03, 0.90, 0.18, 'Restroom door');
+    addCollider(this.world, cx, frontZ, 2.40, 0.16, 'Restroom front wall');
+    addCollider(this.world, leftX, -8.83, 0.16, 0.56, 'Restroom left wall front');
+    addCollider(this.world, leftX, -10.95, 0.16, 1.74, 'Restroom left wall back');
+    addCollider(this.world, leftX + 0.03, doorZ, 0.18, 0.92, 'Restroom door');
 
     this.world.interactables.push({
       id: 'restroom-door',
       label: 'check restroom',
-      position: new pc.Vec3(cx, 1.45, -8.18),
-      radius: 2.25,
+      position: new pc.Vec3(-2.78, 1.45, doorZ),
+      radius: 2.15,
       aimRadius: 0.46,
       onInteract: () => this.useDoor()
     });
@@ -166,7 +167,7 @@ export class RestroomSystem {
 
   private bumpDoor(): void {
     if (!this.door) return;
-    this.door.setLocalScale(0.92, 2.70, 0.12);
-    window.setTimeout(() => this.door?.setLocalScale(0.90, 2.70, 0.11), 90);
+    this.door.setLocalScale(0.12, 2.70, 0.94);
+    window.setTimeout(() => this.door?.setLocalScale(0.11, 2.70, 0.92), 90);
   }
 }
