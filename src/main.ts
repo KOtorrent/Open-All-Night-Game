@@ -5,6 +5,7 @@ import { GameSession } from './gameSession';
 import { GameFrameworkUI } from './gameFrameworkUI';
 import { AnomalyRuntime } from './anomalyRuntime';
 import { FrameworkNightDirector } from './frameworkNightDirector';
+import { CampaignCompletionSystem } from './campaignCompletionSystem';
 import { buildStore } from './storeBuilder';
 import { buildExterior } from './exteriorBuilder';
 import { buildStaffArea } from './staffAreaBuilder';
@@ -127,6 +128,7 @@ const storePhone = new StorePhoneSystem(app, world, state, ui);
 const rearDoorRattle = new RearDoorRattleSystem(world, state, ui);
 const impossibleReceipt = new ImpossibleReceiptSystem(app, world, state, ui);
 const shiftEnd = new ShiftEndSystem(app, world, state, ui, session.progression);
+const campaignCompletion = new CampaignCompletionSystem(world, state, session, ui);
 void officeLore;
 
 const runNightOneContent = session.config.mode !== 'endless' && session.config.night === 1;
@@ -173,6 +175,7 @@ app.on('update', (dt: number) => {
     if (anomaly) void anomalyRuntime.trigger(anomaly);
   } else {
     frameworkNight.update();
+    campaignCompletion.update();
   }
 });
 
