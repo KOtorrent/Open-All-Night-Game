@@ -31,6 +31,7 @@ import { AuthoredRetailAssetSystem } from './authoredRetailAssetSystem';
 import { AuthoredCharacterSystem } from './authoredCharacterSystem';
 import { StoreSignageSystem } from './storeSignageSystem';
 import { StaffDetailSystem } from './staffDetailSystem';
+import { VisualPolishSystem } from './visualPolishSystem';
 import { FrontDoorSystem } from './frontDoorSystem';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
@@ -69,6 +70,7 @@ buildExterior(app, world.colliders);
 buildStaffArea(app, world);
 new StoreSignageSystem(app);
 new StaffDetailSystem(app);
+new VisualPolishSystem(app);
 const performanceProfile = applyPerformanceProfile(app);
 if (performanceProfile.low) console.info(`OPEN ALL NIGHT low-performance profile enabled (${performanceProfile.reason})`);
 

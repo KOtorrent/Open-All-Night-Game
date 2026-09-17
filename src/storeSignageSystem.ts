@@ -20,6 +20,7 @@ export class StoreSignageSystem {
     const serviceStyle: SignStyle = { background: '#7d221b', foreground: '#fff0d4', border: '#d8b28b' };
     const utilityStyle: SignStyle = { background: '#282b29', foreground: '#ece6cc', border: '#8b8c7b' };
     const exteriorStyle: SignStyle = { background: '#163d26', foreground: '#fff0c2', border: '#d7be63', sub: '#f0c85a' };
+    const pumpStyle: SignStyle = { background: '#751d18', foreground: '#fff5d8', border: '#dac37b', sub: '#f0d986' };
 
     this.createDoubleSign('AisleSign1', new pc.Vec3(-5.1, 3.35, 5.0), new pc.Vec2(1.65, 0.48), 'AISLE 1', 'SNACKS • CANDY', aisleStyle);
     this.createDoubleSign('AisleSign2', new pc.Vec3(-1.7, 3.35, 5.0), new pc.Vec2(1.65, 0.48), 'AISLE 2', 'HOUSEHOLD', aisleStyle);
@@ -31,18 +32,30 @@ export class StoreSignageSystem {
     this.createWallSign('RestroomSign', new pc.Vec3(-1.25, 2.55, -8.42), new pc.Vec2(1.35, 0.46), new pc.Vec3(0, 0, 0), 'RESTROOM', '', utilityStyle);
 
     // Large facade sign, oriented toward the forecourt (positive Z).
-    this.createWallSign('CasesFrontBrand', new pc.Vec3(0, 3.48, 12.14), new pc.Vec2(5.4, 0.95), new pc.Vec3(0, 180, 0), "CASE'S COUNTRY GAS STOP", 'FOOD • FUEL • OPEN 24 HOURS', exteriorStyle, 1.25);
+    this.createWallSign('CasesFrontBrand', new pc.Vec3(0, 3.48, 12.24), new pc.Vec2(5.8, 1.02), new pc.Vec3(0, 180, 0), "CASE'S COUNTRY GAS STOP", 'FOOD • FUEL • OPEN 24 HOURS', exteriorStyle, 1.35);
 
-    // The old exteriorBuilder only supplied a blank green roadside panel. Put actual readable
-    // branded faces on both sides so the station identity is visible from the road and forecourt.
-    this.createDoubleSign('RoadsideBrand', new pc.Vec3(-11.5, 5.0, 36.84), new pc.Vec2(3.9, 1.62), "CASE'S", 'COUNTRY GAS • OPEN 24 HOURS', exteriorStyle, 1.15);
+    // Small window decals make the storefront read like a real rural convenience store from the pumps.
+    this.createWallSign('FrontWindowCoffeeDecal', new pc.Vec3(4.2, 2.15, 12.02), new pc.Vec2(1.50, 0.44), new pc.Vec3(0, 180, 0), 'HOT COFFEE', 'ALL NIGHT', serviceStyle, 0.95);
+    this.createWallSign('FrontWindowAtmDecal', new pc.Vec3(-4.2, 2.15, 12.02), new pc.Vec2(1.20, 0.44), new pc.Vec3(0, 180, 0), 'ATM', 'INSIDE', utilityStyle, 0.82);
+
+    // The exteriorBuilder supplies the structural roadside panel; these faces turn it into a sign.
+    this.createDoubleSign('RoadsideBrand', new pc.Vec3(-11.5, 5.0, 36.84), new pc.Vec2(3.9, 1.62), "CASE'S", 'COUNTRY GAS • OPEN 24 HOURS', exteriorStyle, 1.20);
+
+    // Eight pump number placards: clear enough to make Pump 7 an actual navigable landmark.
+    const pumpPositions: Array<[number, number, number]> = [
+      [1, -5.9, 25.3], [2, -4.5, 25.3], [3, 4.5, 25.3], [4, 5.9, 25.3],
+      [5, -5.9, 30.7], [6, -4.5, 30.7], [7, 4.5, 30.7], [8, 5.9, 30.7]
+    ];
+    for (const [number, x, z] of pumpPositions) {
+      this.createDoubleSign(`PumpNumber-${number}`, new pc.Vec3(x, 2.33, z), new pc.Vec2(0.54, 0.38), `PUMP ${number}`, '', pumpStyle, 0.88);
+    }
 
     const facadeLight = new pc.Entity('FacadeSignLight');
     facadeLight.addComponent('light', {
       type: 'omni',
       color: new pc.Color(0.95, 0.78, 0.42),
-      intensity: 0.55,
-      range: 7.0,
+      intensity: 0.62,
+      range: 7.5,
       castShadows: false
     });
     facadeLight.setPosition(0, 3.35, 13.0);
@@ -112,7 +125,8 @@ export class StoreSignageSystem {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = style.foreground;
-    ctx.font = '700 44px monospace';
+    const titleSize = title.length > 18 ? 34 : title.length > 10 ? 40 : 48;
+    ctx.font = `700 ${titleSize}px monospace`;
     ctx.fillText(title, canvas.width / 2, subtitle ? 64 : 80);
 
     if (subtitle) {
