@@ -19,6 +19,10 @@ This is the implementation timeline for the vertical slice, not final locked nar
 - 3:08 AM — unattended sedan appears at Pump 7
 - 3:28 AM — Pump 7 sedan is gone
 - 4:12 AM — distant shelf-shift atmosphere beat
+- 4:35 AM — closing chore: face up Aisle 2
+- 4:47 AM — entrance chime rings; nobody enters
+- 5:02 AM — closing chore: wipe checkout counter
+- 5:28 AM — closing chore: set coffee station for morning
 - 5:55 AM — clock-out reminder
 - 6:00 AM — clock out / Night 1 summary
 
