@@ -3,7 +3,7 @@ import type { BuiltWorld, Interactable } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
 
-type CustomerPhase = 'entering' | 'shopping' | 'approaching' | 'waiting' | 'leaving' | 'done';
+type CustomerPhase = 'entering' | 'shopping' | 'waiting' | 'leaving' | 'done';
 
 interface CustomerActor {
   root: pc.Entity;
@@ -32,9 +32,9 @@ function addPrimitive(parent: pc.Entity, name: string, type: 'box' | 'sphere' | 
   return e;
 }
 
-function createCustomer(app: pc.Application, name: string, coat: pc.Color): pc.Entity {
+function createCustomer(app: pc.Application, name: string, coat: pc.Color, pale = false): pc.Entity {
   const root = new pc.Entity(name);
-  const skin = makeMat(new pc.Color(0.48, 0.38, 0.30), 0.16);
+  const skin = makeMat(pale ? new pc.Color(0.70, 0.68, 0.61) : new pc.Color(0.48, 0.38, 0.30), 0.16);
   const cloth = makeMat(coat, 0.12);
   const dark = makeMat(new pc.Color(0.035, 0.04, 0.045), 0.10);
 
@@ -55,13 +55,20 @@ export class NightOneDirector {
   private readonly state: GameState;
   private readonly ui: GameUI;
   private readonly camera: pc.Entity;
+  private readonly interactables: Interactable[];
   private customer?: CustomerActor;
+  private silentVisitor?: CustomerActor;
+  private silentInteractable?: Interactable;
   private regularSpawned = false;
   private anomalyStarted = false;
   private anomalyTimer = 0;
+  private anomalyFinished = false;
+  private freezerViolationSeconds = 0;
+  private freezerWarningShown = false;
+  private silentSpawned = false;
+  private silentWaitTimer = 0;
   private coolerLights: pc.Entity[] = [];
   private playerWasOutside = false;
-  private transactionInteractable?: Interactable;
   private lastChimeAt = -100;
   private elapsed = 0;
 
@@ -70,6 +77,7 @@ export class NightOneDirector {
     this.state = state;
     this.ui = ui;
     this.camera = camera;
+    this.interactables = world.interactables;
     this.installRegisterTransaction(world.interactables);
     this.buildCoolerLighting();
   }
@@ -78,6 +86,7 @@ export class NightOneDirector {
     this.elapsed += dt;
     this.updateEntranceSensor();
     this.updateCustomer(dt);
+    this.updateSilentVisitor(dt);
 
     const minutes = this.state.getGameMinutes();
     if (!this.regularSpawned && (minutes >= 23 * 60 + 5 || this.elapsed > 7)) this.spawnRegular();
@@ -86,6 +95,10 @@ export class NightOneDirector {
       this.startFreezerFlicker();
     }
     if (this.anomalyStarted && this.anomalyTimer > 0) this.updateFreezerFlicker(dt);
+
+    if (this.anomalyFinished && !this.silentSpawned && (minutes >= 23 * 60 + 35 || this.elapsed > 58)) {
+      this.spawnSilentVisitor();
+    }
   }
 
   private installRegisterTransaction(interactables: Interactable[]): void {
@@ -103,13 +116,11 @@ export class NightOneDirector {
         ];
         this.customer.waypoint = 0;
         this.state.complete('first-sale');
-        this.state.addTask('first-sale', 'Serve the first customer');
         this.playRegisterBeep();
         return '2 items — $6.47. Cash $10.00. Change $3.53.  "Thanks. See you tomorrow."';
       }
       return normalAction();
     };
-    this.transactionInteractable = register;
   }
 
   private spawnRegular(): void {
@@ -153,6 +164,94 @@ export class NightOneDirector {
       return;
     }
 
+    this.moveActor(c, dt);
+  }
+
+  private spawnSilentVisitor(): void {
+    this.silentSpawned = true;
+    const root = createCustomer(this.app, 'Silent-Customer', new pc.Color(0.055, 0.055, 0.065), true);
+    root.setPosition(0, 0, 13.8);
+    root.setEulerAngles(0, 180, 0);
+    this.silentVisitor = {
+      root,
+      phase: 'entering',
+      waypoint: 0,
+      speed: 1.35,
+      served: false,
+      route: [
+        new pc.Vec3(0, 0, 10.2),
+        new pc.Vec3(-1.4, 0, 7.0),
+        new pc.Vec3(-3.5, 0, 7.25)
+      ]
+    };
+    // Intentionally NO chime and NO arrival message. Rule 2 is noticed through absence.
+  }
+
+  private updateSilentVisitor(dt: number): void {
+    const c = this.silentVisitor;
+    if (!c || c.phase === 'done') return;
+
+    if (c.phase === 'waiting') {
+      this.silentWaitTimer += dt;
+      if (this.silentWaitTimer > 14) {
+        this.removeSilentInteractable();
+        c.phase = 'leaving';
+        c.route = [
+          new pc.Vec3(-1.0, 0, 8.6),
+          new pc.Vec3(0, 0, 10.4),
+          new pc.Vec3(0, 0, 13.8)
+        ];
+        c.waypoint = 0;
+        if (!this.state.isComplete('silent-rule-broken')) {
+          this.state.complete('silent-customer-survived');
+          this.ui.showMessage('Without a word, the customer turns toward the door.', 2800);
+        }
+      }
+      return;
+    }
+
+    if (c.waypoint >= c.route.length) {
+      if (c.phase === 'leaving') {
+        c.phase = 'done';
+        c.root.enabled = false;
+        // Still no chime. That absence is the point.
+      } else {
+        c.phase = 'waiting';
+        c.root.setEulerAngles(0, 180, 0);
+        this.installSilentInteractable(c);
+      }
+      return;
+    }
+
+    this.moveActor(c, dt);
+  }
+
+  private installSilentInteractable(c: CustomerActor): void {
+    const item: Interactable = {
+      id: 'silent-customer',
+      label: 'talk',
+      position: new pc.Vec3(-3.5, 1.5, 7.25),
+      radius: 2.6,
+      onInteract: () => {
+        if (this.state.isComplete('silent-rule-broken')) return 'It keeps staring at you.';
+        this.state.complete('silent-rule-broken');
+        this.ui.flashWarning('RULE BROKEN');
+        c.root.setLocalScale(0.90, 0.98, 0.90);
+        return '"..."  Its smile widens. You do not remember hearing the door chime.';
+      }
+    };
+    this.silentInteractable = item;
+    this.interactables.push(item);
+  }
+
+  private removeSilentInteractable(): void {
+    if (!this.silentInteractable) return;
+    const index = this.interactables.indexOf(this.silentInteractable);
+    if (index >= 0) this.interactables.splice(index, 1);
+    this.silentInteractable = undefined;
+  }
+
+  private moveActor(c: CustomerActor, dt: number): void {
     const pos = c.root.getPosition().clone();
     const target = c.route[c.waypoint];
     const delta = new pc.Vec3().sub2(target, pos);
@@ -189,6 +288,7 @@ export class NightOneDirector {
   private startFreezerFlicker(): void {
     this.anomalyStarted = true;
     this.anomalyTimer = 10;
+    this.freezerViolationSeconds = 0;
     this.ui.showMessage('The freezer lights begin to flash.', 3600);
   }
 
@@ -198,10 +298,27 @@ export class NightOneDirector {
     for (const entity of this.coolerLights) {
       if (entity.light) entity.light.intensity = on ? 0.7 : 0.015;
     }
+
+    const p = this.camera.getPosition();
+    const insideAisle4Zone = p.z < -8.15 && p.x > 0.1;
+    if (insideAisle4Zone) {
+      this.freezerViolationSeconds += dt;
+      if (!this.freezerWarningShown && this.freezerViolationSeconds > 1.1) {
+        this.freezerWarningShown = true;
+        this.ui.showMessage('Rule 1: leave Aisle 4 until the lights stop.', 2600);
+      }
+    }
+
     if (this.anomalyTimer <= 0) {
       for (const entity of this.coolerLights) if (entity.light) entity.light.intensity = 0.55;
-      this.ui.showMessage('The freezer lights stop. The hum returns to normal.', 3200);
-      this.state.complete('freezer-flicker-survived');
+      this.anomalyFinished = true;
+      if (this.freezerViolationSeconds > 4) {
+        this.state.complete('freezer-rule-broken');
+        this.ui.flashWarning('YOU STAYED TOO LONG');
+      } else {
+        this.state.complete('freezer-flicker-survived');
+        this.ui.showMessage('The freezer lights stop. The hum returns to normal.', 3200);
+      }
     }
   }
 
