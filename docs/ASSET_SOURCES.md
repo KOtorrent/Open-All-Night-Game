@@ -11,6 +11,12 @@ Open All Night prefers real authored 3D assets for hero props. This file records
 - Intended use: register, shelves, freezer/cooler, retail fixtures and related store props
 - Notes: CC0 permits commercial use and modification; attribution is not required but source should remain documented here.
 
+### Kenney Mini Characters
+- Creator: Kenney
+- License: Creative Commons CC0 1.0 Universal
+- Intended use: temporary-to-midterm authored customer models while the final character art direction is established
+- Notes: current customer replacement layer uses several male/female variants while preserving gameplay actor roots and primitive fallbacks.
+
 ### Kenney Food Kit
 - Source: https://kenney.nl/assets/food-kit
 - Creator: Kenney
@@ -25,13 +31,15 @@ Open All Night prefers real authored 3D assets for hero props. This file records
 
 ## Temporary runtime mirror used during integration
 
-To prove the authored-model pipeline before binary assets are vendored into this repository, the current build can load selected Kenney Mini Market GLBs from:
+To prove the authored-model pipeline before binary assets are vendored into this repository, the current build can load selected Kenney GLBs from:
 
 - Repository: `intellicia-public/parastore`
 - Repository license: MIT
-- Paths: `frontend/public/assets/market/*.glb`
-- Models currently referenced: `cash-register.glb`, `freezers-standing.glb`, `shelf-boxes.glb`, `shelf-bags.glb`
-- Original asset family is identified by that repository as Kenney Mini Market.
+- Retail paths: `frontend/public/assets/market/*.glb`
+- Character paths: `frontend/public/assets/characters/*.glb`
+- Retail models currently referenced: `cash-register.glb`, `freezers-standing.glb`, `shelf-boxes.glb`, `shelf-bags.glb`
+- Character models currently referenced: `character-male-a.glb`, `character-male-c.glb`, `character-male-d.glb`, `character-male-f.glb`, `character-female-f.glb`
+- Original asset families are identified by that repository as Kenney Mini Market and Kenney Mini Characters.
 
 This is an integration bridge, not the intended shipping arrangement. Before Steam packaging, copy only the actually-used models into this repository (or another controlled game asset store), preserve this provenance record, and remove the runtime dependency on raw GitHub URLs.
 

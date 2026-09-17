@@ -19,7 +19,7 @@ export class ReceiptSystem {
   private readonly state: GameState;
   private readonly receiptMat = mat(new pc.Color(0.74, 0.72, 0.62), 0.05);
   private spawned = new Set<string>();
-  private readonly saleIds = ['first-sale', 'late-sale', 'dale-sale'];
+  private readonly saleIds = ['first-sale', 'late-sale', 'dale-sale', 'marcus-sale'];
 
   constructor(app: pc.Application, _world: BuiltWorld, state: GameState) {
     this.app = app;
