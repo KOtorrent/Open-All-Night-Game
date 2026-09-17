@@ -9,10 +9,12 @@ import { PlayerAvatar } from './playerAvatar';
 import { InteractionPolishSystem } from './interactionPolishSystem';
 import { NightOneDirector } from './nightOneDirector';
 import { LateCustomerSystem } from './lateCustomerSystem';
+import { JennaSystem } from './jennaSystem';
 import { DaleSystem } from './daleSystem';
 import { MarcusSystem } from './marcusSystem';
 import { PumpSevenSystem } from './pumpSevenSystem';
 import { WindowWatcherSystem } from './windowWatcherSystem';
+import { StorePhoneSystem } from './storePhoneSystem';
 import { ReceiptSystem } from './receiptSystem';
 import { TransactionFeedbackSystem } from './transactionFeedbackSystem';
 import { AchievementSystem } from './achievementSystem';
@@ -82,6 +84,7 @@ const interactionPolish = new InteractionPolishSystem(app, world, state);
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
 // Register wrappers are intentionally constructed in story order so each later customer can
 // fall back to the previous transaction handler without duplicating checkout logic.
+const jenna = new JennaSystem(app, world, state, ui);
 const lateCustomer = new LateCustomerSystem(app, world, state, ui);
 const dale = new DaleSystem(app, world, state, ui);
 const marcus = new MarcusSystem(app, world, state, ui);
@@ -99,6 +102,7 @@ const fuel = new FuelSystem(app, world, state, ui);
 const delivery = new DeliverySystem(app, world, state, ui);
 const pumpSeven = new PumpSevenSystem(app, world, state, ui);
 const windowWatcher = new WindowWatcherSystem(app, state, ui, camera);
+const storePhone = new StorePhoneSystem(app, world, state, ui);
 const shiftEnd = new ShiftEndSystem(app, world, state, ui);
 
 app.on('update', (dt: number) => {
@@ -108,6 +112,7 @@ app.on('update', (dt: number) => {
   playerAvatar.update();
   state.update(dt);
   nightOne.update(safeDt);
+  jenna.update(safeDt);
   lateCustomer.update(safeDt);
   dale.update(safeDt);
   marcus.update(safeDt);
@@ -124,6 +129,7 @@ app.on('update', (dt: number) => {
   delivery.update(safeDt);
   pumpSeven.update();
   windowWatcher.update(safeDt);
+  storePhone.update(safeDt);
   shiftEnd.update();
   ambience.update(camera);
 });

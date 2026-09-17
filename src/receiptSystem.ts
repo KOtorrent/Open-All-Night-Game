@@ -19,7 +19,7 @@ export class ReceiptSystem {
   private readonly state: GameState;
   private readonly receiptMat = mat(new pc.Color(0.74, 0.72, 0.62), 0.05);
   private spawned = new Set<string>();
-  private readonly saleIds = ['first-sale', 'late-sale', 'dale-sale', 'marcus-sale'];
+  private readonly saleIds = ['first-sale', 'jenna-sale', 'late-sale', 'dale-sale', 'marcus-sale'];
 
   constructor(app: pc.Application, _world: BuiltWorld, state: GameState) {
     this.app = app;
@@ -39,9 +39,9 @@ export class ReceiptSystem {
     const index = this.saleIds.indexOf(id);
     const slip = new pc.Entity(`Receipt-${id}`);
     slip.addComponent('render', { type: 'box' });
-    slip.setPosition(-3.92 + index * 0.08, 1.635 + index * 0.006, 7.83 + index * 0.035);
+    slip.setPosition(-3.96 + index * 0.075, 1.635 + index * 0.006, 7.80 + index * 0.032);
     slip.setLocalScale(0.22, 0.012, 0.48);
-    slip.setEulerAngles(0, -7 + index * 5, 2 - index * 2);
+    slip.setEulerAngles(0, -10 + index * 4, 2 - index);
     if (slip.render) slip.render.material = this.receiptMat;
     this.app.root.addChild(slip);
   }

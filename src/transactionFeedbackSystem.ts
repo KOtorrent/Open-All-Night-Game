@@ -30,6 +30,14 @@ export class TransactionFeedbackSystem {
       change: '$3.53'
     },
     {
+      id: 'jenna-sale',
+      title: 'SALE COMPLETE',
+      lines: ['MILK                $3.89', 'ASPIRIN             $3.19', 'CRACKERS            $2.33'],
+      total: '$9.41',
+      payment: '$20.00 CASH',
+      change: '$10.59'
+    },
+    {
       id: 'late-sale',
       title: 'SALE COMPLETE',
       lines: ['BOTTLED WATER       $2.09', 'CHIPS               $3.04', 'LOTTERY             $2.99'],
@@ -59,22 +67,12 @@ export class TransactionFeedbackSystem {
     this.state = state;
     this.panel = document.createElement('div');
     this.panel.style.cssText = [
-      'position:fixed',
-      'right:22px',
-      'bottom:24px',
-      'width:280px',
-      'padding:13px 15px',
-      'background:rgba(5,12,10,.94)',
-      'border:1px solid rgba(117,192,139,.42)',
+      'position:fixed', 'right:22px', 'bottom:24px', 'width:280px', 'padding:13px 15px',
+      'background:rgba(5,12,10,.94)', 'border:1px solid rgba(117,192,139,.42)',
       'box-shadow:0 8px 30px rgba(0,0,0,.55),inset 0 0 22px rgba(42,130,75,.06)',
-      'color:#cde8ce',
-      'font:12px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace',
-      'letter-spacing:.35px',
-      'z-index:25',
-      'opacity:0',
-      'transform:translateY(8px)',
-      'transition:opacity .16s ease,transform .16s ease',
-      'pointer-events:none'
+      'color:#cde8ce', 'font:12px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace',
+      'letter-spacing:.35px', 'z-index:25', 'opacity:0', 'transform:translateY(8px)',
+      'transition:opacity .16s ease,transform .16s ease', 'pointer-events:none'
     ].join(';');
     document.body.appendChild(this.panel);
   }

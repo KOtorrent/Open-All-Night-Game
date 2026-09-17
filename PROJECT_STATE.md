@@ -18,14 +18,15 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Full convenience-store shell, checkout, coffee station, four aisles, cooler bank, staff area, office, restroom, exterior forecourt and eight pumps
 - Readable in-world signage for all four aisles, coffee, employees-only, restroom and Case’s front branding
 - Register transaction foundation with visible merchandise, auto-calculated change and POS-style sale-complete overlay
-- Physical receipts accumulate after first sale, late traveler, Dale and Marcus transactions
+- Physical receipts accumulate after Earl, Jenna, traveler, Dale and Marcus transactions
 - Ordinary customers:
-  - first customer / Earl-style opening sale
+  - opening customer / Earl-style first sale
+  - 12:55 AM Jenna — tired local parent buying milk, aspirin and crackers
   - 1:10 AM late-night traveler
   - 2:05 AM Dale — intentionally suspicious and completely harmless forever
   - 3:42 AM Marcus — normal road worker buying coffee/chips/gum
 - Authored character replacement system watches gameplay actor roots and swaps primitive NPC visuals for real GLBs while preserving movement/interactions/CCTV behavior
-- Authored character variants currently mapped for Earl, Silent Customer, traveler, Dale and Marcus
+- Authored character variants currently mapped for Earl, Silent Customer, Jenna, traveler, Dale and Marcus
 - `?characters=0` disables authored character replacement; `?assets=0` disables all current authored layers
 - Night clerk notebook with initial three Night 1 rules
 - Freezer Flicker rule event, Silent Customer rule event, 2:00 AM Bathroom Knock rule event
@@ -34,14 +35,16 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Pump 5 authorization with visible vehicle and departure
 - Overnight delivery truck / manifest / six-carton stocking loop
 - Pump 7 unattended sedan foreshadow at 3:08 AM, gone at 3:28 AM
+- 1:24 AM counter-phone atmosphere event: optional answer interaction hears only matching refrigeration hum and a click; not a rule/fail state
 - 4:25 AM optional Window Watcher visual scare outside the front-right glass; non-failing and not a rule
 - Restrained atmosphere beats: passing headlights, fluorescent sputter, shelf shift, false 4:47 AM entrance chime
 - Rear breaker / timed partial power failure
 - Eight-camera CCTV; Camera 4 covers aisles 3–4, Camera 6 rear loading exterior, player body visible on camera
 - Generated interior refrigeration/fluorescent hum and exterior wind/road ambience
-- Employee time clock, 5:55 reminder, 6:00 Night 1 completion and summary
+- Employee time clock, 5:55 reminder, 6:00 Night 1 completion and expanded shift summary showing rules, customers, assigned work, Dale status and phone response
 - Local achievement foundation ready for later Steamworks mirroring:
   - FIRST DAY
+  - REGULAR
   - DALE WAS FINE
   - TRUST ISSUES
   - EMPLOYEE OF THE MONTH

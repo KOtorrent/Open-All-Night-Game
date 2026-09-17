@@ -12,7 +12,9 @@ This is the implementation timeline for the vertical slice, not final locked nar
 - 12:10 AM — Pump 5 fuel authorization
 - 12:35 AM — overnight delivery / manifest / cartons
 - 12:48 AM — harmless passing-headlights atmosphere beat
+- 12:55 AM — Jenna arrives for milk, aspirin and crackers; ordinary local-customer beat
 - 1:10 AM — ordinary late-night traveler
+- 1:24 AM — counter phone rings; answering reveals only the store’s own refrigeration hum, then a click
 - 1:42 AM — one fluorescent sputter atmosphere beat
 - 2:00 AM — restroom closure / knocking rule event
 - 2:05 AM — Dale arrives; suspicious, completely harmless
@@ -28,4 +30,4 @@ This is the implementation timeline for the vertical slice, not final locked nar
 - 5:55 AM — clock-out reminder
 - 6:00 AM — clock out / Night 1 summary
 
-The pacing goal remains mostly mundane retail work with supernatural beats separated by normal tasks and ordinary customers. Night 1 still teaches only the three notebook rules; the Pump 7 sedan, window watcher and false chime are uncertainty/foreshadowing rather than new rule checks.
+The pacing goal remains mostly mundane retail work with supernatural beats separated by normal tasks and ordinary customers. Night 1 still teaches only the three notebook rules; the Pump 7 sedan, phone call, window watcher and false chime are uncertainty/foreshadowing rather than new rule checks.
