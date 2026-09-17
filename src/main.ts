@@ -4,6 +4,7 @@ import { GameState } from './gameState';
 import { GameSession } from './gameSession';
 import { GameFrameworkUI } from './gameFrameworkUI';
 import { AnomalyRuntime } from './anomalyRuntime';
+import { FrameworkNightDirector } from './frameworkNightDirector';
 import { buildStore } from './storeBuilder';
 import { buildExterior } from './exteriorBuilder';
 import { buildStaffArea } from './staffAreaBuilder';
@@ -74,6 +75,7 @@ ui.onNewShift(() => {
 });
 new DevTools(state, ui);
 const anomalyRuntime = new AnomalyRuntime(session, ui);
+const frameworkNight = new FrameworkNightDirector(session, state, ui, anomalyRuntime);
 
 const world = buildStore(app, state, ui);
 buildExterior(app, world.colliders);
@@ -97,9 +99,6 @@ const player = new PlayerController(camera, canvas, world.colliders, world.inter
 const playerAvatar = new PlayerAvatar(app, player);
 const frontDoor = new FrontDoorSystem(app, player);
 const interactionPolish = new InteractionPolishSystem(app, world, state);
-
-// Night 1 remains the currently-authored content layer. The full-game session framework now keeps
-// it isolated so Nights 2-5 and Endless can be implemented without accidentally firing Night 1 logic.
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
 const jenna = new JennaSystem(app, world, state, ui);
 const lateCustomer = new LateCustomerSystem(app, world, state, ui);
@@ -127,13 +126,11 @@ const windowWatcher = new WindowWatcherSystem(app, state, ui, camera);
 const storePhone = new StorePhoneSystem(app, world, state, ui);
 const rearDoorRattle = new RearDoorRattleSystem(world, state, ui);
 const impossibleReceipt = new ImpossibleReceiptSystem(app, world, state, ui);
-const shiftEnd = new ShiftEndSystem(app, world, state, ui);
+const shiftEnd = new ShiftEndSystem(app, world, state, ui, session.progression);
 void officeLore;
 
 const runNightOneContent = session.config.mode !== 'endless' && session.config.night === 1;
-if (!runNightOneContent && !session.isEndless()) {
-  ui.showMessage(`NIGHT ${session.config.night}: ${session.night.title} framework loaded. Authored event pass pending.`, 5000);
-}
+if (!runNightOneContent && !session.isEndless()) ui.showMessage(`NIGHT ${session.config.night}: ${session.night.title}`, 5000);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
@@ -174,6 +171,8 @@ app.on('update', (dt: number) => {
   } else if (session.isEndless()) {
     const anomaly = session.updateEndless(dt);
     if (anomaly) void anomalyRuntime.trigger(anomaly);
+  } else {
+    frameworkNight.update();
   }
 });
 
