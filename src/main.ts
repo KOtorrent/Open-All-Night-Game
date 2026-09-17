@@ -7,6 +7,7 @@ import { PlayerController } from './playerController';
 import { NightOneDirector } from './nightOneDirector';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
+import { PowerSystem } from './powerSystem';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -40,6 +41,7 @@ const player = new PlayerController(camera, canvas, world.colliders, world.inter
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
 const chores = new ChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
+const power = new PowerSystem(app, world, state, ui);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
@@ -47,6 +49,7 @@ app.on('update', (dt: number) => {
   state.update(dt);
   nightOne.update(safeDt);
   chores.update();
+  power.update(safeDt);
   ambience.update(camera);
 });
 
