@@ -79,8 +79,6 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
   const doorMat = mat(new pc.Color(0.13, 0.14, 0.14), 0.55, 0.24);
   const fixtureMat = mat(new pc.Color(0.76, 0.80, 0.78), 0, 0.18, new pc.Color(0.18, 0.22, 0.21));
 
-  // The first blockout left stale stock-shelf collision in this area. Remove it before
-  // relocating the fixtures so the player never hits an invisible wall on the way in.
   removeCollider(world, 'Stock shelf A', 'Stock shelf B');
   app.root.findByName('StockShelfA')?.setPosition(-5.05, 1.35, -9.55);
   app.root.findByName('StockShelfB')?.setPosition(-4.35, 1.35, -10.15);
@@ -88,20 +86,14 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
     app.root.findByName(`StockBox-${i}`)?.setPosition(-4.85 + (i % 2) * 0.62, 0.45 + (i % 3) * 0.58, -10.85 + (i % 2) * 1.05);
   }
 
-  // Move the original temporary desk and monitor into the office proper.
   app.root.findByName('OfficeDesk')?.setPosition(-7.65, 0.75, -10.45);
   app.root.findByName('OfficeMonitor')?.setPosition(-7.65, 1.25, -10.48);
   app.root.findByName('OfficeMonitorScreen')?.setPosition(-7.65, 1.26, -10.37);
 
-  // Manager office: one visually clear entrance only. The front wall is solid; the office
-  // is entered from the stock/utility room through a single side doorway, so the player no
-  // longer sees two adjacent openings from the sales floor.
   box(app, 'ManagerOfficeFloor', -7.75, 0.015, -10.0, 4.1, 0.06, 3.8, laminate);
   box(app, 'ManagerOfficeLeftWall', -9.72, 1.55, -10.0, 0.12, 3.1, 3.8, wall);
   box(app, 'ManagerOfficeBackWall', -7.75, 1.55, -11.82, 4.05, 3.1, 0.12, wall);
   box(app, 'ManagerOfficeFrontWall', -7.75, 1.55, -8.18, 4.05, 3.1, 0.12, wall);
-
-  // Right wall split around a single 1.2m doorway centered at z=-9.60.
   box(app, 'ManagerOfficeRightWallBack', -5.78, 1.55, -11.01, 0.12, 3.1, 1.62, wall);
   box(app, 'ManagerOfficeRightWallFront', -5.78, 1.55, -8.59, 0.12, 3.1, 0.82, wall);
   box(app, 'ManagerOfficeSideDoorHeader', -5.78, 2.87, -9.60, 0.12, 0.46, 1.20, wall);
@@ -114,7 +106,6 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
   collider(world, -5.78, -11.01, 0.12, 1.62, 'Manager office right wall back');
   collider(world, -5.78, -8.59, 0.12, 0.82, 'Manager office right wall front');
 
-  // Office props.
   cylinder(app, 'OfficeChairPedestal', -8.45, 0.47, -9.73, 0.20, 0.70, 0.20, trim);
   box(app, 'OfficeChairSeat', -8.45, 0.86, -9.73, 0.62, 0.13, 0.62, trim);
   const chairBack = box(app, 'OfficeChairBack', -8.45, 1.22, -10.02, 0.62, 0.67, 0.12, trim);
@@ -128,7 +119,6 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
   for (let i = 0; i < 4; i++) box(app, `OfficePaper-${i}`, -9.59, 1.45 + (i % 2) * 0.52, -10.57 + Math.floor(i / 2) * 0.78, 0.018, 0.36, 0.54, paper);
   box(app, 'OfficeMonitorGlow', -7.65, 1.26, -10.34, 0.54, 0.36, 0.018, screen);
 
-  // Bright enough to navigate and read the room while remaining moodier than the sales floor.
   addFixtureLight(app, 'ManagerOfficeCeilingLight', -7.65, -9.65, 0.95, 5.2, fixtureMat, true);
   const deskLamp = new pc.Entity('ManagerDeskLamp');
   deskLamp.addComponent('light', {
@@ -138,7 +128,6 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
   deskLamp.setPosition(-7.45, 1.72, -10.35);
   app.root.addChild(deskLamp);
 
-  // Middle stock/utility space with a visible rear delivery door.
   collider(world, -5.05, -9.55, 0.70, 4.0, 'Relocated stock shelf A');
   collider(world, -4.35, -10.15, 0.70, 2.6, 'Relocated stock shelf B');
   box(app, 'RearDeliveryDoor', -3.35, 1.45, -11.86, 1.20, 2.85, 0.09, doorMat);
@@ -150,12 +139,9 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
     rearDoor.aimRadius = 0.52;
   }
 
-  // Two cool utility fixtures light the path from the employee doorway to the office side door
-  // and rear delivery door. This fixes the near-black staff corridor without flattening the mood.
   addFixtureLight(app, 'StockRoomFrontLight', -4.25, -8.45, 0.68, 4.6, fixtureMat, false);
   addFixtureLight(app, 'StockRoomRearLight', -3.65, -10.65, 0.58, 4.2, fixtureMat, false);
 
-  // Tone down the old red horror accent here now that this is a navigable work area.
-  const oldBackLight = app.root.findByName('BackHallLight');
+  const oldBackLight = app.root.findByName('BackHallLight') as pc.Entity | null;
   if (oldBackLight?.light) oldBackLight.light.intensity = 0.18;
 }
