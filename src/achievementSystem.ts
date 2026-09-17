@@ -12,10 +12,10 @@ const CHORE_IDS = [
   'clean-spill',
   'take-trash',
   'delivery-manifest',
-  'delivery-stock',
-  'closing-face-aisle2',
-  'closing-wipe-counter',
-  'closing-coffee-prep'
+  'delivery-stocked',
+  'closing-faceup',
+  'closing-counter',
+  'closing-coffee'
 ];
 
 /**
