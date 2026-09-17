@@ -145,7 +145,8 @@ export class FuelSystem {
     add('HeadlampL', 'box', new pc.Vec3(-0.52, 0.58, -1.74), new pc.Vec3(0.28, 0.16, 0.05), lamp);
     add('HeadlampR', 'box', new pc.Vec3(0.52, 0.58, -1.74), new pc.Vec3(0.28, 0.16, 0.05), lamp);
 
-    root.setPosition(-5.9, 0, 25.3);
+    // Pump numbering places Pump 5 on the far-left rear island at z=30.7.
+    root.setPosition(-5.9, 0, 30.7);
     root.setEulerAngles(0, 180, 0);
     this.app.root.addChild(root);
     this.car = root;
