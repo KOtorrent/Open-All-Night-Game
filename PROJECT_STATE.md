@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event and exterior forecourt.
+Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, exterior forecourt, and a more deliberate rear staff layout.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -12,16 +12,20 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 ## Current implementation
 - PlayCanvas/Vite/TypeScript scaffold
 - First-person WASD movement and mouse look
-- Faster tuned movement after browser playtest: 4.8 m/s walk, 7.3 m/s sprint
+- Tuned movement: 4.8 m/s walk, 7.3 m/s sprint
 - Custom AABB collision for store and exterior
-- Context-sensitive E interactions
+- Context-sensitive E interactions using center-screen aim-ray proximity rather than broad nearby cones
+- Per-prop interaction aim radii for monitor, chores, register, notebook, coffee, cooler, rear door, etc.
 - Crosshair, interaction prompt, task panel, clock, warning flash and vignette feedback
+- NEW SHIFT reset control for fast clean Night 1 playtests
 - Canon time pacing: 1 in-game hour = 4 real minutes
 - Local autosave of clock/task progress and dynamic tasks
 - Full convenience-store shell at gameplay scale
 - Front entrance/windows and door-threshold chime behavior
 - Front-left checkout counter and POS silhouette
 - Register transaction foundation with auto-calculated change
+- Register prompt changes contextually: clock in / ring up items / use register
+- First customer visibly places a drink and candy bar on the counter before checkout
 - Night clerk notebook interaction with the three initial Night 1 rules
 - Front-right coffee station and brew task
 - Four stocked aisle fixtures
@@ -31,12 +35,19 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - First normal customer arrival, shopping route, register wait, transaction and departure
 - Silent Customer anomaly: enters without chime, waits at register, exposes E — TALK temptation, records rule break or survival
 - Timed Night 1 chores: Aisle 1 restock, Aisle 3 spill cleanup, counter trash
+- Chore prompts now target the actual visible carton/spill/trash prop rather than adjacent shelf areas
 - Rear breaker box and timed partial-power outage with reset task
-- Back-room divider, stock shelving and manager-office silhouettes
+- Rear staff area rebuilt into three readable zones:
+  - enclosed manager office on the far-left rear
+  - middle stock/utility area
+  - restroom/cooler side kept separate
+- Manager office now includes desk, monitor, chair, filing cabinet, bulletin board/papers, warm light and real doorway framing
+- Rear delivery door moved into the stock/utility zone with visible push bar
 - Functional CCTV mode on the office monitor with eight switchable cameras
   - Camera 4 covers aisles 3–4
-  - Camera 6 covers rear delivery
+  - Camera 6 covers rear stock/delivery
   - Exterior pump/road cameras included
+- Player now has a world-space body proxy that follows the FPS camera and is visible on CCTV
 - Customer restroom geometry with toilet/sink/mirror silhouettes
 - 2:00 AM restroom-knocking rule event with obey/break outcomes
 - ATM
@@ -50,28 +61,22 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Reusable GLB/container AssetRegistry ready for authored model replacement
 - GitHub Actions build/typecheck validation on every PR update
 
-## Validation
-- First vertical slice passed `npm run build` in GitHub Actions before merge.
-- Second gameplay/exterior branch is being validated continuously by PR CI before merge.
-
 ## Immediate playtest targets
-1. Verify the new movement speed feels right.
-2. Walk outside and inspect canopy, pumps, ICE chest, dumpster and boundary collision.
-3. Wait for the first customer, follow their route, then ring them up at the register.
-4. Observe the freezer-flicker event and test obeying/breaking Rule 1.
-5. Observe the Silent Customer and test the temptation to press E — TALK.
-6. Verify timed chores appear and can be completed.
-7. Wait for the power event and reset the rear breaker.
-8. Use the office monitor CCTV and cycle all eight cameras with Q/E, Escape to exit.
-9. If playing long enough to reach 2:00 AM, test the restroom-knocking rule.
-10. Listen for location-aware ambient sound after the first click/pointer-lock gesture.
+1. Start a clean Night 1 with the NEW SHIFT control.
+2. Verify register/notebook/coffee prompts appear only when the crosshair is actually on those props.
+3. Verify the Aisle 1 restock prompt appears when looking directly at the carton, not the shelf.
+4. Enter the manager office and verify it reads as a separate enclosed room.
+5. Look directly at the office monitor and verify CCTV activates without backing away or aiming beside it.
+6. Cycle CCTV cameras and verify the player's own body is visible when inside a camera's field of view.
+7. Verify the rear stock/utility zone and rear delivery door are navigable without invisible old shelf blockers.
+8. Continue checking first-customer checkout, freezer flicker, Silent Customer, timed chores, power event and restroom knock.
 
 ## Next milestone
-1. Fix playtest issues from the second large pass.
+1. Fix any remaining playtest targeting/layout issues.
 2. Start importing real GLB/PBR hero props through AssetRegistry: POS/register, shelf fixture, coffee machine, ATM, gas pump, cooler, restroom fixtures, trash/dumpster and customer models.
-3. Improve authored materials/textures and keep the current lighting mood.
+3. Improve authored materials/textures while preserving the current lighting mood.
 4. Add more Night 1 customer beats, fuel authorization, delivery/manifest behavior and additional anomalies only after the current loop is stable.
-5. Expand Night 1 only after the art pipeline proves it can maintain the visual target.
+5. Keep making large coherent passes rather than single-feature micro-iterations.
 
 ## Standing rules
 - Commit every meaningful milestone.
