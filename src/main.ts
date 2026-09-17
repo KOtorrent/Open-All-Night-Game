@@ -3,6 +3,7 @@ import { GameUI } from './ui';
 import { GameState } from './gameState';
 import { buildStore } from './storeBuilder';
 import { PlayerController } from './playerController';
+import { NightOneDirector } from './nightOneDirector';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -25,21 +26,24 @@ const camera = new pc.Entity('PlayerCamera');
 camera.addComponent('camera', {
   clearColor: new pc.Color(0.006, 0.009, 0.012),
   nearClip: 0.05,
-  farClip: 120,
+  farClip: 160,
   fov: 70
 });
 camera.setPosition(world.spawn);
 app.root.addChild(camera);
 
 const player = new PlayerController(camera, canvas, world.colliders, world.interactables, ui, world.spawnYaw);
+const nightOne = new NightOneDirector(app, world, state, ui, camera);
 
 app.on('update', (dt: number) => {
-  player.update(Math.min(dt, 0.05));
+  const safeDt = Math.min(dt, 0.05);
+  player.update(safeDt);
   state.update(dt);
+  nightOne.update(safeDt);
 });
 
 window.addEventListener('error', (event) => {
   ui.showMessage(`Runtime error: ${event.message}`, 8000);
 });
 
-console.info('OPEN ALL NIGHT vertical slice booted');
+console.info('OPEN ALL NIGHT Night 1 vertical slice booted');
