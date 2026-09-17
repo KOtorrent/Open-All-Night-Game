@@ -8,11 +8,16 @@ import { PlayerController } from './playerController';
 import { PlayerAvatar } from './playerAvatar';
 import { InteractionPolishSystem } from './interactionPolishSystem';
 import { NightOneDirector } from './nightOneDirector';
+import { LateCustomerSystem } from './lateCustomerSystem';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
 import { CctvSystem } from './cctvSystem';
 import { RestroomSystem } from './restroomSystem';
+import { FuelSystem } from './fuelSystem';
+import { DeliverySystem } from './deliverySystem';
+import { ShiftEndSystem } from './shiftEndSystem';
+import { DevTools } from './devTools';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -33,6 +38,7 @@ ui.onNewShift(() => {
   state.resetSave();
   window.location.reload();
 });
+new DevTools(state, ui);
 
 const world = buildStore(app, state, ui);
 buildExterior(app, world.colliders);
@@ -52,11 +58,16 @@ const player = new PlayerController(camera, canvas, world.colliders, world.inter
 const playerAvatar = new PlayerAvatar(app, player);
 const interactionPolish = new InteractionPolishSystem(app, world, state);
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
+// Construct after NightOneDirector so this wrapper can cleanly fall back to the existing register transaction logic.
+const lateCustomer = new LateCustomerSystem(app, world, state, ui);
 const chores = new ChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
 const power = new PowerSystem(app, world, state, ui);
 new CctvSystem(app, world, ui, player, camera);
 const restroom = new RestroomSystem(app, world, state, ui);
+const fuel = new FuelSystem(app, world, state, ui);
+const delivery = new DeliverySystem(app, world, state, ui);
+const shiftEnd = new ShiftEndSystem(app, world, state, ui);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
@@ -65,9 +76,13 @@ app.on('update', (dt: number) => {
   playerAvatar.update();
   state.update(dt);
   nightOne.update(safeDt);
+  lateCustomer.update(safeDt);
   chores.update();
   power.update(safeDt);
   restroom.update(safeDt);
+  fuel.update(safeDt);
+  delivery.update(safeDt);
+  shiftEnd.update();
   ambience.update(camera);
 });
 

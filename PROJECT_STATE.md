@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, exterior forecourt, and a more deliberate rear staff layout.
+Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, exterior forecourt, a second mundane customer transaction, and a real shift-ending loop.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -17,7 +17,8 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Context-sensitive E interactions using center-screen aim-ray proximity rather than broad nearby cones
 - Per-prop interaction aim radii for monitor, chores, register, notebook, coffee, cooler, rear door, etc.
 - Crosshair, interaction prompt, task panel, clock, warning flash and vignette feedback
-- NEW SHIFT reset control for fast clean Night 1 playtests
+- NEW SHIFT reset control for clean Night 1 playtests
+- Optional `?dev=1` time-skip controls (+15/+30/+60 game minutes) so Codespaces testing does not require waiting through the full shift
 - Canon time pacing: 1 in-game hour = 4 real minutes
 - Local autosave of clock/task progress and dynamic tasks
 - Full convenience-store shell at gameplay scale
@@ -26,6 +27,12 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Register transaction foundation with auto-calculated change
 - Register prompt changes contextually: clock in / ring up items / use register
 - First customer visibly places a drink and candy bar on the counter before checkout
+- Second ordinary late-night traveler after 1:10 AM:
+  - chimes in normally after the Silent Customer beat resolves
+  - walks a different shopping route
+  - places water, chips and a lottery slip on the counter
+  - uses the same register transaction path without bypassing earlier checkout logic
+  - leaves a mundane-but-eerie line before departing
 - Night clerk notebook interaction with the three initial Night 1 rules
 - Front-right coffee station and brew task
 - Four stocked aisle fixtures
@@ -41,14 +48,14 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
   - enclosed manager office on the far-left rear
   - middle stock/utility area
   - restroom/cooler side kept separate
-- Manager office now uses ONE side doorway from the stock/utility room; the old front-facing second opening is gone
-- Stale stock-area collision blockers were removed so the office route is actually navigable
-- Manager office now includes desk, monitor, chair, filing cabinet, bulletin board/papers, warm desk light and a brighter ceiling fixture
-- Stock/utility corridor now has two visible cool-white fixtures so it is readable without killing the night mood
-- Rear delivery door remains in the stock/utility zone with visible push bar
+- Manager office uses ONE side doorway from the stock/utility room
+- Stale stock-area collision blockers removed so the office route is navigable
+- Manager office includes desk, monitor, chair, filing cabinet, bulletin board/papers, warm desk light and brighter ceiling fixture
+- Stock/utility corridor has two visible cool-white fixtures
+- Rear delivery door sits in the stock/utility zone with visible push bar
 - Functional CCTV mode on the office monitor with eight switchable cameras
   - Camera 4 covers aisles 3–4
-  - Camera 6 covers rear stock/delivery
+  - Camera 6 is now an exterior rear-delivery/loading camera
   - Exterior pump/road cameras included
 - Player has a world-space body proxy that follows the FPS camera and is visible on CCTV
 - Customer restroom geometry with toilet/sink/mirror silhouettes
@@ -60,26 +67,44 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Fuel canopy with columns and fixture-driven lighting
 - Four pump islands / eight pumps, including Pump 7 placement
 - ICE chest, dumpster, roadside sign silhouette, road and tree-line darkness
+- Fuel authorization gameplay:
+  - dedicated counter fuel console with request lamp
+  - timed $40 Pump 5 authorization task after midnight
+  - visible customer car parked at the actual Pump 5 location
+  - car departs after authorization
+- Overnight delivery gameplay:
+  - delivery truck arrives behind the store
+  - rear-door clipboard/manifest interaction
+  - manifest check creates a second task to put away six cartons
+  - delivery cartons physically appear in the stock room and disappear when stocked
+  - delivery truck departs after acceptance
+- Night 1 shift ending:
+  - dedicated employee time clock near the register
+  - 5:55 AM clock-out reminder/task
+  - 6:00 AM interaction completes Night 1 and shows SHIFT COMPLETE
 - Generated ambient audio: interior refrigeration/fluorescent hum and exterior wind/road hiss
 - Reusable GLB/container AssetRegistry ready for authored model replacement
 - GitHub Actions build/typecheck validation on every PR update
 
-## Immediate playtest targets
-1. Start a clean Night 1 with the NEW SHIFT control.
-2. Walk through the employee doorway into the stock/utility room and verify the path is visibly brighter.
-3. Enter the manager office through its SINGLE side doorway and verify there is no second front opening.
-4. Verify there are no invisible blockers preventing office entry.
-5. Look directly at the office monitor and verify CCTV activates from normal standing distance.
-6. Cycle CCTV cameras and verify the player's own body is visible when inside a camera's field of view.
-7. Verify register/notebook/coffee/chore prompts still target their actual props.
-8. Continue checking customer checkout, freezer flicker, Silent Customer, timed chores, power event and restroom knock.
+## Next playtest targets
+Because Codespaces browser testing is resource-constrained, do not re-test after every commit. Use CI for compile safety and batch human testing at milestone boundaries.
+
+When the next human test is worthwhile:
+1. Verify the manager office single-door access and brighter staff corridor.
+2. Add `?dev=1` to the game URL and use the time-skip buttons to reach 12:10 AM quickly.
+3. Confirm Pump 5 fuel request appears, console interaction works, and the car is visible outside.
+4. Skip to 12:35 AM and verify delivery truck / manifest / six-carton stock loop.
+5. Check Camera 6 during the delivery to confirm it now watches the exterior loading area.
+6. Resolve the Silent Customer, skip to 1:10 AM, and verify the second ordinary traveler shops, places three items, rings up, and leaves normally.
+7. Use time skip near 5:55 AM and verify the time-clock task and 6:00 AM Night 1 completion.
+8. Continue spot-checking first customer, freezer flicker, chores, power event and restroom knock.
 
 ## Next milestone
-1. Fix any remaining playtest targeting/layout issues.
-2. Start importing real GLB/PBR hero props through AssetRegistry: POS/register, shelf fixture, coffee machine, ATM, gas pump, cooler, restroom fixtures, trash/dumpster and customer models.
-3. Improve authored materials/textures while preserving the current lighting mood.
-4. Add more Night 1 customer beats, fuel authorization, delivery/manifest behavior and additional anomalies only after the current loop is stable.
-5. Keep making large coherent passes rather than single-feature micro-iterations.
+1. Continue building Night 1 in large batches rather than micro-iterations.
+2. Start real GLB/PBR hero-prop replacement through AssetRegistry: POS/register, shelf fixture, coffee machine, ATM, gas pump, cooler, restroom fixtures, trash/dumpster and customer models.
+3. Add delivery/fuel audio and modest animation polish.
+4. Add Night 1 completion persistence / transition shell once the current retail loop is stable.
+5. Improve authored materials/textures while preserving the current lighting mood.
 
 ## Standing rules
 - Commit every meaningful milestone.

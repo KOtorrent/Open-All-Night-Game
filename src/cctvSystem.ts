@@ -40,7 +40,9 @@ export class CctvSystem {
       { label: 'CAM 3 — AISLES 1–2', position: new pc.Vec3(-8.5, 3.55, 4.3), target: new pc.Vec3(-2.8, 1.1, -0.6) },
       { label: 'CAM 4 — AISLES 3–4', position: new pc.Vec3(8.5, 3.55, 4.3), target: new pc.Vec3(2.5, 1.1, -0.8) },
       { label: 'CAM 5 — COOLERS', position: new pc.Vec3(8.4, 3.35, -7.7), target: new pc.Vec3(4.8, 1.35, -10.25) },
-      { label: 'CAM 6 — REAR DELIVERY', position: new pc.Vec3(-3.2, 3.15, -7.7), target: new pc.Vec3(-5.3, 1.0, -10.4) },
+      // Exterior loading camera: ordinary overnight deliveries now show up here before this
+      // camera becomes a horror surface later in the campaign.
+      { label: 'CAM 6 — REAR DELIVERY', position: new pc.Vec3(-8.8, 3.8, -13.0), target: new pc.Vec3(-4.5, 1.3, -16.0) },
       { label: 'CAM 7 — PUMPS', position: new pc.Vec3(8.2, 3.65, 13.1), target: new pc.Vec3(0.0, 1.2, 27.5) },
       { label: 'CAM 8 — ROAD', position: new pc.Vec3(-8.2, 3.65, 13.1), target: new pc.Vec3(-10.0, 1.3, 38.0) }
     ];
@@ -66,7 +68,6 @@ export class CctvSystem {
     const interactable: Interactable = {
       id: 'cctv-monitor',
       label: 'view CCTV',
-      // Exact center of the monitor screen in the rebuilt manager office.
       position: new pc.Vec3(-7.65, 1.26, -10.34),
       radius: 2.65,
       aimRadius: 0.48,

@@ -40,6 +40,14 @@ export class GameState {
     return this.gameMinutes;
   }
 
+  /** Developer/playtest helper. Only surfaced by the UI when ?dev=1 is present. */
+  advanceMinutes(amount: number): void {
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    this.gameMinutes = Math.min(30 * 60, this.gameMinutes + amount);
+    this.save();
+    this.refreshUI();
+  }
+
   complete(id: string): boolean {
     if (this.completed.has(id)) return false;
     this.completed.add(id);
