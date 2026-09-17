@@ -60,6 +60,10 @@ export class GameState {
     return this.completed.has(id);
   }
 
+  getCompletedIds(): string[] {
+    return [...this.completed];
+  }
+
   addTask(id: string, text: string): void {
     if (this.baseTasks.some((task) => task.id === id) || this.dynamicTasks.some((task) => task.id === id)) {
       this.refreshUI();
