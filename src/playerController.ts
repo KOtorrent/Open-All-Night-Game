@@ -12,6 +12,7 @@ export class PlayerController {
   private yaw = 180;
   private pitch = 0;
   private locked = false;
+  private active = true;
   private playerRadius = 0.28;
   // Tuned after first browser playtest. The original 3.2 m/s felt sluggish in the 20x24m store.
   private walkSpeed = 4.8;
@@ -36,20 +37,34 @@ export class PlayerController {
     this.bindInput();
   }
 
+  setActive(active: boolean): void {
+    this.active = active;
+    this.keys.clear();
+    this.currentTarget = undefined;
+    this.ui.setPrompt(undefined);
+  }
+
+  isActive(): boolean {
+    return this.active;
+  }
+
   private bindInput(): void {
-    this.canvas.addEventListener('click', () => this.canvas.requestPointerLock());
+    this.canvas.addEventListener('click', () => {
+      if (this.active) this.canvas.requestPointerLock();
+    });
     document.addEventListener('pointerlockchange', () => {
       this.locked = document.pointerLockElement === this.canvas;
       this.ui.help.style.opacity = this.locked ? '.25' : '.82';
     });
     window.addEventListener('keydown', (event) => {
+      if (!this.active) return;
       this.keys.add(event.code);
       if (event.code === 'KeyE' && !event.repeat) this.interact();
     });
     window.addEventListener('keyup', (event) => this.keys.delete(event.code));
     window.addEventListener('blur', () => this.keys.clear());
     window.addEventListener('mousemove', (event) => {
-      if (!this.locked) return;
+      if (!this.active || !this.locked) return;
       this.yaw -= event.movementX * 0.105;
       this.pitch -= event.movementY * 0.105;
       this.pitch = Math.max(-82, Math.min(82, this.pitch));
@@ -58,6 +73,8 @@ export class PlayerController {
   }
 
   update(dt: number): void {
+    if (!this.active) return;
+
     const sprinting = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight');
     const speed = sprinting ? this.sprintSpeed : this.walkSpeed;
     let forwardInput = 0;
