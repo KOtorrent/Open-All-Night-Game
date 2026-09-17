@@ -28,20 +28,20 @@ export class StoreSignageSystem {
     this.createDoubleSign('AisleSign4', new pc.Vec3(5.1, 3.35, 5.0), new pc.Vec2(1.65, 0.48), 'AISLE 4', 'COLD DRINKS', aisleStyle);
 
     this.createWallSign('CoffeeSign', new pc.Vec3(6.45, 2.75, 9.45), new pc.Vec2(1.8, 0.55), new pc.Vec3(0, 180, 0), 'FRESH COFFEE', '24 HOURS', serviceStyle);
-    this.createWallSign('EmployeesSign', new pc.Vec3(-7.2, 2.65, -8.72), new pc.Vec2(1.55, 0.46), new pc.Vec3(0, 0, 0), 'EMPLOYEES ONLY', '', serviceStyle);
-    this.createWallSign('RestroomSign', new pc.Vec3(-1.25, 2.55, -8.42), new pc.Vec2(1.35, 0.46), new pc.Vec3(0, 0, 0), 'RESTROOM', '', utilityStyle);
 
-    // Large facade sign, oriented toward the forecourt (positive Z).
+    // There is exactly one employee entrance from the sales floor: the original central gap in the
+    // back divider. Put its sign over THAT opening instead of over the office wall.
+    this.createWallSign('EmployeesSign', new pc.Vec3(-3.10, 2.82, -7.10), new pc.Vec2(1.55, 0.46), new pc.Vec3(0, 0, 0), 'EMPLOYEES ONLY', '', serviceStyle);
+
+    // Restroom sign now lives inside the staff corridor beside the west-facing restroom door; it is
+    // deliberately not visible as a second doorway from the sales floor.
+    this.createWallSign('RestroomSign', new pc.Vec3(-2.56, 2.22, -9.62), new pc.Vec2(1.20, 0.40), new pc.Vec3(0, 90, 0), 'RESTROOM', '', utilityStyle);
+
     this.createWallSign('CasesFrontBrand', new pc.Vec3(0, 3.48, 12.24), new pc.Vec2(5.8, 1.02), new pc.Vec3(0, 180, 0), "CASE'S COUNTRY GAS STOP", 'FOOD • FUEL • OPEN 24 HOURS', exteriorStyle, 1.35);
-
-    // Small window decals make the storefront read like a real rural convenience store from the pumps.
     this.createWallSign('FrontWindowCoffeeDecal', new pc.Vec3(4.2, 2.15, 12.02), new pc.Vec2(1.50, 0.44), new pc.Vec3(0, 180, 0), 'HOT COFFEE', 'ALL NIGHT', serviceStyle, 0.95);
     this.createWallSign('FrontWindowAtmDecal', new pc.Vec3(-4.2, 2.15, 12.02), new pc.Vec2(1.20, 0.44), new pc.Vec3(0, 180, 0), 'ATM', 'INSIDE', utilityStyle, 0.82);
-
-    // The exteriorBuilder supplies the structural roadside panel; these faces turn it into a sign.
     this.createDoubleSign('RoadsideBrand', new pc.Vec3(-11.5, 5.0, 36.84), new pc.Vec2(3.9, 1.62), "CASE'S", 'COUNTRY GAS • OPEN 24 HOURS', exteriorStyle, 1.20);
 
-    // Eight pump number placards: clear enough to make Pump 7 an actual navigable landmark.
     const pumpPositions: Array<[number, number, number]> = [
       [1, -5.9, 25.3], [2, -4.5, 25.3], [3, 4.5, 25.3], [4, 5.9, 25.3],
       [5, -5.9, 30.7], [6, -4.5, 30.7], [7, 4.5, 30.7], [8, 5.9, 30.7]
@@ -65,11 +65,9 @@ export class StoreSignageSystem {
   private createDoubleSign(name: string, pos: pc.Vec3, size: pc.Vec2, title: string, subtitle: string, style: SignStyle, emission = 0.72): void {
     const material = this.makeSignMaterial(title, subtitle, style, emission);
     this.makeBacking(name, pos, new pc.Vec3(size.x + 0.08, size.y + 0.08, 0.07));
-
     const front = this.makePlane(`${name}-Front`, material, pos, size);
     front.setEulerAngles(90, 0, 0);
     front.setPosition(pos.x, pos.y, pos.z + 0.042);
-
     const back = this.makePlane(`${name}-Back`, material, pos, size);
     back.setEulerAngles(90, 180, 0);
     back.setPosition(pos.x, pos.y, pos.z - 0.042);
@@ -79,8 +77,6 @@ export class StoreSignageSystem {
     const material = this.makeSignMaterial(title, subtitle, style, emission);
     this.makeBacking(name, pos, new pc.Vec3(size.x + 0.08, size.y + 0.08, 0.055));
     const plane = this.makePlane(`${name}-Face`, material, pos, size);
-    // Primitive planes lie on X/Z; +90 X makes them vertical. Preserve that base rotation when
-    // applying the requested wall-facing yaw instead of accidentally laying signs flat.
     plane.setEulerAngles(90 + rotation.x, rotation.y, rotation.z);
   }
 
@@ -89,7 +85,6 @@ export class StoreSignageSystem {
     material.diffuse = new pc.Color(0.025, 0.027, 0.025);
     material.gloss = 0.16;
     material.update();
-
     const e = new pc.Entity(`${name}-Backing`);
     e.addComponent('render', { type: 'box' });
     e.setPosition(pos);
@@ -115,26 +110,22 @@ export class StoreSignageSystem {
     canvas.height = 160;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas 2D context unavailable for signage');
-
     ctx.fillStyle = style.background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = style.border;
     ctx.lineWidth = 8;
     ctx.strokeRect(6, 6, canvas.width - 12, canvas.height - 12);
-
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = style.foreground;
     const titleSize = title.length > 18 ? 34 : title.length > 10 ? 40 : 48;
     ctx.font = `700 ${titleSize}px monospace`;
     ctx.fillText(title, canvas.width / 2, subtitle ? 64 : 80);
-
     if (subtitle) {
       ctx.fillStyle = style.sub ?? '#d8ca78';
       ctx.font = '700 20px monospace';
       ctx.fillText(subtitle, canvas.width / 2, 116);
     }
-
     const texture = new pc.Texture(this.app.graphicsDevice, {
       width: canvas.width,
       height: canvas.height,
@@ -146,7 +137,6 @@ export class StoreSignageSystem {
     });
     texture.setSource(canvas);
     this.textures.push(texture);
-
     const material = new pc.StandardMaterial();
     material.diffuseMap = texture;
     material.emissiveMap = texture;
