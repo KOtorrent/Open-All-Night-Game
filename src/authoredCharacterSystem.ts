@@ -27,6 +27,7 @@ export class AuthoredCharacterSystem {
   private readonly bindings: CharacterBinding[] = [
     { rootName: 'Earl-Regular-Customer', assetId: 'character-earl', file: 'character-male-a.glb', scale: 1.06, yaw: 180 },
     { rootName: 'Silent-Customer', assetId: 'character-silent', file: 'character-female-f.glb', scale: 1.04, yaw: 180 },
+    { rootName: 'Jenna', assetId: 'character-jenna', file: 'character-female-b.glb', scale: 1.04, yaw: 180 },
     { rootName: 'LateNightTraveler', assetId: 'character-traveler', file: 'character-male-c.glb', scale: 1.05, yaw: 180 },
     { rootName: 'Dale', assetId: 'character-dale', file: 'character-male-f.glb', scale: 1.08, yaw: 180 },
     { rootName: 'Marcus-Regular', assetId: 'character-marcus', file: 'character-male-d.glb', scale: 1.05, yaw: 180 }
@@ -39,17 +40,12 @@ export class AuthoredCharacterSystem {
     this.disabled = params.get('characters') === '0' || params.get('assets') === '0';
 
     for (const binding of this.bindings) {
-      this.registry.register({
-        id: binding.assetId,
-        url: `${CHARACTER_BASE}/${binding.file}`,
-        scale: binding.scale
-      });
+      this.registry.register({ id: binding.assetId, url: `${CHARACTER_BASE}/${binding.file}`, scale: binding.scale });
     }
   }
 
   update(): void {
     if (this.disabled) return;
-
     for (const binding of this.bindings) {
       if (this.attached.has(binding.rootName) || this.loading.has(binding.rootName)) continue;
       const node = this.app.root.findByName(binding.rootName);
