@@ -4,20 +4,13 @@ import { AssetRegistry } from './assetRegistry';
 const MARKET_BASE = 'https://raw.githubusercontent.com/intellicia-public/parastore/main/frontend/public/assets/market';
 
 /**
- * Runtime bridge for real authored retail models. The current models are Kenney Mini Market
- * derivatives served from a public MIT repository; original Kenney assets are CC0 and provenance
- * is recorded in docs/ASSET_SOURCES.md.
- *
- * Primitive gameplay geometry remains in place as collision/fallback. Visual placeholder pieces
- * are hidden only after the authored model has loaded successfully. Add ?assets=0 to disable this
- * layer during troubleshooting.
+ * Runtime bridge for real authored retail models. Primitive gameplay geometry remains collision /
+ * fallback. Unvalidated decorative imports are opt-in until their scale/orientation is approved.
  */
 export class AuthoredRetailAssetSystem {
-  private readonly app: pc.Application;
   private readonly registry: AssetRegistry;
 
-  constructor(app: pc.Application) {
-    this.app = app;
+  constructor(private readonly app: pc.Application) {
     this.registry = new AssetRegistry(app);
 
     this.registry.register({ id: 'authored-register', url: `${MARKET_BASE}/cash-register.glb`, scale: 0.95 });
@@ -39,12 +32,19 @@ export class AuthoredRetailAssetSystem {
       return;
     }
 
-    await Promise.allSettled([
+    const jobs: Promise<void>[] = [
       this.replaceRegister(),
       this.replaceCoolerVisual(),
       this.addShelfHeroSamples(),
-      this.addRetailAccents()
-    ]);
+      this.addEntryRug()
+    ];
+
+    // These models were the mystery objects seen in the milestone playtest. Keep the source and
+    // placements available for future tuning, but do not ship them into the default scene until
+    // each one has been visually validated.
+    if (params.get('experimentalAssets') === '1') jobs.push(this.addRetailAccents());
+
+    await Promise.allSettled(jobs);
   }
 
   private async replaceRegister(): Promise<void> {
@@ -56,7 +56,6 @@ export class AuthoredRetailAssetSystem {
       });
       model.name = 'AuthoredRegister';
       this.setNamedVisualsEnabled(['POSBase', 'POSScreen', 'POSKeypad'], false);
-      console.info('OPEN ALL NIGHT authored register loaded');
     } catch (error) {
       console.warn('Authored register unavailable; keeping primitive fallback.', error);
     }
@@ -71,7 +70,6 @@ export class AuthoredRetailAssetSystem {
       });
       model.name = 'AuthoredCoolers';
       this.setPrefixVisualsEnabled('CoolerGlass-', false);
-      console.info('OPEN ALL NIGHT authored cooler bank loaded');
     } catch (error) {
       console.warn('Authored cooler bank unavailable; keeping primitive fallback.', error);
     }
@@ -80,21 +78,26 @@ export class AuthoredRetailAssetSystem {
   private async addShelfHeroSamples(): Promise<void> {
     try {
       const left = await this.registry.instantiate('authored-shelf-boxes', this.app.root, {
-        position: new pc.Vec3(-8.35, 0.0, 3.8),
-        rotation: new pc.Vec3(0, 90, 0),
-        scale: 0.92
+        position: new pc.Vec3(-8.35, 0.0, 3.8), rotation: new pc.Vec3(0, 90, 0), scale: 0.92
       });
       left.name = 'AuthoredShelfSampleBoxes';
-
       const right = await this.registry.instantiate('authored-shelf-bags', this.app.root, {
-        position: new pc.Vec3(8.35, 0.0, 3.8),
-        rotation: new pc.Vec3(0, -90, 0),
-        scale: 0.92
+        position: new pc.Vec3(8.35, 0.0, 3.8), rotation: new pc.Vec3(0, -90, 0), scale: 0.92
       });
       right.name = 'AuthoredShelfSampleBags';
-      console.info('OPEN ALL NIGHT authored shelf samples loaded');
     } catch (error) {
       console.warn('Authored shelf samples unavailable; continuing without them.', error);
+    }
+  }
+
+  private async addEntryRug(): Promise<void> {
+    try {
+      const rug = await this.registry.instantiate('authored-entry-rug', this.app.root, {
+        position: new pc.Vec3(0, 0.025, 9.75), rotation: new pc.Vec3(0, 0, 0), scale: 1.15
+      });
+      rug.name = 'AuthoredEntryRug';
+    } catch (error) {
+      console.warn('Authored entry rug unavailable; continuing without it.', error);
     }
   }
 
@@ -105,18 +108,13 @@ export class AuthoredRetailAssetSystem {
       ['authored-bottle-return', 'AuthoredBottleReturn', new pc.Vec3(8.25, 0, -5.65), new pc.Vec3(0, -90, 0), 0.92],
       ['authored-shelf-end', 'AuthoredEndcapA', new pc.Vec3(-3.70, 0, 3.05), new pc.Vec3(0, 0, 0), 0.88],
       ['authored-shelf-end', 'AuthoredEndcapB', new pc.Vec3(3.70, 0, 3.05), new pc.Vec3(0, 180, 0), 0.88],
-      ['authored-chest-freezer', 'AuthoredChestFreezer', new pc.Vec3(7.55, 0, -6.95), new pc.Vec3(0, -90, 0), 0.95],
-      ['authored-entry-rug', 'AuthoredEntryRug', new pc.Vec3(0, 0.025, 9.75), new pc.Vec3(0, 0, 0), 1.15]
+      ['authored-chest-freezer', 'AuthoredChestFreezer', new pc.Vec3(7.55, 0, -6.95), new pc.Vec3(0, -90, 0), 0.95]
     ] as const;
 
-    const results = await Promise.allSettled(placements.map(async ([id, name, position, rotation, scale]) => {
+    await Promise.allSettled(placements.map(async ([id, name, position, rotation, scale]) => {
       const model = await this.registry.instantiate(id, this.app.root, { position, rotation, scale });
       model.name = name;
-      return model;
     }));
-
-    const successCount = results.filter((result) => result.status === 'fulfilled').length;
-    console.info(`OPEN ALL NIGHT authored retail accents loaded: ${successCount}/${placements.length}`);
   }
 
   private setNamedVisualsEnabled(names: string[], enabled: boolean): void {
