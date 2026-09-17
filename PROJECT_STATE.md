@@ -23,11 +23,11 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Ordinary customers: opening customer/Earl, Jenna, late-night traveler, Dale, Marcus
 - Customer shopping routes are forced through walkable aisle corridors instead of shelf footprints
 - Dale remains intentionally suspicious and completely harmless forever
-- Authored character replacement swaps primitive NPC visuals for real GLBs while preserving movement/interactions/CCTV behavior
-- Authored character heights normalized to adult scale after milestone playtest exposed undersized imports
-- `?characters=0` disables authored character replacement; `?assets=0` disables authored asset layers
-- Only visually safer authored retail replacements are enabled by default: register, cooler bank and entry rug
-- Shelf-pack and decorative retail GLBs are isolated behind `?experimentalAssets=1` until individually visually approved
+- The Kenney mini-character GLBs are now DISABLED BY DEFAULT after graphics testing showed the chibi/toy proportions are completely wrong for this game
+- Normal-proportioned primitive actors are the current baseline until a better human asset set is selected and visually approved
+- `?characters=1` or `?experimentalCharacters=1` explicitly re-enables the rejected mini-character experiment; `?assets=0` disables authored asset layers
+- Default authored retail layer now keeps only the register and entry rug
+- Cooler, shelf-pack and decorative retail GLBs are isolated behind `?experimentalAssets=1`; the cooler import was identified as the unexplained gray object in front of the freezer wall
 - Night clerk notebook with initial three Night 1 rules
 - Freezer Flicker rule event, Silent Customer rule event, 2:00 AM Bathroom Knock rule event
 - Timed chores: Aisle 1 restock, Aisle 3 spill cleanup, counter trash
@@ -41,15 +41,15 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - 3:56 AM rear delivery-door handle rattle
 - 4:25 AM optional Window Watcher scare
 - 5:16 AM impossible 6:01 AM receipt
-- Restrained atmosphere beats: passing headlights, fluorescent sputter, shelf shift, false entrance chime
-- Manager office contains optional lore surfaces and is authored only by `staffAreaBuilder`; `RestroomSystem` no longer duplicates/overlaps office geometry
-- Staff-side environmental dressing: lockers, utility sink, mop bucket, broom, cleaning chemicals, hand truck, cartons, filing cabinet, corkboard, mug and papers
+- Manager office remains the far-left enclosed room with its own side doorway
+- Restroom is now a fully enclosed room behind the employee divider with its ONLY entrance on the west wall facing the stock corridor; there is no restroom doorway visible from the sales floor
+- The EMPLOYEES ONLY sign is aligned with the one sales-floor staff entrance; RESTROOM signage is inside the stock corridor beside the side-facing restroom door
+- Staff-side environmental dressing remains in the utility/office areas without sharing restroom volume
 - Rear breaker / timed partial power failure
 - Eight-camera CCTV; Camera 4 covers aisles 3–4, Camera 6 rear loading exterior, player body visible on camera
 - CCTV presentation includes live CASE SECURITY timecode plus brief channel-switch static
 - Generated interior refrigeration/fluorescent hum and exterior wind/road ambience
 - Employee time clock, 5:55 reminder, 6:00 Night 1 completion and expanded summary
-- Local achievement foundation ready for later Steamworks mirroring
 - Reusable GLB/container AssetRegistry with shared loading and placement support
 - Asset provenance documented in `docs/ASSET_SOURCES.md`; external raw-GitHub GLBs remain an integration bridge and must be vendored before shipping
 - GitHub Actions build/typecheck validation on PR updates
@@ -62,42 +62,42 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Checkout face broken into deliberate branded panels with kickplate / trim instead of one flat block
 - Coffee station gains backsplash and stronger material separation
 - Aisles gain green header caps, metallic edge highlights and stronger long-range silhouettes
-- Cooler bank gains top trim and visible cool-light accents
+- Cooler bank uses the stable procedural baseline until a replacement GLB is individually approved
 - Storefront gains dark fascia cap, green band, cream pinstripe and soffit fixtures
 - Fuel canopy carries matching cream accent language
 - Large illuminated facade branding, roadside pylon branding, storefront window decals and numbered pumps make the exterior navigable
 - Visual target and acceptance rules are documented in `docs/VISUAL_TARGET.md`
 
 ## Testing strategy
-Codespaces browser play is resource-constrained. Do not human-test every commit. CI handles compile/type safety; human visual reviews happen at milestone boundaries.
+Codespaces browser play is resource-constrained. CI handles compile/type safety; human visual reviews happen at milestone boundaries.
 
-For visual validation use `?dev=1` to jump among events. Codespaces automatically uses lower-cost rendering. Use `?low=0` only for deliberate full-quality lighting review. `?assets=0` and `?characters=0` remain troubleshooting fallbacks; `?experimentalAssets=1` deliberately re-enables unvalidated retail models.
+For visual validation use `?dev=1`. `?low=0` is reserved for deliberate full-quality lighting review. `?experimentalAssets=1` and `?experimentalCharacters=1` should NOT be used during baseline testing.
 
 ## Current graphics acceptance checklist
-1. Store readable from register, each aisle and back staff threshold without flashlight-like behavior.
-2. Restroom fully sealed and clearly separate from manager office.
-3. Office enterable through its single side doorway with no duplicate or overlapping wall geometry.
-4. All ordinary customers read at believable adult scale and remain in walkable corridors.
-5. No customer visibly clips through shelves during normal routes.
-6. Facade sign clearly visible from pump area and roadside sign visible from forecourt.
-7. Pump 7 easily identifiable from its physical placard.
-8. Previously mysterious imported decorative props absent in default build.
-9. Checkout, coffee, shelving, coolers, floor and exterior facade read as distinct manufactured materials / surfaces.
+1. Store readable from register, each aisle and back staff threshold.
+2. Only ONE employee opening visible from sales floor.
+3. Restroom hidden behind staff divider and entered from the stock corridor only.
+4. Manager office visually and physically separate from restroom with a clear gap/utility corridor between them.
+5. Default customers have believable adult proportions; no chibi/toy GLBs.
+6. No customer visibly clips through shelves during normal routes.
+7. No mystery GLB object appears in front of the cooler/freezer wall.
+8. Facade sign clearly visible from pump area and roadside sign visible from forecourt.
+9. Checkout, coffee, shelving, coolers, floor and exterior facade read as distinct manufactured surfaces.
 10. Full-quality mode preserves the same composition with improved shadow fidelity rather than becoming materially darker.
 
 ## Next milestone
-1. Human-review this graphics baseline and correct brightness, sign orientation, character scale and any overlap based on screenshots.
-2. Replace hero props one at a time with visually validated authored GLB/PBR assets: pumps, ATM, coffee equipment, restroom fixtures, office furniture, stock-room equipment.
-3. Build a controlled material/texture library and reduce remaining flat-color blockout surfaces.
-4. Improve customer motion / idle presentation after character size and routes are confirmed visually.
-5. Vendor approved external GLBs into controlled game asset paths before packaging.
-6. Only after the graphics language is locked, expand the full five-night campaign on top of this baseline.
+1. Human-review the corrected staff/restroom layout and baseline actors.
+2. Find or build a believable stylized adult human asset family before authored character replacement returns to the default build.
+3. Replace hero props one at a time with visually validated authored GLB/PBR assets.
+4. Build a controlled material/texture library and reduce remaining flat-color blockout surfaces.
+5. Improve customer motion / idle presentation after the final character style is selected.
+6. Only after graphics language is locked, expand the full five-night campaign.
 
 ## Standing rules
 - Commit every meaningful milestone.
 - Prefer real authored 3D assets over code-built primitive hero props.
 - Primitives are acceptable for structural geometry, fallback visuals and invisible collision.
-- Do not enable an imported decorative asset in the default build until its scale/orientation/silhouette is visually approved.
+- Do not enable an imported asset in the default build until its scale/orientation/silhouette is visually approved.
 - Dark must remain playable; horror comes from contrast and uncertainty, not inability to see.
 - Preserve gameplay canon from the original Open All Night design.
 - Dale remains suspicious but harmless forever.
