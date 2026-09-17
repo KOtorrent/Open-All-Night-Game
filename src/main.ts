@@ -1,6 +1,11 @@
 import * as pc from 'playcanvas';
 import { GameUI } from './ui';
 import { GameState } from './gameState';
+import { GameSession } from './gameSession';
+import { GameFrameworkUI } from './gameFrameworkUI';
+import { AnomalyRuntime } from './anomalyRuntime';
+import { FrameworkNightDirector } from './frameworkNightDirector';
+import { CampaignCompletionSystem } from './campaignCompletionSystem';
 import { buildStore } from './storeBuilder';
 import { buildExterior } from './exteriorBuilder';
 import { buildStaffArea } from './staffAreaBuilder';
@@ -57,13 +62,21 @@ const resize = () => app.resizeCanvas(canvas.width, canvas.height);
 window.addEventListener('resize', resize);
 resize();
 
+const session = new GameSession();
 const ui = new GameUI();
-const state = new GameState(ui);
+new GameFrameworkUI(session);
+const state = new GameState(ui, {
+  startMinutes: session.night.startMinutes,
+  endMinutes: session.isEndless() ? 99999 : session.night.endMinutes,
+  saveKey: `open-all-night-run-${session.config.mode}-night-${session.config.night}`
+});
 ui.onNewShift(() => {
   state.resetSave();
   window.location.reload();
 });
 new DevTools(state, ui);
+const anomalyRuntime = new AnomalyRuntime(session, ui);
+const frameworkNight = new FrameworkNightDirector(session, state, ui, anomalyRuntime);
 
 const world = buildStore(app, state, ui);
 buildExterior(app, world.colliders);
@@ -79,12 +92,7 @@ void authoredAssets.start();
 const authoredCharacters = new AuthoredCharacterSystem(app);
 
 const camera = new pc.Entity('PlayerCamera');
-camera.addComponent('camera', {
-  clearColor: new pc.Color(0.006, 0.009, 0.012),
-  nearClip: 0.05,
-  farClip: 180,
-  fov: 70
-});
+camera.addComponent('camera', { clearColor: new pc.Color(0.006, 0.009, 0.012), nearClip: 0.05, farClip: 180, fov: 70 });
 camera.setPosition(world.spawn);
 app.root.addChild(camera);
 
@@ -100,7 +108,7 @@ const marcus = new MarcusSystem(app, world, state, ui);
 const customerRouteSafety = new CustomerRouteSafetySystem([nightOne, jenna, lateCustomer, dale, marcus]);
 const receipts = new ReceiptSystem(app, world, state);
 const transactions = new TransactionFeedbackSystem(state);
-const achievements = new AchievementSystem(state);
+const achievements = new AchievementSystem(state, session.progression);
 const atmosphere = new NightOneAtmosphereSystem(app, state, ui);
 const chores = new ChoreSystem(app, world, state, ui);
 const midShiftTasks = new MidShiftTaskSystem(app, world, state, ui);
@@ -119,8 +127,12 @@ const windowWatcher = new WindowWatcherSystem(app, state, ui, camera);
 const storePhone = new StorePhoneSystem(app, world, state, ui);
 const rearDoorRattle = new RearDoorRattleSystem(world, state, ui);
 const impossibleReceipt = new ImpossibleReceiptSystem(app, world, state, ui);
-const shiftEnd = new ShiftEndSystem(app, world, state, ui);
+const shiftEnd = new ShiftEndSystem(app, world, state, ui, session.progression);
+const campaignCompletion = new CampaignCompletionSystem(world, state, session, ui);
 void officeLore;
+
+const runNightOneContent = session.config.mode !== 'endless' && session.config.night === 1;
+if (!runNightOneContent && !session.isEndless()) ui.showMessage(`NIGHT ${session.config.night}: ${session.night.title}`, 5000);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
@@ -129,37 +141,43 @@ app.on('update', (dt: number) => {
   playerAvatar.update();
   frontDoor.update(safeDt);
   state.update(dt);
-  nightOne.update(safeDt);
-  jenna.update(safeDt);
-  lateCustomer.update(safeDt);
-  dale.update(safeDt);
-  marcus.update(safeDt);
-  customerRouteSafety.update();
   authoredCharacters.update();
-  receipts.update();
-  transactions.update();
   achievements.update();
-  atmosphere.update(safeDt);
-  chores.update();
-  midShiftTasks.update();
-  closingChores.update();
-  power.update(safeDt);
-  restroom.update(safeDt);
-  fuel.update(safeDt);
-  delivery.update(safeDt);
-  pumpSeven.update();
   cctvPolish.update(safeDt);
-  cctvAnomaly.update(safeDt);
-  windowWatcher.update(safeDt);
-  storePhone.update(safeDt);
-  rearDoorRattle.update(safeDt);
-  impossibleReceipt.update();
-  shiftEnd.update();
   ambience.update(camera);
+
+  if (runNightOneContent) {
+    nightOne.update(safeDt);
+    jenna.update(safeDt);
+    lateCustomer.update(safeDt);
+    dale.update(safeDt);
+    marcus.update(safeDt);
+    customerRouteSafety.update();
+    receipts.update();
+    transactions.update();
+    atmosphere.update(safeDt);
+    chores.update();
+    midShiftTasks.update();
+    closingChores.update();
+    power.update(safeDt);
+    restroom.update(safeDt);
+    fuel.update(safeDt);
+    delivery.update(safeDt);
+    pumpSeven.update();
+    cctvAnomaly.update(safeDt);
+    windowWatcher.update(safeDt);
+    storePhone.update(safeDt);
+    rearDoorRattle.update(safeDt);
+    impossibleReceipt.update();
+    shiftEnd.update();
+  } else if (session.isEndless()) {
+    const anomaly = session.updateEndless(dt);
+    if (anomaly) void anomalyRuntime.trigger(anomaly);
+  } else {
+    frameworkNight.update();
+    campaignCompletion.update();
+  }
 });
 
-window.addEventListener('error', (event) => {
-  ui.showMessage(`Runtime error: ${event.message}`, 8000);
-});
-
-console.info('OPEN ALL NIGHT Night 1 vertical slice booted');
+window.addEventListener('error', (event) => ui.showMessage(`Runtime error: ${event.message}`, 8000));
+console.info(`OPEN ALL NIGHT booted: ${session.config.mode} / night ${session.config.night} / seed ${session.config.seed}`);
