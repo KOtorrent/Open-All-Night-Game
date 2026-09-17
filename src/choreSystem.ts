@@ -41,9 +41,7 @@ export class ChoreSystem {
   update(): void {
     const minute = this.state.getGameMinutes();
     for (const chore of this.chores) {
-      if (!chore.spawned && minute >= chore.triggerMinute && !this.state.isComplete(chore.id)) {
-        this.spawn(chore);
-      }
+      if (!chore.spawned && minute >= chore.triggerMinute && !this.state.isComplete(chore.id)) this.spawn(chore);
     }
   }
 
@@ -57,20 +55,34 @@ export class ChoreSystem {
 
   private spawnRestock(chore: TimedChore): void {
     const cardboard = mat(new pc.Color(0.34, 0.20, 0.09), 0.08);
+    const tape = mat(new pc.Color(0.60, 0.50, 0.30), 0.10);
     const box = new pc.Entity('RestockCarton');
     box.addComponent('render', { type: 'box' });
     box.setPosition(-7.1, 0.34, 4.6);
     box.setLocalScale(0.72, 0.68, 0.58);
     if (box.render) box.render.material = cardboard;
     this.app.root.addChild(box);
+
+    const strip = new pc.Entity('RestockCartonTape');
+    strip.addComponent('render', { type: 'box' });
+    strip.setPosition(-7.1, 0.69, 4.6);
+    strip.setLocalScale(0.11, 0.018, 0.60);
+    if (strip.render) strip.render.material = tape;
+    this.app.root.addChild(strip);
+
     chore.entity = box;
 
     const interactable: Interactable = {
       id: chore.id,
-      label: 'restock shelf',
-      position: new pc.Vec3(-6.3, 1.0, 3.8),
-      radius: 2.5,
-      onInteract: () => this.finish(chore, 'You fill the empty facings. The shelf looks normal again.')
+      label: 'restock from carton',
+      // Interaction point is centered on the visible carton itself, not the shelf beside it.
+      position: new pc.Vec3(-7.1, 0.48, 4.6),
+      radius: 2.6,
+      aimRadius: 0.46,
+      onInteract: () => {
+        strip.enabled = false;
+        return this.finish(chore, 'You fill the empty facings. The shelf looks normal again.');
+      }
     };
     chore.interactable = interactable;
     this.world.interactables.push(interactable);
@@ -90,8 +102,9 @@ export class ChoreSystem {
     const interactable: Interactable = {
       id: chore.id,
       label: 'clean spill',
-      position: new pc.Vec3(3.1, 0.25, -1.8),
-      radius: 2.2,
+      position: new pc.Vec3(3.1, 0.08, -1.8),
+      radius: 2.4,
+      aimRadius: 0.70,
       onInteract: () => this.finish(chore, 'Paper towels, cleaner, thirty seconds. Retail glamour.')
     };
     chore.interactable = interactable;
@@ -111,9 +124,10 @@ export class ChoreSystem {
 
     const interactable: Interactable = {
       id: chore.id,
-      label: 'take trash',
-      position: new pc.Vec3(-8.1, 0.8, 7.8),
-      radius: 2.2,
+      label: 'take trash bag',
+      position: new pc.Vec3(-8.3, 0.48, 8.2),
+      radius: 2.4,
+      aimRadius: 0.55,
       onInteract: () => this.finish(chore, 'You tie off the bag and take it out back. The night air feels colder.')
     };
     chore.interactable = interactable;
