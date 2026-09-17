@@ -8,6 +8,9 @@ export class GameUI {
   readonly help: HTMLDivElement;
   readonly warning: HTMLDivElement;
   readonly vignette: HTMLDivElement;
+  readonly cctv: HTMLDivElement;
+  readonly cctvLabel: HTMLDivElement;
+  readonly cctvHelp: HTMLDivElement;
 
   constructor() {
     this.root = document.createElement('div');
@@ -44,7 +47,18 @@ export class GameUI {
     this.vignette = document.createElement('div');
     this.vignette.style.cssText = 'position:absolute;inset:0;background:radial-gradient(circle at center,transparent 56%,rgba(0,0,0,.20) 78%,rgba(0,0,0,.48) 100%);opacity:.52';
 
-    this.root.append(this.vignette, title, this.clock, this.crosshair, this.prompt, this.message, this.tasks, this.help, this.warning);
+    this.cctv = document.createElement('div');
+    this.cctv.style.cssText = 'position:absolute;inset:0;display:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.08) 0 2px,rgba(255,255,255,.015) 2px 4px);box-shadow:inset 0 0 130px rgba(0,0,0,.55);';
+
+    this.cctvLabel = document.createElement('div');
+    this.cctvLabel.style.cssText = 'position:absolute;left:22px;top:20px;padding:6px 9px;background:rgba(0,0,0,.62);border:1px solid rgba(200,220,210,.25);font-size:13px;letter-spacing:1.2px;color:#b9cfbd';
+
+    this.cctvHelp = document.createElement('div');
+    this.cctvHelp.textContent = 'Q / E — CHANGE CAMERA     ESC — EXIT CCTV';
+    this.cctvHelp.style.cssText = 'position:absolute;left:50%;bottom:22px;transform:translateX(-50%);padding:7px 11px;background:rgba(0,0,0,.68);font-size:12px;letter-spacing:.7px;color:#bdc9bf';
+    this.cctv.append(this.cctvLabel, this.cctvHelp);
+
+    this.root.append(this.vignette, title, this.clock, this.crosshair, this.prompt, this.message, this.tasks, this.help, this.warning, this.cctv);
     document.body.appendChild(this.root);
   }
 
@@ -69,6 +83,18 @@ export class GameUI {
       if (this.warning.textContent === text) this.warning.style.opacity = '0';
       this.vignette.style.opacity = '.52';
     }, ms);
+  }
+
+  setCctv(active: boolean, label = ''): void {
+    this.cctv.style.display = active ? 'block' : 'none';
+    this.cctvLabel.textContent = label;
+    this.crosshair.style.opacity = active ? '0' : '.72';
+    this.tasks.style.opacity = active ? '0' : '1';
+    this.help.style.opacity = active ? '0' : this.help.style.opacity;
+  }
+
+  setCctvLabel(label: string): void {
+    this.cctvLabel.textContent = label;
   }
 
   setClock(text: string): void {
