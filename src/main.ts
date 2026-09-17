@@ -8,6 +8,7 @@ import { NightOneDirector } from './nightOneDirector';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
+import { CctvSystem } from './cctvSystem';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -42,6 +43,7 @@ const nightOne = new NightOneDirector(app, world, state, ui, camera);
 const chores = new ChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
 const power = new PowerSystem(app, world, state, ui);
+new CctvSystem(app, world, ui, player, camera);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
