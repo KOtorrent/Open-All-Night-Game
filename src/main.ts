@@ -2,6 +2,7 @@ import * as pc from 'playcanvas';
 import { GameUI } from './ui';
 import { GameState } from './gameState';
 import { buildStore } from './storeBuilder';
+import { buildExterior } from './exteriorBuilder';
 import { PlayerController } from './playerController';
 import { NightOneDirector } from './nightOneDirector';
 
@@ -21,12 +22,13 @@ resize();
 const ui = new GameUI();
 const state = new GameState(ui);
 const world = buildStore(app, state, ui);
+buildExterior(app, world.colliders);
 
 const camera = new pc.Entity('PlayerCamera');
 camera.addComponent('camera', {
   clearColor: new pc.Color(0.006, 0.009, 0.012),
   nearClip: 0.05,
-  farClip: 160,
+  farClip: 180,
   fov: 70
 });
 camera.setPosition(world.spawn);
