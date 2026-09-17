@@ -12,8 +12,10 @@ import { LateCustomerSystem } from './lateCustomerSystem';
 import { DaleSystem } from './daleSystem';
 import { MarcusSystem } from './marcusSystem';
 import { PumpSevenSystem } from './pumpSevenSystem';
+import { WindowWatcherSystem } from './windowWatcherSystem';
 import { ReceiptSystem } from './receiptSystem';
 import { TransactionFeedbackSystem } from './transactionFeedbackSystem';
+import { AchievementSystem } from './achievementSystem';
 import { NightOneAtmosphereSystem } from './nightOneAtmosphereSystem';
 import { ClosingChoreSystem } from './closingChoreSystem';
 import { AuthoredRetailAssetSystem } from './authoredRetailAssetSystem';
@@ -85,6 +87,7 @@ const dale = new DaleSystem(app, world, state, ui);
 const marcus = new MarcusSystem(app, world, state, ui);
 const receipts = new ReceiptSystem(app, world, state);
 const transactions = new TransactionFeedbackSystem(state);
+const achievements = new AchievementSystem(state);
 const atmosphere = new NightOneAtmosphereSystem(app, state, ui);
 const chores = new ChoreSystem(app, world, state, ui);
 const closingChores = new ClosingChoreSystem(app, world, state, ui);
@@ -95,6 +98,7 @@ const restroom = new RestroomSystem(app, world, state, ui);
 const fuel = new FuelSystem(app, world, state, ui);
 const delivery = new DeliverySystem(app, world, state, ui);
 const pumpSeven = new PumpSevenSystem(app, world, state, ui);
+const windowWatcher = new WindowWatcherSystem(app, state, ui, camera);
 const shiftEnd = new ShiftEndSystem(app, world, state, ui);
 
 app.on('update', (dt: number) => {
@@ -110,6 +114,7 @@ app.on('update', (dt: number) => {
   authoredCharacters.update();
   receipts.update();
   transactions.update();
+  achievements.update();
   atmosphere.update(safeDt);
   chores.update();
   closingChores.update();
@@ -118,6 +123,7 @@ app.on('update', (dt: number) => {
   fuel.update(safeDt);
   delivery.update(safeDt);
   pumpSeven.update();
+  windowWatcher.update(safeDt);
   shiftEnd.update();
   ambience.update(camera);
 });
