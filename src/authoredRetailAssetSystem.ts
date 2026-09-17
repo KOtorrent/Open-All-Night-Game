@@ -24,6 +24,12 @@ export class AuthoredRetailAssetSystem {
     this.registry.register({ id: 'authored-coolers', url: `${MARKET_BASE}/freezers-standing.glb`, scale: 1.10 });
     this.registry.register({ id: 'authored-shelf-boxes', url: `${MARKET_BASE}/shelf-boxes.glb`, scale: 1.0 });
     this.registry.register({ id: 'authored-shelf-bags', url: `${MARKET_BASE}/shelf-bags.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-display-bread', url: `${MARKET_BASE}/display-bread.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-display-fruit', url: `${MARKET_BASE}/display-fruit.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-bottle-return', url: `${MARKET_BASE}/bottle-return.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-shelf-end', url: `${MARKET_BASE}/shelf-end.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-chest-freezer', url: `${MARKET_BASE}/freezer.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-entry-rug', url: `${MARKET_BASE}/rugRectangle.glb`, scale: 1.0 });
   }
 
   async start(): Promise<void> {
@@ -36,7 +42,8 @@ export class AuthoredRetailAssetSystem {
     await Promise.allSettled([
       this.replaceRegister(),
       this.replaceCoolerVisual(),
-      this.addShelfHeroSamples()
+      this.addShelfHeroSamples(),
+      this.addRetailAccents()
     ]);
   }
 
@@ -63,7 +70,6 @@ export class AuthoredRetailAssetSystem {
         scale: 1.28
       });
       model.name = 'AuthoredCoolers';
-      // Preserve the original collider and cooler lights; only hide the most obvious visual shell.
       this.setPrefixVisualsEnabled('CoolerGlass-', false);
       console.info('OPEN ALL NIGHT authored cooler bank loaded');
     } catch (error) {
@@ -72,8 +78,6 @@ export class AuthoredRetailAssetSystem {
   }
 
   private async addShelfHeroSamples(): Promise<void> {
-    // These intentionally augment, rather than replace, the long gameplay shelves until their
-    // imported scale/orientation has been visually approved in a milestone playtest.
     try {
       const left = await this.registry.instantiate('authored-shelf-boxes', this.app.root, {
         position: new pc.Vec3(-8.35, 0.0, 3.8),
@@ -92,6 +96,27 @@ export class AuthoredRetailAssetSystem {
     } catch (error) {
       console.warn('Authored shelf samples unavailable; continuing without them.', error);
     }
+  }
+
+  private async addRetailAccents(): Promise<void> {
+    const placements = [
+      ['authored-display-bread', 'AuthoredBreadDisplay', new pc.Vec3(7.55, 0, 4.7), new pc.Vec3(0, -90, 0), 0.84],
+      ['authored-display-fruit', 'AuthoredFruitDisplay', new pc.Vec3(6.10, 0, 5.5), new pc.Vec3(0, 180, 0), 0.78],
+      ['authored-bottle-return', 'AuthoredBottleReturn', new pc.Vec3(8.25, 0, -5.65), new pc.Vec3(0, -90, 0), 0.92],
+      ['authored-shelf-end', 'AuthoredEndcapA', new pc.Vec3(-3.70, 0, 3.05), new pc.Vec3(0, 0, 0), 0.88],
+      ['authored-shelf-end', 'AuthoredEndcapB', new pc.Vec3(3.70, 0, 3.05), new pc.Vec3(0, 180, 0), 0.88],
+      ['authored-chest-freezer', 'AuthoredChestFreezer', new pc.Vec3(7.55, 0, -6.95), new pc.Vec3(0, -90, 0), 0.95],
+      ['authored-entry-rug', 'AuthoredEntryRug', new pc.Vec3(0, 0.025, 9.75), new pc.Vec3(0, 0, 0), 1.15]
+    ] as const;
+
+    const results = await Promise.allSettled(placements.map(async ([id, name, position, rotation, scale]) => {
+      const model = await this.registry.instantiate(id, this.app.root, { position, rotation, scale });
+      model.name = name;
+      return model;
+    }));
+
+    const successCount = results.filter((result) => result.status === 'fulfilled').length;
+    console.info(`OPEN ALL NIGHT authored retail accents loaded: ${successCount}/${placements.length}`);
   }
 
   private setNamedVisualsEnabled(names: string[], enabled: boolean): void {
