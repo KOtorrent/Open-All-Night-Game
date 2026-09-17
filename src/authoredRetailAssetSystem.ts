@@ -33,16 +33,12 @@ export class AuthoredRetailAssetSystem {
       return;
     }
 
-    // Default graphics baseline: only the three imports that already read correctly enough to keep
-    // testing. The shelf packs and decorative fixtures stay out of the normal scene until approved.
-    const jobs: Promise<void>[] = [
-      this.replaceRegister(),
-      this.replaceCoolerVisual(),
-      this.addEntryRug()
-    ];
+    // After the graphics playtest, the cooler import is no longer considered approved: it was the
+    // unexplained gray object sitting in front of the freezer wall. Keep the normal build clean.
+    const jobs: Promise<void>[] = [this.replaceRegister(), this.addEntryRug()];
 
     if (params.get('experimentalAssets') === '1') {
-      jobs.push(this.addShelfHeroSamples(), this.addRetailAccents());
+      jobs.push(this.replaceCoolerVisual(), this.addShelfHeroSamples(), this.addRetailAccents());
     }
 
     await Promise.allSettled(jobs);
@@ -72,7 +68,7 @@ export class AuthoredRetailAssetSystem {
       model.name = 'AuthoredCoolers';
       this.setPrefixVisualsEnabled('CoolerGlass-', false);
     } catch (error) {
-      console.warn('Authored cooler bank unavailable; keeping primitive fallback.', error);
+      console.warn('Experimental cooler bank unavailable; keeping primitive fallback.', error);
     }
   }
 
