@@ -66,8 +66,9 @@ export class CctvSystem {
     const interactable: Interactable = {
       id: 'cctv-monitor',
       label: 'view CCTV',
-      position: new pc.Vec3(-2.1, 1.3, -9.7),
-      radius: 2.5,
+      // Monitor now lives inside the enclosed manager office at the far-left rear of the store.
+      position: new pc.Vec3(-8.15, 1.3, -10.05),
+      radius: 2.35,
       onInteract: () => {
         this.enter();
       }
