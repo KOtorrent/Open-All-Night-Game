@@ -112,17 +112,18 @@ export class ShiftEndSystem {
     ].filter(Boolean).length;
     const jobs = [
       'first-sale', 'jenna-sale', 'restock-aisle-1', 'clean-spill', 'take-trash', 'authorize-pump-5',
-      'delivery-manifest', 'delivery-stocked', 'late-sale', 'dale-sale', 'marcus-sale',
-      'closing-faceup', 'closing-counter', 'closing-coffee'
+      'delivery-manifest', 'delivery-stocked', 'late-sale', 'dale-sale', 'cooler-temp-log',
+      'marcus-sale', 'lottery-count', 'closing-faceup', 'closing-counter', 'closing-coffee'
     ];
     const jobsDone = jobs.filter((id) => completed.has(id)).length;
     const customers = ['first-sale', 'jenna-sale', 'late-sale', 'dale-sale', 'marcus-sale'];
     const customersServed = customers.filter((id) => completed.has(id)).length;
+    const loreRead = ['lore-roster', 'lore-incident-log', 'lore-terminal'].filter((id) => completed.has(id)).length;
 
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(0,0,0,.84);color:#e7e2cb;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:auto';
     overlay.innerHTML = `
-      <div style="width:min(560px,88vw);border:1px solid rgba(230,220,170,.28);background:#090b0b;padding:30px 34px;box-shadow:0 20px 80px #000">
+      <div style="width:min(580px,88vw);border:1px solid rgba(230,220,170,.28);background:#090b0b;padding:30px 34px;box-shadow:0 20px 80px #000">
         <div style="font-size:12px;letter-spacing:3px;color:#b7ad76">OPEN ALL NIGHT</div>
         <div style="font-size:28px;margin-top:9px;letter-spacing:2px">NIGHT 1 — FIRST SHIFT</div>
         <div style="font-size:13px;margin-top:6px;color:#9a9a8e">10:55 PM — 6:00 AM</div>
@@ -131,6 +132,8 @@ export class ShiftEndSystem {
           <div>Rule status: <b>${ruleBroken ? 'YOU BROKE A RULE' : 'NO KNOWN RULES BROKEN'}</b></div>
           <div>Customers served: <b>${customersServed}/5</b></div>
           <div>Assigned work completed: <b>${jobsDone}/${jobs.length}</b></div>
+          <div>Office records read: <b>${loreRead}/3</b></div>
+          <div>CAM 4: <b>${completed.has('cctv-figure-seen') ? 'something was there' : 'nothing noted'}</b></div>
           <div>Dale: <b>${completed.has('dale-was-fine') ? 'was completely fine' : 'still suspicious, probably'}</b></div>
           <div>Counter phone: <b>${completed.has('answered-store-phone') ? 'answered' : 'unanswered'}</b></div>
         </div>
