@@ -13,6 +13,10 @@ import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
 import { CctvSystem } from './cctvSystem';
 import { RestroomSystem } from './restroomSystem';
+import { FuelSystem } from './fuelSystem';
+import { DeliverySystem } from './deliverySystem';
+import { ShiftEndSystem } from './shiftEndSystem';
+import { DevTools } from './devTools';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -33,6 +37,7 @@ ui.onNewShift(() => {
   state.resetSave();
   window.location.reload();
 });
+new DevTools(state, ui);
 
 const world = buildStore(app, state, ui);
 buildExterior(app, world.colliders);
@@ -57,6 +62,9 @@ const ambience = new AmbientAudio(canvas);
 const power = new PowerSystem(app, world, state, ui);
 new CctvSystem(app, world, ui, player, camera);
 const restroom = new RestroomSystem(app, world, state, ui);
+const fuel = new FuelSystem(app, world, state, ui);
+const delivery = new DeliverySystem(app, world, state, ui);
+const shiftEnd = new ShiftEndSystem(app, world, state, ui);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
@@ -68,6 +76,9 @@ app.on('update', (dt: number) => {
   chores.update();
   power.update(safeDt);
   restroom.update(safeDt);
+  fuel.update(safeDt);
+  delivery.update(safeDt);
+  shiftEnd.update();
   ambience.update(camera);
 });
 
