@@ -13,8 +13,10 @@ interface CharacterBinding {
 }
 
 /**
- * Replaces temporary primitive customer bodies with authored character GLBs while preserving
- * gameplay actor roots, routes, interactions and CCTV visibility.
+ * Optional authored-character experiment. The current Kenney mini-character set is deliberately
+ * NOT enabled in the normal game because the first graphics playtest proved the proportions are
+ * too toy-like/chibi for Open All Night. The normal-proportioned primitive actors stay active
+ * until a better human asset set is selected and visually approved.
  */
 export class AuthoredCharacterSystem {
   private readonly registry: AssetRegistry;
@@ -22,8 +24,6 @@ export class AuthoredCharacterSystem {
   private readonly loading = new Set<string>();
   private readonly disabled: boolean;
 
-  // Kenney Mini Characters are substantially smaller than the meter-scale blockout people.
-  // These values intentionally target a normal adult silhouette (~1.7-1.9 m in our world).
   private readonly bindings: CharacterBinding[] = [
     { rootName: 'Earl-Regular-Customer', assetId: 'character-earl', file: 'character-male-a.glb', scale: 2.22, yaw: 180 },
     { rootName: 'Silent-Customer', assetId: 'character-silent', file: 'character-female-f.glb', scale: 2.18, yaw: 180 },
@@ -36,10 +36,15 @@ export class AuthoredCharacterSystem {
   constructor(private readonly app: pc.Application) {
     this.registry = new AssetRegistry(app);
     const params = new URLSearchParams(window.location.search);
-    this.disabled = params.get('characters') === '0' || params.get('assets') === '0';
+    const explicitlyEnabled = params.get('characters') === '1' || params.get('experimentalCharacters') === '1';
+    this.disabled = params.get('assets') === '0' || !explicitlyEnabled;
 
     for (const binding of this.bindings) {
       this.registry.register({ id: binding.assetId, url: `${CHARACTER_BASE}/${binding.file}`, scale: binding.scale });
+    }
+
+    if (this.disabled) {
+      console.info('OPEN ALL NIGHT authored mini-character layer disabled; using normal-proportioned fallback actors.');
     }
   }
 
@@ -56,8 +61,6 @@ export class AuthoredCharacterSystem {
 
   private async attach(root: pc.Entity, binding: CharacterBinding): Promise<void> {
     try {
-      // Several primitive actors used 0.86-ish root scaling. Reset the gameplay root before
-      // mounting the authored model so its size is predictable and consistent between customers.
       root.setLocalScale(1, 1, 1);
       const model = await this.registry.instantiate(binding.assetId, root, {
         position: new pc.Vec3(0, binding.y ?? 0, 0),
@@ -67,7 +70,7 @@ export class AuthoredCharacterSystem {
       model.name = `${binding.rootName}-AuthoredModel`;
       this.hidePrimitiveChildren(root, model);
       this.attached.add(binding.rootName);
-      console.info(`OPEN ALL NIGHT authored character attached: ${binding.rootName}`);
+      console.info(`OPEN ALL NIGHT experimental authored character attached: ${binding.rootName}`);
     } catch (error) {
       console.warn(`Authored character unavailable for ${binding.rootName}; keeping primitive fallback.`, error);
     } finally {
