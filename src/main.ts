@@ -3,7 +3,10 @@ import { GameUI } from './ui';
 import { GameState } from './gameState';
 import { buildStore } from './storeBuilder';
 import { buildExterior } from './exteriorBuilder';
+import { buildStaffArea } from './staffAreaBuilder';
 import { PlayerController } from './playerController';
+import { PlayerAvatar } from './playerAvatar';
+import { InteractionPolishSystem } from './interactionPolishSystem';
 import { NightOneDirector } from './nightOneDirector';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
@@ -26,8 +29,14 @@ resize();
 
 const ui = new GameUI();
 const state = new GameState(ui);
+ui.onNewShift(() => {
+  state.resetSave();
+  window.location.reload();
+});
+
 const world = buildStore(app, state, ui);
 buildExterior(app, world.colliders);
+buildStaffArea(app, world);
 
 const camera = new pc.Entity('PlayerCamera');
 camera.addComponent('camera', {
@@ -40,6 +49,8 @@ camera.setPosition(world.spawn);
 app.root.addChild(camera);
 
 const player = new PlayerController(camera, canvas, world.colliders, world.interactables, ui, world.spawnYaw);
+const playerAvatar = new PlayerAvatar(app, player);
+const interactionPolish = new InteractionPolishSystem(app, world, state);
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
 const chores = new ChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
@@ -49,7 +60,9 @@ const restroom = new RestroomSystem(app, world, state, ui);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
+  interactionPolish.update();
   player.update(safeDt);
+  playerAvatar.update();
   state.update(dt);
   nightOne.update(safeDt);
   chores.update();

@@ -14,7 +14,6 @@ export class PlayerController {
   private locked = false;
   private active = true;
   private playerRadius = 0.28;
-  // Tuned after first browser playtest. The original 3.2 m/s felt sluggish in the 20x24m store.
   private walkSpeed = 4.8;
   private sprintSpeed = 7.3;
   private currentTarget?: Interactable;
@@ -46,6 +45,14 @@ export class PlayerController {
 
   isActive(): boolean {
     return this.active;
+  }
+
+  getYaw(): number {
+    return this.yaw;
+  }
+
+  getPosition(): pc.Vec3 {
+    return this.camera.getPosition().clone();
   }
 
   private bindInput(): void {
@@ -127,24 +134,35 @@ export class PlayerController {
       -Math.sin(yaw) * Math.cos(pitch),
       -Math.sin(pitch),
       -Math.cos(yaw) * Math.cos(pitch)
-    );
+    ).normalize();
 
     let best: Interactable | undefined;
-    let bestScore = -Infinity;
+    let bestScore = Number.POSITIVE_INFINITY;
+
     for (const item of this.interactables) {
-      const to = new pc.Vec3().sub2(item.position, pos);
-      const distance = to.length();
-      const maxDistance = item.radius ?? 2.6;
-      if (distance > maxDistance) continue;
-      to.normalize();
-      const facing = forward.dot(to);
-      if (facing < 0.72) continue;
-      const score = facing * 2 - distance * 0.2;
-      if (score > bestScore) {
+      const offset = new pc.Vec3().sub2(item.position, pos);
+      const distance = offset.length();
+      if (distance <= 0.001 || distance > (item.radius ?? 2.6)) continue;
+
+      const alongRay = forward.dot(offset);
+      if (alongRay <= 0) continue;
+
+      // Treat interactions like a short center-screen ray with a small forgiving radius.
+      // This makes prompts belong to the actual prop the crosshair is over instead of
+      // appearing merely because the player is somewhere nearby.
+      const perpendicularSq = Math.max(0, offset.lengthSq() - alongRay * alongRay);
+      const perpendicular = Math.sqrt(perpendicularSq);
+      const aimRadius = item.aimRadius ?? 0.52;
+      if (perpendicular > aimRadius) continue;
+
+      // Prefer the object closest to the aim ray first, then the nearer object.
+      const score = perpendicular * 4 + distance * 0.08;
+      if (score < bestScore) {
         bestScore = score;
         best = item;
       }
     }
+
     this.currentTarget = best;
     this.ui.setPrompt(best?.label);
   }

@@ -11,6 +11,7 @@ export class GameUI {
   readonly cctv: HTMLDivElement;
   readonly cctvLabel: HTMLDivElement;
   readonly cctvHelp: HTMLDivElement;
+  readonly newShiftButton: HTMLButtonElement;
 
   constructor() {
     this.root = document.createElement('div');
@@ -23,6 +24,13 @@ export class GameUI {
     const title = document.createElement('div');
     title.textContent = 'CASE’S COUNTRY GAS STOP';
     title.style.cssText = 'position:absolute;left:18px;top:14px;font-size:12px;letter-spacing:1.5px;color:#d8cf9b;opacity:.9';
+
+    this.newShiftButton = document.createElement('button');
+    this.newShiftButton.textContent = 'NEW SHIFT';
+    this.newShiftButton.title = 'Reset Night 1 progress and start again at 10:55 PM';
+    this.newShiftButton.style.cssText = 'position:absolute;left:18px;top:38px;pointer-events:auto;border:1px solid rgba(216,207,155,.28);background:rgba(0,0,0,.38);color:#c8c095;padding:4px 7px;font:10px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.8px;opacity:.48;cursor:pointer';
+    this.newShiftButton.addEventListener('mouseenter', () => { this.newShiftButton.style.opacity = '.9'; });
+    this.newShiftButton.addEventListener('mouseleave', () => { this.newShiftButton.style.opacity = '.48'; });
 
     this.crosshair = document.createElement('div');
     this.crosshair.textContent = '+';
@@ -58,8 +66,14 @@ export class GameUI {
     this.cctvHelp.style.cssText = 'position:absolute;left:50%;bottom:22px;transform:translateX(-50%);padding:7px 11px;background:rgba(0,0,0,.68);font-size:12px;letter-spacing:.7px;color:#bdc9bf';
     this.cctv.append(this.cctvLabel, this.cctvHelp);
 
-    this.root.append(this.vignette, title, this.clock, this.crosshair, this.prompt, this.message, this.tasks, this.help, this.warning, this.cctv);
+    this.root.append(this.vignette, title, this.newShiftButton, this.clock, this.crosshair, this.prompt, this.message, this.tasks, this.help, this.warning, this.cctv);
     document.body.appendChild(this.root);
+  }
+
+  onNewShift(callback: () => void): void {
+    this.newShiftButton.addEventListener('click', () => {
+      if (window.confirm('Start a new Night 1 shift? Current local progress will be reset.')) callback();
+    });
   }
 
   setPrompt(text?: string): void {
@@ -90,6 +104,7 @@ export class GameUI {
     this.cctvLabel.textContent = label;
     this.crosshair.style.opacity = active ? '0' : '.72';
     this.tasks.style.opacity = active ? '0' : '1';
+    this.newShiftButton.style.display = active ? 'none' : 'block';
     this.help.style.opacity = active ? '0' : this.help.style.opacity;
   }
 

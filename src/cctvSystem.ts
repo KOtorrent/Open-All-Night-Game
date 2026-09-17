@@ -40,7 +40,7 @@ export class CctvSystem {
       { label: 'CAM 3 — AISLES 1–2', position: new pc.Vec3(-8.5, 3.55, 4.3), target: new pc.Vec3(-2.8, 1.1, -0.6) },
       { label: 'CAM 4 — AISLES 3–4', position: new pc.Vec3(8.5, 3.55, 4.3), target: new pc.Vec3(2.5, 1.1, -0.8) },
       { label: 'CAM 5 — COOLERS', position: new pc.Vec3(8.4, 3.35, -7.7), target: new pc.Vec3(4.8, 1.35, -10.25) },
-      { label: 'CAM 6 — REAR DELIVERY', position: new pc.Vec3(-8.8, 3.15, -8.2), target: new pc.Vec3(-7.8, 1.0, -11.2) },
+      { label: 'CAM 6 — REAR DELIVERY', position: new pc.Vec3(-3.2, 3.15, -7.7), target: new pc.Vec3(-5.3, 1.0, -10.4) },
       { label: 'CAM 7 — PUMPS', position: new pc.Vec3(8.2, 3.65, 13.1), target: new pc.Vec3(0.0, 1.2, 27.5) },
       { label: 'CAM 8 — ROAD', position: new pc.Vec3(-8.2, 3.65, 13.1), target: new pc.Vec3(-10.0, 1.3, 38.0) }
     ];
@@ -66,12 +66,11 @@ export class CctvSystem {
     const interactable: Interactable = {
       id: 'cctv-monitor',
       label: 'view CCTV',
-      // Monitor now lives inside the enclosed manager office at the far-left rear of the store.
-      position: new pc.Vec3(-8.15, 1.3, -10.05),
-      radius: 2.35,
-      onInteract: () => {
-        this.enter();
-      }
+      // Exact center of the monitor screen in the rebuilt manager office.
+      position: new pc.Vec3(-7.65, 1.26, -10.34),
+      radius: 2.65,
+      aimRadius: 0.48,
+      onInteract: () => this.enter()
     };
     this.interactable = interactable;
     this.world.interactables.push(interactable);
