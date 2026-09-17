@@ -123,7 +123,7 @@ export class ShiftEndSystem {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(0,0,0,.84);color:#e7e2cb;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:auto';
     overlay.innerHTML = `
-      <div style="width:min(580px,88vw);border:1px solid rgba(230,220,170,.28);background:#090b0b;padding:30px 34px;box-shadow:0 20px 80px #000">
+      <div style="width:min(600px,90vw);border:1px solid rgba(230,220,170,.28);background:#090b0b;padding:30px 34px;box-shadow:0 20px 80px #000">
         <div style="font-size:12px;letter-spacing:3px;color:#b7ad76">OPEN ALL NIGHT</div>
         <div style="font-size:28px;margin-top:9px;letter-spacing:2px">NIGHT 1 — FIRST SHIFT</div>
         <div style="font-size:13px;margin-top:6px;color:#9a9a8e">10:55 PM — 6:00 AM</div>
@@ -136,6 +136,8 @@ export class ShiftEndSystem {
           <div>CAM 4: <b>${completed.has('cctv-figure-seen') ? 'something was there' : 'nothing noted'}</b></div>
           <div>Dale: <b>${completed.has('dale-was-fine') ? 'was completely fine' : 'still suspicious, probably'}</b></div>
           <div>Counter phone: <b>${completed.has('answered-store-phone') ? 'answered' : 'unanswered'}</b></div>
+          <div>Rear door: <b>${completed.has('checked-rear-rattle') ? 'checked after the rattle' : 'left alone'}</b></div>
+          <div>6:01 receipt: <b>${completed.has('read-impossible-receipt') ? 'read' : 'left on the printer'}</b></div>
         </div>
         <div style="margin-top:24px;color:#c5bea0;font-size:13px">The morning shift never showed up. For now, that is somebody else’s problem.</div>
         <button id="night1-summary-close" style="margin-top:26px;padding:9px 13px;background:#171a18;color:#e6dfbd;border:1px solid #595541;font:12px inherit;cursor:pointer">RETURN TO STORE</button>
