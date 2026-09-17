@@ -9,6 +9,10 @@ import { PlayerAvatar } from './playerAvatar';
 import { InteractionPolishSystem } from './interactionPolishSystem';
 import { NightOneDirector } from './nightOneDirector';
 import { LateCustomerSystem } from './lateCustomerSystem';
+import { DaleSystem } from './daleSystem';
+import { PumpSevenSystem } from './pumpSevenSystem';
+import { ReceiptSystem } from './receiptSystem';
+import { NightOneAtmosphereSystem } from './nightOneAtmosphereSystem';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
@@ -18,6 +22,7 @@ import { FuelSystem } from './fuelSystem';
 import { DeliverySystem } from './deliverySystem';
 import { ShiftEndSystem } from './shiftEndSystem';
 import { DevTools } from './devTools';
+import { applyPerformanceProfile } from './performanceProfile';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -43,6 +48,8 @@ new DevTools(state, ui);
 const world = buildStore(app, state, ui);
 buildExterior(app, world.colliders);
 buildStaffArea(app, world);
+const performanceProfile = applyPerformanceProfile(app);
+if (performanceProfile.low) console.info(`OPEN ALL NIGHT low-performance profile enabled (${performanceProfile.reason})`);
 
 const camera = new pc.Entity('PlayerCamera');
 camera.addComponent('camera', {
@@ -58,8 +65,12 @@ const player = new PlayerController(camera, canvas, world.colliders, world.inter
 const playerAvatar = new PlayerAvatar(app, player);
 const interactionPolish = new InteractionPolishSystem(app, world, state);
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
-// Construct after NightOneDirector so this wrapper can cleanly fall back to the existing register transaction logic.
+// Register wrappers are intentionally constructed in story order so each later customer can
+// fall back to the previous transaction handler without duplicating register logic.
 const lateCustomer = new LateCustomerSystem(app, world, state, ui);
+const dale = new DaleSystem(app, world, state, ui);
+const receipts = new ReceiptSystem(app, world, state);
+const atmosphere = new NightOneAtmosphereSystem(app, state, ui);
 const chores = new ChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
 const power = new PowerSystem(app, world, state, ui);
@@ -67,6 +78,7 @@ new CctvSystem(app, world, ui, player, camera);
 const restroom = new RestroomSystem(app, world, state, ui);
 const fuel = new FuelSystem(app, world, state, ui);
 const delivery = new DeliverySystem(app, world, state, ui);
+const pumpSeven = new PumpSevenSystem(app, world, state, ui);
 const shiftEnd = new ShiftEndSystem(app, world, state, ui);
 
 app.on('update', (dt: number) => {
@@ -77,11 +89,15 @@ app.on('update', (dt: number) => {
   state.update(dt);
   nightOne.update(safeDt);
   lateCustomer.update(safeDt);
+  dale.update(safeDt);
+  receipts.update();
+  atmosphere.update(safeDt);
   chores.update();
   power.update(safeDt);
   restroom.update(safeDt);
   fuel.update(safeDt);
   delivery.update(safeDt);
+  pumpSeven.update();
   shiftEnd.update();
   ambience.update(camera);
 });

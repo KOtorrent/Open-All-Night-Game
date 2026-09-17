@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, exterior forecourt, a second mundane customer transaction, and a real shift-ending loop.
+Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event, fuel authorization, delivery work, multiple ordinary customers, Pump 7 foreshadowing, exterior forecourt, and a complete shift-ending loop.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -14,102 +14,78 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - First-person WASD movement and mouse look
 - Tuned movement: 4.8 m/s walk, 7.3 m/s sprint
 - Custom AABB collision for store and exterior
-- Context-sensitive E interactions using center-screen aim-ray proximity rather than broad nearby cones
+- Context-sensitive E interactions using center-screen aim-ray proximity
 - Per-prop interaction aim radii for monitor, chores, register, notebook, coffee, cooler, rear door, etc.
 - Crosshair, interaction prompt, task panel, clock, warning flash and vignette feedback
 - NEW SHIFT reset control for clean Night 1 playtests
-- Optional `?dev=1` time-skip controls (+15/+30/+60 game minutes) so Codespaces testing does not require waiting through the full shift
+- Optional `?dev=1` time-skip controls (+15/+30/+60 game minutes)
+- Automatic low-performance rendering profile when running on Codespaces, plus `?low=1` / `?low=0` overrides
 - Canon time pacing: 1 in-game hour = 4 real minutes
 - Local autosave of clock/task progress and dynamic tasks
 - Full convenience-store shell at gameplay scale
 - Front entrance/windows and door-threshold chime behavior
 - Front-left checkout counter and POS silhouette
 - Register transaction foundation with auto-calculated change
-- Register prompt changes contextually: clock in / ring up items / use register
+- Contextual register prompt: clock in / ring up items / use register
 - First customer visibly places a drink and candy bar on the counter before checkout
-- Second ordinary late-night traveler after 1:10 AM:
-  - chimes in normally after the Silent Customer beat resolves
-  - walks a different shopping route
-  - places water, chips and a lottery slip on the counter
-  - uses the same register transaction path without bypassing earlier checkout logic
-  - leaves a mundane-but-eerie line before departing
+- Second ordinary late-night traveler after 1:10 AM with a different route and three-item checkout
+- Dale appears after 2:05 AM as an intentionally suspicious but completely harmless regular
+  - wanders deep into the back aisles before approaching the counter
+  - optional TALK interaction
+  - buys jerky/root beer with exact change
+  - completion records `dale-was-fine` for later achievement wiring
 - Night clerk notebook interaction with the three initial Night 1 rules
 - Front-right coffee station and brew task
 - Four stocked aisle fixtures
 - Rear refrigerated cooler bank with dedicated cool interior lighting
 - Freezer Flicker anomaly with Rule 1 zone checking and violation feedback
-- Basic customer actor construction and waypoint movement
-- First normal customer arrival, shopping route, register wait, transaction and departure
-- Silent Customer anomaly: enters without chime, waits at register, exposes E — TALK temptation, records rule break or survival
+- Silent Customer anomaly with no entrance chime and dangerous TALK temptation
 - Timed Night 1 chores: Aisle 1 restock, Aisle 3 spill cleanup, counter trash
-- Chore prompts target the actual visible carton/spill/trash prop rather than adjacent shelf areas
 - Rear breaker box and timed partial-power outage with reset task
-- Rear staff area rebuilt into three readable zones:
-  - enclosed manager office on the far-left rear
-  - middle stock/utility area
-  - restroom/cooler side kept separate
-- Manager office uses ONE side doorway from the stock/utility room
-- Stale stock-area collision blockers removed so the office route is navigable
-- Manager office includes desk, monitor, chair, filing cabinet, bulletin board/papers, warm desk light and brighter ceiling fixture
-- Stock/utility corridor has two visible cool-white fixtures
-- Rear delivery door sits in the stock/utility zone with visible push bar
-- Functional CCTV mode on the office monitor with eight switchable cameras
+- Rear staff area split into enclosed manager office, stock/utility zone, and separate restroom/cooler side
+- Manager office uses one side doorway and has dedicated brighter lighting
+- Rear delivery door in stock/utility area
+- Functional CCTV with eight switchable cameras
   - Camera 4 covers aisles 3–4
-  - Camera 6 is now an exterior rear-delivery/loading camera
-  - Exterior pump/road cameras included
-- Player has a world-space body proxy that follows the FPS camera and is visible on CCTV
-- Customer restroom geometry with toilet/sink/mirror silhouettes
-- 2:00 AM restroom-knocking rule event with obey/break outcomes
+  - Camera 6 watches the exterior rear-delivery/loading area
+  - exterior pump and road cameras included
+- Player world-space body proxy follows FPS camera and is visible on CCTV
+- Customer restroom with 2:00 AM Bathroom Knock rule event
 - ATM
-- Fixture-driven fluorescent grid plus restrained back-hall accent light
+- Fixture-driven fluorescent lighting
 - Playable exterior gas-station forecourt
-- Storefront sidewalk / parking markings
-- Fuel canopy with columns and fixture-driven lighting
-- Four pump islands / eight pumps, including Pump 7 placement
+- Four pump islands / eight pumps including Pump 7
 - ICE chest, dumpster, roadside sign silhouette, road and tree-line darkness
-- Fuel authorization gameplay:
-  - dedicated counter fuel console with request lamp
-  - timed $40 Pump 5 authorization task after midnight
-  - visible customer car parked at the actual Pump 5 location
-  - car departs after authorization
-- Overnight delivery gameplay:
-  - delivery truck arrives behind the store
-  - rear-door clipboard/manifest interaction
-  - manifest check creates a second task to put away six cartons
-  - delivery cartons physically appear in the stock room and disappear when stocked
-  - delivery truck departs after acceptance
+- Pump 5 fuel authorization gameplay with counter console, request lamp, visible car and departure
+- Overnight delivery gameplay with truck, manifest, six stock cartons and departure
+- Pump 7 Night 1 foreshadowing: unattended dark sedan silently appears and later vanishes; no rule/fail state yet
 - Night 1 shift ending:
-  - dedicated employee time clock near the register
-  - 5:55 AM clock-out reminder/task
-  - 6:00 AM interaction completes Night 1 and shows SHIFT COMPLETE
+  - employee time clock
+  - 5:55 AM clock-out reminder
+  - 6:00 AM completion persistence
+  - Night 1 summary overlay reporting rule outcomes, jobs completed, and Dale status
 - Generated ambient audio: interior refrigeration/fluorescent hum and exterior wind/road hiss
 - Reusable GLB/container AssetRegistry ready for authored model replacement
-- GitHub Actions build/typecheck validation on every PR update
+- GitHub Actions build/typecheck validation on PR updates
 
-## Next playtest targets
-Because Codespaces browser testing is resource-constrained, do not re-test after every commit. Use CI for compile safety and batch human testing at milestone boundaries.
+## Testing strategy
+Codespaces browser play is resource-constrained. Do not human-test every commit. CI handles compile/type safety and human playtests happen at milestone boundaries.
 
-When the next human test is worthwhile:
-1. Verify the manager office single-door access and brighter staff corridor.
-2. Add `?dev=1` to the game URL and use the time-skip buttons to reach 12:10 AM quickly.
-3. Confirm Pump 5 fuel request appears, console interaction works, and the car is visible outside.
-4. Skip to 12:35 AM and verify delivery truck / manifest / six-carton stock loop.
-5. Check Camera 6 during the delivery to confirm it now watches the exterior loading area.
-6. Resolve the Silent Customer, skip to 1:10 AM, and verify the second ordinary traveler shops, places three items, rings up, and leaves normally.
-7. Use time skip near 5:55 AM and verify the time-clock task and 6:00 AM Night 1 completion.
-8. Continue spot-checking first customer, freezer flicker, chores, power event and restroom knock.
+For milestone testing use `?dev=1` to jump between events. Codespaces automatically uses the lower-cost render profile. Add `?low=0` only when deliberately checking full-quality lighting.
 
 ## Next milestone
-1. Continue building Night 1 in large batches rather than micro-iterations.
-2. Start real GLB/PBR hero-prop replacement through AssetRegistry: POS/register, shelf fixture, coffee machine, ATM, gas pump, cooler, restroom fixtures, trash/dumpster and customer models.
-3. Add delivery/fuel audio and modest animation polish.
-4. Add Night 1 completion persistence / transition shell once the current retail loop is stable.
-5. Improve authored materials/textures while preserving the current lighting mood.
+1. Continue Night 1 in coherent batches rather than micro-iterations.
+2. Begin real CC0 GLB/PBR hero-prop replacement through AssetRegistry: POS/register, shelves, cooler, coffee machine, ATM, gas pump, restroom fixtures and customers.
+3. Add another layer of retail polish: receipts, product variety, customer idle behavior and better transaction feedback.
+4. Add modest animation/audio polish to fuel and delivery beats.
+5. Improve authored materials/textures while preserving the current dark convenience-store mood.
+6. Only start Night 2 after Night 1 gameplay and art pipeline are convincingly proven.
 
 ## Standing rules
 - Commit every meaningful milestone.
 - Prefer real authored 3D assets over code-built primitive hero props.
 - Primitives are acceptable for structural geometry, blockout, temporary character placeholders and invisible collision.
 - Preserve gameplay canon from the original Open All Night design.
-- Do not expand all five nights until Night 1 proves the gameplay and art pipeline.
+- Dale remains suspicious but harmless forever.
+- Larry remains Larry, never Frank.
 - Never leave meaningful work only in an AI sandbox or temporary container.
