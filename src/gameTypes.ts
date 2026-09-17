@@ -13,6 +13,8 @@ export interface Interactable {
   label: string;
   position: pc.Vec3;
   radius?: number;
+  /** Maximum perpendicular distance from the player's center-screen aim ray. */
+  aimRadius?: number;
   onInteract: () => string | void;
 }
 
