@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Playable Night 1 vertical slice with first customer/anomaly loop and exterior forecourt.
+Playable Night 1 vertical slice with customer loop, anomalies, chores, CCTV, power event and exterior forecourt.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -31,7 +31,14 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - First normal customer arrival, shopping route, register wait, transaction and departure
 - Silent Customer anomaly: enters without chime, waits at register, exposes E — TALK temptation, records rule break or survival
 - Timed Night 1 chores: Aisle 1 restock, Aisle 3 spill cleanup, counter trash
+- Rear breaker box and timed partial-power outage with reset task
 - Back-room divider, stock shelving and manager-office silhouettes
+- Functional CCTV mode on the office monitor with eight switchable cameras
+  - Camera 4 covers aisles 3–4
+  - Camera 6 covers rear delivery
+  - Exterior pump/road cameras included
+- Customer restroom geometry with toilet/sink/mirror silhouettes
+- 2:00 AM restroom-knocking rule event with obey/break outcomes
 - ATM
 - Fixture-driven fluorescent grid plus back-hall accent light
 - Playable exterior gas-station forecourt
@@ -54,13 +61,16 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 4. Observe the freezer-flicker event and test obeying/breaking Rule 1.
 5. Observe the Silent Customer and test the temptation to press E — TALK.
 6. Verify timed chores appear and can be completed.
-7. Listen for location-aware ambient sound after the first click/pointer-lock gesture.
+7. Wait for the power event and reset the rear breaker.
+8. Use the office monitor CCTV and cycle all eight cameras with Q/E, Escape to exit.
+9. If playing long enough to reach 2:00 AM, test the restroom-knocking rule.
+10. Listen for location-aware ambient sound after the first click/pointer-lock gesture.
 
 ## Next milestone
 1. Fix playtest issues from the second large pass.
 2. Start importing real GLB/PBR hero props through AssetRegistry: POS/register, shelf fixture, coffee machine, ATM, gas pump, cooler, restroom fixtures, trash/dumpster and customer models.
 3. Improve authored materials/textures and keep the current lighting mood.
-4. Add CCTV foundation, restroom/back-room interaction depth and additional Night 1 customer beats.
+4. Add more Night 1 customer beats, fuel authorization, delivery/manifest behavior and additional anomalies only after the current loop is stable.
 5. Expand Night 1 only after the art pipeline proves it can maintain the visual target.
 
 ## Standing rules
