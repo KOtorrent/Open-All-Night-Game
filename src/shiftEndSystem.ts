@@ -110,10 +110,14 @@ export class ShiftEndSystem {
       completed.has('silent-customer-survived'),
       completed.has('restroom-knock-survived')
     ].filter(Boolean).length;
-    const jobsDone = [
-      'first-sale', 'restock-aisle-1', 'clean-spill', 'take-trash', 'authorize-pump-5',
-      'delivery-manifest', 'delivery-stock', 'late-sale', 'dale-sale'
-    ].filter((id) => completed.has(id)).length;
+    const jobs = [
+      'first-sale', 'jenna-sale', 'restock-aisle-1', 'clean-spill', 'take-trash', 'authorize-pump-5',
+      'delivery-manifest', 'delivery-stocked', 'late-sale', 'dale-sale', 'marcus-sale',
+      'closing-faceup', 'closing-counter', 'closing-coffee'
+    ];
+    const jobsDone = jobs.filter((id) => completed.has(id)).length;
+    const customers = ['first-sale', 'jenna-sale', 'late-sale', 'dale-sale', 'marcus-sale'];
+    const customersServed = customers.filter((id) => completed.has(id)).length;
 
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(0,0,0,.84);color:#e7e2cb;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:auto';
@@ -125,8 +129,10 @@ export class ShiftEndSystem {
         <div style="margin-top:26px;line-height:1.9;font-size:14px">
           <div>Rules survived: <b>${survivedRules}/3</b></div>
           <div>Rule status: <b>${ruleBroken ? 'YOU BROKE A RULE' : 'NO KNOWN RULES BROKEN'}</b></div>
-          <div>Retail jobs completed: <b>${jobsDone}/9</b></div>
+          <div>Customers served: <b>${customersServed}/5</b></div>
+          <div>Assigned work completed: <b>${jobsDone}/${jobs.length}</b></div>
           <div>Dale: <b>${completed.has('dale-was-fine') ? 'was completely fine' : 'still suspicious, probably'}</b></div>
+          <div>Counter phone: <b>${completed.has('answered-store-phone') ? 'answered' : 'unanswered'}</b></div>
         </div>
         <div style="margin-top:24px;color:#c5bea0;font-size:13px">The morning shift never showed up. For now, that is somebody else’s problem.</div>
         <button id="night1-summary-close" style="margin-top:26px;padding:9px 13px;background:#171a18;color:#e6dfbd;border:1px solid #595541;font:12px inherit;cursor:pointer">RETURN TO STORE</button>
