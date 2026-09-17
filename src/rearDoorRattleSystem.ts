@@ -1,3 +1,4 @@
+import * as pc from 'playcanvas';
 import type { BuiltWorld, Interactable } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
@@ -54,7 +55,7 @@ export class RearDoorRattleSystem {
     const item: Interactable = {
       id: 'rear-rattle-check',
       label: 'check rear door',
-      position: { x: -4.1, y: 1.35, z: -11.55 } as never,
+      position: new pc.Vec3(-4.1, 1.35, -11.55),
       radius: 2.3,
       aimRadius: 0.48,
       onInteract: () => {
