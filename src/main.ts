@@ -6,6 +6,7 @@ import { buildExterior } from './exteriorBuilder';
 import { PlayerController } from './playerController';
 import { NightOneDirector } from './nightOneDirector';
 import { ChoreSystem } from './choreSystem';
+import { AmbientAudio } from './ambientAudio';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -38,6 +39,7 @@ app.root.addChild(camera);
 const player = new PlayerController(camera, canvas, world.colliders, world.interactables, ui, world.spawnYaw);
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
 const chores = new ChoreSystem(app, world, state, ui);
+const ambience = new AmbientAudio(canvas);
 
 app.on('update', (dt: number) => {
   const safeDt = Math.min(dt, 0.05);
@@ -45,6 +47,7 @@ app.on('update', (dt: number) => {
   state.update(dt);
   nightOne.update(safeDt);
   chores.update();
+  ambience.update(camera);
 });
 
 window.addEventListener('error', (event) => {
