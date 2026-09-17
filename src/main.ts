@@ -13,6 +13,8 @@ import { DaleSystem } from './daleSystem';
 import { PumpSevenSystem } from './pumpSevenSystem';
 import { ReceiptSystem } from './receiptSystem';
 import { NightOneAtmosphereSystem } from './nightOneAtmosphereSystem';
+import { ClosingChoreSystem } from './closingChoreSystem';
+import { AuthoredRetailAssetSystem } from './authoredRetailAssetSystem';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
@@ -51,6 +53,12 @@ buildStaffArea(app, world);
 const performanceProfile = applyPerformanceProfile(app);
 if (performanceProfile.low) console.info(`OPEN ALL NIGHT low-performance profile enabled (${performanceProfile.reason})`);
 
+// Real authored retail models load asynchronously and gracefully fall back to the primitive
+// gameplay geometry if the remote source is unavailable. This keeps collision deterministic while
+// finally allowing visual quality to advance independently of the blockout.
+const authoredAssets = new AuthoredRetailAssetSystem(app);
+void authoredAssets.start();
+
 const camera = new pc.Entity('PlayerCamera');
 camera.addComponent('camera', {
   clearColor: new pc.Color(0.006, 0.009, 0.012),
@@ -72,6 +80,7 @@ const dale = new DaleSystem(app, world, state, ui);
 const receipts = new ReceiptSystem(app, world, state);
 const atmosphere = new NightOneAtmosphereSystem(app, state, ui);
 const chores = new ChoreSystem(app, world, state, ui);
+const closingChores = new ClosingChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
 const power = new PowerSystem(app, world, state, ui);
 new CctvSystem(app, world, ui, player, camera);
@@ -93,6 +102,7 @@ app.on('update', (dt: number) => {
   receipts.update();
   atmosphere.update(safeDt);
   chores.update();
+  closingChores.update();
   power.update(safeDt);
   restroom.update(safeDt);
   fuel.update(safeDt);
