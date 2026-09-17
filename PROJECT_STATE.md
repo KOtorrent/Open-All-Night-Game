@@ -35,23 +35,26 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - First normal customer arrival, shopping route, register wait, transaction and departure
 - Silent Customer anomaly: enters without chime, waits at register, exposes E — TALK temptation, records rule break or survival
 - Timed Night 1 chores: Aisle 1 restock, Aisle 3 spill cleanup, counter trash
-- Chore prompts now target the actual visible carton/spill/trash prop rather than adjacent shelf areas
+- Chore prompts target the actual visible carton/spill/trash prop rather than adjacent shelf areas
 - Rear breaker box and timed partial-power outage with reset task
 - Rear staff area rebuilt into three readable zones:
   - enclosed manager office on the far-left rear
   - middle stock/utility area
   - restroom/cooler side kept separate
-- Manager office now includes desk, monitor, chair, filing cabinet, bulletin board/papers, warm light and real doorway framing
-- Rear delivery door moved into the stock/utility zone with visible push bar
+- Manager office now uses ONE side doorway from the stock/utility room; the old front-facing second opening is gone
+- Stale stock-area collision blockers were removed so the office route is actually navigable
+- Manager office now includes desk, monitor, chair, filing cabinet, bulletin board/papers, warm desk light and a brighter ceiling fixture
+- Stock/utility corridor now has two visible cool-white fixtures so it is readable without killing the night mood
+- Rear delivery door remains in the stock/utility zone with visible push bar
 - Functional CCTV mode on the office monitor with eight switchable cameras
   - Camera 4 covers aisles 3–4
   - Camera 6 covers rear stock/delivery
   - Exterior pump/road cameras included
-- Player now has a world-space body proxy that follows the FPS camera and is visible on CCTV
+- Player has a world-space body proxy that follows the FPS camera and is visible on CCTV
 - Customer restroom geometry with toilet/sink/mirror silhouettes
 - 2:00 AM restroom-knocking rule event with obey/break outcomes
 - ATM
-- Fixture-driven fluorescent grid plus back-hall accent light
+- Fixture-driven fluorescent grid plus restrained back-hall accent light
 - Playable exterior gas-station forecourt
 - Storefront sidewalk / parking markings
 - Fuel canopy with columns and fixture-driven lighting
@@ -63,13 +66,13 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 
 ## Immediate playtest targets
 1. Start a clean Night 1 with the NEW SHIFT control.
-2. Verify register/notebook/coffee prompts appear only when the crosshair is actually on those props.
-3. Verify the Aisle 1 restock prompt appears when looking directly at the carton, not the shelf.
-4. Enter the manager office and verify it reads as a separate enclosed room.
-5. Look directly at the office monitor and verify CCTV activates without backing away or aiming beside it.
+2. Walk through the employee doorway into the stock/utility room and verify the path is visibly brighter.
+3. Enter the manager office through its SINGLE side doorway and verify there is no second front opening.
+4. Verify there are no invisible blockers preventing office entry.
+5. Look directly at the office monitor and verify CCTV activates from normal standing distance.
 6. Cycle CCTV cameras and verify the player's own body is visible when inside a camera's field of view.
-7. Verify the rear stock/utility zone and rear delivery door are navigable without invisible old shelf blockers.
-8. Continue checking first-customer checkout, freezer flicker, Silent Customer, timed chores, power event and restroom knock.
+7. Verify register/notebook/coffee/chore prompts still target their actual props.
+8. Continue checking customer checkout, freezer flicker, Silent Customer, timed chores, power event and restroom knock.
 
 ## Next milestone
 1. Fix any remaining playtest targeting/layout issues.
