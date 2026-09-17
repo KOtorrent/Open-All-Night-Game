@@ -13,8 +13,9 @@ export class PlayerController {
   private pitch = 0;
   private locked = false;
   private playerRadius = 0.28;
-  private walkSpeed = 3.2;
-  private sprintSpeed = 5.1;
+  // Tuned after first browser playtest. The original 3.2 m/s felt sluggish in the 20x24m store.
+  private walkSpeed = 4.8;
+  private sprintSpeed = 7.3;
   private currentTarget?: Interactable;
 
   constructor(
