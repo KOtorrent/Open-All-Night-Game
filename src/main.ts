@@ -8,6 +8,7 @@ import { PlayerController } from './playerController';
 import { PlayerAvatar } from './playerAvatar';
 import { InteractionPolishSystem } from './interactionPolishSystem';
 import { NightOneDirector } from './nightOneDirector';
+import { LateCustomerSystem } from './lateCustomerSystem';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
@@ -57,6 +58,8 @@ const player = new PlayerController(camera, canvas, world.colliders, world.inter
 const playerAvatar = new PlayerAvatar(app, player);
 const interactionPolish = new InteractionPolishSystem(app, world, state);
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
+// Construct after NightOneDirector so this wrapper can cleanly fall back to the existing register transaction logic.
+const lateCustomer = new LateCustomerSystem(app, world, state, ui);
 const chores = new ChoreSystem(app, world, state, ui);
 const ambience = new AmbientAudio(canvas);
 const power = new PowerSystem(app, world, state, ui);
@@ -73,6 +76,7 @@ app.on('update', (dt: number) => {
   playerAvatar.update();
   state.update(dt);
   nightOne.update(safeDt);
+  lateCustomer.update(safeDt);
   chores.update();
   power.update(safeDt);
   restroom.update(safeDt);
