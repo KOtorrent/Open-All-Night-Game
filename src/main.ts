@@ -10,11 +10,15 @@ import { InteractionPolishSystem } from './interactionPolishSystem';
 import { NightOneDirector } from './nightOneDirector';
 import { LateCustomerSystem } from './lateCustomerSystem';
 import { DaleSystem } from './daleSystem';
+import { MarcusSystem } from './marcusSystem';
 import { PumpSevenSystem } from './pumpSevenSystem';
 import { ReceiptSystem } from './receiptSystem';
+import { TransactionFeedbackSystem } from './transactionFeedbackSystem';
 import { NightOneAtmosphereSystem } from './nightOneAtmosphereSystem';
 import { ClosingChoreSystem } from './closingChoreSystem';
 import { AuthoredRetailAssetSystem } from './authoredRetailAssetSystem';
+import { AuthoredCharacterSystem } from './authoredCharacterSystem';
+import { StoreSignageSystem } from './storeSignageSystem';
 import { ChoreSystem } from './choreSystem';
 import { AmbientAudio } from './ambientAudio';
 import { PowerSystem } from './powerSystem';
@@ -50,14 +54,15 @@ new DevTools(state, ui);
 const world = buildStore(app, state, ui);
 buildExterior(app, world.colliders);
 buildStaffArea(app, world);
+new StoreSignageSystem(app);
 const performanceProfile = applyPerformanceProfile(app);
 if (performanceProfile.low) console.info(`OPEN ALL NIGHT low-performance profile enabled (${performanceProfile.reason})`);
 
-// Real authored retail models load asynchronously and gracefully fall back to the primitive
-// gameplay geometry if the remote source is unavailable. This keeps collision deterministic while
-// finally allowing visual quality to advance independently of the blockout.
+// Authored retail and character models load asynchronously and gracefully fall back to primitive
+// gameplay geometry if remote sources are unavailable. Collision and logic therefore stay stable.
 const authoredAssets = new AuthoredRetailAssetSystem(app);
 void authoredAssets.start();
+const authoredCharacters = new AuthoredCharacterSystem(app);
 
 const camera = new pc.Entity('PlayerCamera');
 camera.addComponent('camera', {
@@ -74,10 +79,12 @@ const playerAvatar = new PlayerAvatar(app, player);
 const interactionPolish = new InteractionPolishSystem(app, world, state);
 const nightOne = new NightOneDirector(app, world, state, ui, camera);
 // Register wrappers are intentionally constructed in story order so each later customer can
-// fall back to the previous transaction handler without duplicating register logic.
+// fall back to the previous transaction handler without duplicating checkout logic.
 const lateCustomer = new LateCustomerSystem(app, world, state, ui);
 const dale = new DaleSystem(app, world, state, ui);
+const marcus = new MarcusSystem(app, world, state, ui);
 const receipts = new ReceiptSystem(app, world, state);
+const transactions = new TransactionFeedbackSystem(state);
 const atmosphere = new NightOneAtmosphereSystem(app, state, ui);
 const chores = new ChoreSystem(app, world, state, ui);
 const closingChores = new ClosingChoreSystem(app, world, state, ui);
@@ -99,7 +106,10 @@ app.on('update', (dt: number) => {
   nightOne.update(safeDt);
   lateCustomer.update(safeDt);
   dale.update(safeDt);
+  marcus.update(safeDt);
+  authoredCharacters.update();
   receipts.update();
+  transactions.update();
   atmosphere.update(safeDt);
   chores.update();
   closingChores.update();
