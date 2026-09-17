@@ -16,6 +16,7 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - `?dev=1` time-skip controls; automatic Codespaces low-performance profile with `?low=1` / `?low=0`
 - Canon pacing: 1 in-game hour = 4 real minutes
 - Full convenience-store shell, checkout, coffee station, four aisles, cooler bank, staff area, office, restroom, exterior forecourt and eight pumps
+- Physical automatic glass entrance door reacts to player and Night 1 customer roots instead of leaving the entry as an empty opening
 - Readable in-world signage for all four aisles, coffee, employees-only, restroom and Case’s front branding
 - Register transaction foundation with visible merchandise, auto-calculated change and POS-style sale-complete overlay
 - Physical receipts accumulate after Earl, Jenna, traveler, Dale and Marcus transactions
@@ -34,16 +35,20 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Pump 7 unattended sedan foreshadow at 3:08 AM, gone at 3:28 AM
 - 1:24 AM counter-phone atmosphere event: optional answer hears matching refrigeration hum and a click
 - Optional CAM 4-only figure between 3:33 and 3:44 AM; exists only in the CCTV camera view, disappears after being watched, no rule/fail state
+- 3:56 AM rear delivery-door handle rattle; optional check finds nobody outside, no rule/fail state
 - 4:25 AM optional Window Watcher visual scare outside the front-right glass; non-failing and not a rule
+- 5:16 AM impossible receipt: printer runs by itself and produces a 6:01 AM zero-dollar NIGHT CLERK sale before the shift ends
 - Restrained atmosphere beats: passing headlights, fluorescent sputter, shelf shift, false 4:47 AM entrance chime
-- Manager office now contains three optional lore surfaces:
+- Manager office contains three optional lore surfaces:
   - employee roster seeding Daniel and older L. CASE night-shift history
   - incident folder mentioning Pump 7 resets with no visible vehicle
   - old management terminal flagging Pump 7 manual review and Camera 4 image-delay complaints
+- Staff-side environmental dressing expanded with employee lockers, utility sink, mop bucket, broom, cleaning chemicals, hand truck, collapsed cartons, filing cabinet, office corkboard, mug and paper clutter
 - Rear breaker / timed partial power failure
 - Eight-camera CCTV; Camera 4 covers aisles 3–4, Camera 6 rear loading exterior, player body visible on camera
+- CCTV presentation now includes live CASE SECURITY timecode plus brief channel-switch static while preserving scanlines/compression styling
 - Generated interior refrigeration/fluorescent hum and exterior wind/road ambience
-- Employee time clock, 5:55 reminder, 6:00 Night 1 completion and expanded summary showing rules, customers, work, office records, CAM 4, Dale and phone response
+- Employee time clock, 5:55 reminder, 6:00 Night 1 completion and expanded summary showing rules, customers, work, office records, CAM 4, Dale, phone, rear-door and impossible-receipt outcomes
 - Local achievement foundation ready for later Steamworks mirroring: FIRST DAY, REGULAR, DALE WAS FINE, TRUST ISSUES, EMPLOYEE OF THE MONTH
 - Expanded reusable GLB/container AssetRegistry with shared in-flight loading, batch preload and placement support
 - Authored retail layer now attempts real Kenney Mini Market models for register, cooler bank, boxed/bagged shelves, bread display, fruit display, bottle return, two endcaps, chest freezer and entry rug
@@ -61,7 +66,8 @@ At the next milestone playtest use `?dev=1` to jump among events. Codespaces aut
 2. Expand authored replacement toward ATM, coffee machine, pumps, restroom fixtures and office furniture when verified source models are available.
 3. Improve customer motion/idle presentation after authored characters are visually confirmed.
 4. Add more environmental texture/material identity while preserving the current dark convenience-store mood.
-5. Keep Night 1 coherent and polished before beginning Night 2.
+5. Vendor the currently-used external GLBs into a controlled game asset path before packaging work.
+6. Keep Night 1 coherent and polished before beginning Night 2.
 
 ## Standing rules
 - Commit every meaningful milestone.
