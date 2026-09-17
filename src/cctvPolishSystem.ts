@@ -31,7 +31,7 @@ export class CctvPolishSystem {
     this.tick -= dt;
     if (this.tick > 0) return;
     this.tick = 0.25;
-    this.timecode.textContent = `${this.format(this.state.getGameMinutes())}   REC ●`;
+    this.timecode.textContent = `CASE SECURITY   ${this.format(this.state.getGameMinutes())}   REC ●`;
   }
 
   private flashStatic(): void {
@@ -47,6 +47,6 @@ export class CctvPolishSystem {
     const h = hour24.toString().padStart(2, '0');
     const m = minute.toString().padStart(2, '0');
     const s = second.toString().padStart(2, '0');
-    return `1999-10-31  ${h}:${m}:${s}`;
+    return `${h}:${m}:${s}`;
   }
 }
