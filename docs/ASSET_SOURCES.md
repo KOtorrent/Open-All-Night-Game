@@ -37,9 +37,11 @@ To prove the authored-model pipeline before binary assets are vendored into this
 - Repository license: MIT
 - Retail paths: `frontend/public/assets/market/*.glb`
 - Character paths: `frontend/public/assets/characters/*.glb`
-- Retail models currently referenced: `cash-register.glb`, `freezers-standing.glb`, `shelf-boxes.glb`, `shelf-bags.glb`
+- Retail models currently referenced: `cash-register.glb`, `freezers-standing.glb`, `shelf-boxes.glb`, `shelf-bags.glb`, `display-bread.glb`, `display-fruit.glb`, `bottle-return.glb`, `shelf-end.glb`, `freezer.glb`, `rugRectangle.glb`
 - Character models currently referenced: `character-male-a.glb`, `character-male-c.glb`, `character-male-d.glb`, `character-male-f.glb`, `character-female-f.glb`
 - Original asset families are identified by that repository as Kenney Mini Market and Kenney Mini Characters.
+
+The retail filenames above were verified against the mirror repository before being added to the runtime registry.
 
 This is an integration bridge, not the intended shipping arrangement. Before Steam packaging, copy only the actually-used models into this repository (or another controlled game asset store), preserve this provenance record, and remove the runtime dependency on raw GitHub URLs.
 
