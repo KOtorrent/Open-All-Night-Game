@@ -28,6 +28,11 @@ resize();
 
 const ui = new GameUI();
 const state = new GameState(ui);
+ui.onNewShift(() => {
+  state.resetSave();
+  window.location.reload();
+});
+
 const world = buildStore(app, state, ui);
 buildExterior(app, world.colliders);
 buildStaffArea(app, world);
