@@ -4,6 +4,7 @@ import { GameState } from './gameState';
 import { GameSession } from './gameSession';
 import { GameFrameworkUI } from './gameFrameworkUI';
 import { AnomalyRuntime } from './anomalyRuntime';
+import { ANOMALY_BY_ID } from './anomalyCatalog';
 import { FrameworkNightDirector } from './frameworkNightDirector';
 import { CampaignCompletionSystem } from './campaignCompletionSystem';
 import { SharedAnomalyHandlers } from './sharedAnomalyHandlers';
@@ -168,18 +169,21 @@ const nightThreeRuntime = session.isCampaignNight(3) ? new NightThreeRuntime(app
 const nightFourRuntime = session.isCampaignNight(4) ? new NightFourRuntime(world, state, ui, session.progression) : undefined;
 const nightFiveRuntime = session.isCampaignNight(5) ? new NightFiveRuntime(app, world, state, ui) : undefined;
 
-if (new URLSearchParams(window.location.search).get('dev') === '1') {
-  // QA-only: exposes night-runtime instances so automated tests can inspect internal timer state
-  // directly (e.g. instance['someTimer']) instead of guessing real-time vs simulated-time ratios.
-  Object.assign((window as unknown as { __oanDebug: Record<string, unknown> }).__oanDebug, {
-    nightTwoRuntime, nightThreeRuntime, nightFourRuntime, nightFiveRuntime
-  });
-}
 const endlessHud = new EndlessHudSystem(session);
 const laterRetail = new LaterNightRetailSystem(world, session, state, ui);
 const interactiveAnomalies = new InteractiveAnomalySystem(world, session, state, ui, anomalyRuntime);
 const endlessRun = new EndlessRunSystem(session, state, player);
 void officeLore;
+
+if (new URLSearchParams(window.location.search).get('dev') === '1') {
+  // QA-only: exposes night-runtime/anomaly instances so automated tests can inspect internal timer
+  // state directly (e.g. instance['someTimer']) or drive update(dt) with an arbitrary dt to test a
+  // timeout path deterministically, instead of waiting on real-time vs simulated-time ratios.
+  Object.assign((window as unknown as { __oanDebug: Record<string, unknown> }).__oanDebug, {
+    nightTwoRuntime, nightThreeRuntime, nightFourRuntime, nightFiveRuntime,
+    anomalyRuntime, interactiveAnomalies, ANOMALY_BY_ID
+  });
+}
 
 const runNightOneContent = session.config.mode !== 'endless' && session.config.night === 1;
 if (!runNightOneContent && !session.isEndless()) ui.showMessage(`NIGHT ${session.config.night}: ${session.night.title}`, 5000);
