@@ -87,8 +87,12 @@ export class InteractiveAnomalySystem {
   }
 
   private arm(definition: AnomalyDefinition, challenge: Challenge): void {
-    if (this.active) this.fail(this.active.id);
     this.session.progression.recordAnomaly(definition.id, definition.tier === 'mythic');
+    if (this.active) {
+      this.state.complete(`anomaly:${definition.id}`);
+      this.ui.showMessage(`${definition.title}: ${challenge.text}`, 3600);
+      return;
+    }
     this.state.complete(`anomaly:${definition.id}`);
     this.active = challenge;
     this.timer = challenge.timeout;
