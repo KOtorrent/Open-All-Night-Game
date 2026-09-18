@@ -36,7 +36,13 @@ export class CampaignCompletionSystem {
       this.state.addTask(`night${this.session.config.night}-clock-out`, this.session.config.night === 5 ? 'Stay on shift until morning arrives' : 'Clock out at 6:00 AM');
       this.ui.showMessage(this.session.config.night === 5 ? '5:55 AM. The clock is not behaving normally.' : '5:55 AM. Five minutes left.', 3500);
     }
-    if (this.session.config.night === 5 && minute >= this.session.night.endMinutes && !this.endingOverlay) this.showEndingChoice();
+    if (this.session.config.night === 5 && minute >= this.session.night.endMinutes && !this.endingOverlay) {
+      if (this.state.isComplete('n5-ritual-complete') && this.state.isComplete('larry-conversation')) this.showEndingChoice();
+      else if (!this.state.isComplete('n5-ending-wait-message')) {
+        this.state.complete('n5-ending-wait-message');
+        this.ui.showMessage('The clock reads 5:60. The shift will not end until the routine is complete.', 5200);
+      }
+    }
   }
 
   private interact(): string {
@@ -46,6 +52,8 @@ export class CampaignCompletionSystem {
       return `${remaining} minute${remaining === 1 ? '' : 's'} left on the shift.`;
     }
     if (night === 5) {
+      if (!this.state.isComplete('n5-ritual-complete')) return '5:60. Finish the routine before you try to leave.';
+      if (!this.state.isComplete('larry-conversation')) return '5:60. Someone is waiting to speak with you.';
       this.showEndingChoice();
       return 'The punch clock reads 5:60.';
     }
@@ -71,7 +79,16 @@ export class CampaignCompletionSystem {
     });
     if (endingId) this.session.progression.recordEnding(endingId);
     this.ui.flashWarning(night === 5 ? 'SHIFT CHANGE' : 'SHIFT COMPLETE', 2400);
-    this.ui.showMessage(night === 5 ? 'The night finally decides what morning means.' : `Night ${night} complete. Night ${Math.min(5, night + 1)} unlocked.`, 5200);
+    if (night === 5 && endingId) {
+      const endingText = endingId === ENDINGS.clockOut.id
+        ? 'You leave. Behind you, the OPEN sign stays lit.'
+        : endingId === ENDINGS.stay.id
+          ? 'You stay behind the counter. Somewhere outside, morning finally begins.'
+          : 'You break the routine on purpose. Case’s is gone before sunrise.';
+      this.ui.showMessage(endingText, 6200);
+    } else {
+      this.ui.showMessage(`Night ${night} complete. Night ${Math.min(5, night + 1)} unlocked.`, 5200);
+    }
   }
 
   private showEndingChoice(): void {
