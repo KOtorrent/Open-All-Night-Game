@@ -67,6 +67,13 @@ export class SharedAnomalyHandlers {
     runtime.register('duplicate-player', () => this.triggerMessage('duplicate-player', 'Camera 4 shows you in Aisle 3 while you are standing somewhere else.'));
     runtime.register('missing-aisle', () => this.triggerMessage('missing-aisle', 'For several seconds, Aisle 2 ends at a blank wall.'));
     runtime.register('extra-door', () => this.triggerMessage('extra-door', 'A narrow black door is standing where the back wall should be.'));
+
+    // Mythics are deliberately rare, but they are real runtime events now rather than catalog-only IDs.
+    runtime.register('empty-bus', () => this.spawnPresence('empty-bus', new pc.Vec3(-7.5, 1.5, 27.0), new pc.Color(0.12, 0.13, 0.12), 'A bus is idling beyond the pumps with its doors open. There is nobody inside.', 24));
+    runtime.register('second-store', () => this.triggerMythic('second-store', 'Across the road, another Case’s is open. Every light is on. Your silhouette is behind its counter.'));
+    runtime.register('wrong-moon', () => this.triggerMythic('wrong-moon', 'The moon is too large, too low, and on the wrong side of the road.'));
+    runtime.register('customer-with-your-name', () => this.triggerMythic('customer-with-your-name', 'A customer hands you an ID. The name on it is yours.'));
+    runtime.register('larry-parking-lot', () => this.spawnPresence('larry-parking-lot', new pc.Vec3(2.8, 1.0, 19.5), new pc.Color(0.12, 0.12, 0.10), 'An older man is standing alone in the parking lot. When the canopy light flickers, he is gone.', 16));
   }
 
   update(dt: number): void {
@@ -80,6 +87,12 @@ export class SharedAnomalyHandlers {
   private triggerMessage(id: string, text: string): void {
     this.ctx.state.complete(`anomaly:${id}`);
     this.ctx.ui.showMessage(text, 4200);
+  }
+
+  private triggerMythic(id: string, text: string): void {
+    this.ctx.state.complete(`anomaly:${id}`);
+    this.ctx.ui.flashWarning('SOMETHING IS VERY WRONG', 1500);
+    this.ctx.ui.showMessage(text, 6200);
   }
 
   private spawnPresence(id: string, position: pc.Vec3, color: pc.Color, text: string, seconds = 14): void {
