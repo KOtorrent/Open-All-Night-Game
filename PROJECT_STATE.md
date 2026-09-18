@@ -21,7 +21,13 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - `GameFrameworkUI` provides campaign continuation, Chapter Select, Endless unlock state and progression counts. F2 opens it in development; `?menu=1` opens it on boot.
 - `CampaignCompletionSystem` supplies Night 2-4 completion/unlock behavior and the Night 5 three-ending choice framework.
 - `AchievementSystem` now uses the full 30-achievement catalog and shared progression store rather than a five-achievement Night 1-only list.
-- Endless Mode framework uses weighted standard/mythic anomaly scheduling and persistent survival/anomaly-count records.
+- Endless Mode framework uses weighted standard/mythic anomaly scheduling, per-anomaly cooldowns, immediate-repeat suppression and persistent survival/anomaly-count records.
+- Shared anomaly handlers now cover the reusable standard catalog plus all five mythics so later-night schedules and Endless no longer degrade to framework-only diagnostics for most events.
+- Authored Night 2 runtime interactables cover customer count, candy facing, coffee refresh, Daniel schedule lore and stock count.
+- Authored Night 3 runtime adds storm ambience/lightning plus door check, breaker verification, entrance mop, storm manifest and Larry incident-note tasks.
+- Authored Night 4 runtime adds notebook/camera cross-checks, rear-trash verification, Daniel corrected-rule lore and a rule-verification interaction.
+- Authored Night 5 runtime adds routine/count/coffee/Larry-file tasks plus Larry’s six-line shift-change conversation and hidden BREAK THE RULES availability gate.
+- Endless Mode now has an on-screen survival/anomaly counter.
 - Night 1 authored gameplay is isolated so it does not fire inside Nights 2-5 or Endless.
 - `docs/FULL_GAME_FRAMEWORK.md` is the implementation contract and later Claude bug-testing handoff guide.
 
@@ -85,13 +91,13 @@ Mythics:
 10. Framework documentation is complete enough for a second agent to implement/test individual runtime handlers.
 
 ## Next milestone
-1. Finish wiring reusable anomaly handlers into the catalog/runtime instead of adding one-off directors.
-2. Implement authored Night 2 runtime systems against its existing timeline scaffold.
-3. Implement Night 3 storm/weather/power variants.
-4. Implement Night 4 corrupted-rule verification systems.
-5. Implement Night 5 Larry / impossible-time / ending runtime content.
-6. Flesh out Endless pools, intensity scaling and recurrence suppression.
-7. After full framework/content coverage exists, hand the repo to Claude for systematic bug testing and repair of environment layout, NPC overlap, collision, restroom/office, coolers, prompts and visual regressions.
+1. Deepen later-night anomaly handlers from presentation/message behavior into full interactive pass/fail mechanics where appropriate.
+2. Add Night 2 recurring-customer transaction state and explicit head-count/repeater rule consequences.
+3. Add Night 3 storm rain presentation, blackout containment checks and Camera 6 rear-door verification state.
+4. Add Night 4 notebook corruption UI and persistent rule-verification consequences.
+5. Finish Night 5 impossible-time ritual, Larry staging and ending-specific scene consequences.
+6. Expand Endless intensity tiers, score milestones, death/failure reset flow and seeded run summaries.
+7. After content coverage is complete, hand the repo to Claude for systematic bug testing and repair of environment layout, NPC overlap, collision, restroom/office, coolers, prompts and visual regressions.
 
 ## Standing rules
 - GitHub is always the source of truth.
