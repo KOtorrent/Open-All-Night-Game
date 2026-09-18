@@ -51,14 +51,26 @@ export class GameSession {
     this.endlessLastId = chosen.id;
     this.endlessLastSeen.set(chosen.id, this.endlessElapsed);
     this.endlessAnomalies++;
+    const tier = this.getEndlessTier();
     const intensity = Math.min(1, this.endlessElapsed / 3600);
-    const gap = 50 - intensity * 25 + this.random() * 22;
-    this.nextEndlessAt = this.endlessElapsed + Math.max(18, gap);
+    const tierPressure = (tier - 1) * 3.5;
+    const gap = 50 - intensity * 25 - tierPressure + this.random() * 22;
+    this.nextEndlessAt = this.endlessElapsed + Math.max(12, gap);
     return chosen;
   }
 
-  getEndlessStats(): { seconds: number; anomalies: number } {
-    return { seconds: this.endlessElapsed, anomalies: this.endlessAnomalies };
+  getEndlessStats(): { seconds: number; anomalies: number; tier: number; score: number } {
+    const tier = this.getEndlessTier();
+    const score = Math.floor(this.endlessElapsed * 3 + this.endlessAnomalies * 150 + tier * 500);
+    return { seconds: this.endlessElapsed, anomalies: this.endlessAnomalies, tier, score };
+  }
+
+  getEndlessTier(): number {
+    if (this.endlessElapsed >= 3600 || this.endlessAnomalies >= 45) return 5;
+    if (this.endlessElapsed >= 2400 || this.endlessAnomalies >= 30) return 4;
+    if (this.endlessElapsed >= 1500 || this.endlessAnomalies >= 20) return 3;
+    if (this.endlessElapsed >= 600 || this.endlessAnomalies >= 10) return 2;
+    return 1;
   }
 
   private resolveConfig(): SessionConfig {
