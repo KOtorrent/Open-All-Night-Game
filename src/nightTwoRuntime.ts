@@ -30,7 +30,11 @@ export class NightTwoRuntime {
     add('n2-stock', 'finish stock count', new pc.Vec3(-6.4, 1.0, -9.5), 'The overnight stock count balances. One item has no SKU.');
 
     world.interactables.push({
-      id: 'n2-repeater-response', label: 'refuse repeat sale', position: new pc.Vec3(-4.65, 1.12, 7.72), radius: 2.2, aimRadius: 0.48,
+      // Confirmed in-engine: this sat only 0.03m from laterNightRetailSystem's always-present
+      // 'later-night-register-sale' interactable at the same counter spot. Close enough that this
+      // one (registered first) always won the aim-target tie, so a player couldn't ring up a
+      // waiting ordinary customer while a repeater response window happened to be active. Offset.
+      id: 'n2-repeater-response', label: 'refuse repeat sale', position: new pc.Vec3(-4.65, 1.12, 8.02), radius: 2.2, aimRadius: 0.48,
       onInteract: () => {
         if (!this.repeaterArmed) return 'No duplicate sale is pending.';
         if (this.state.isComplete('n2-repeater-refused')) return 'You already refused the duplicate sale.';

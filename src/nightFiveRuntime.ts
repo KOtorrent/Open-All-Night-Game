@@ -26,7 +26,11 @@ export class NightFiveRuntime {
     add('n5-larry-file', 'read Larry Case file', new pc.Vec3(-7.5, 1.35, -9.3), 'LARRY CASE — NIGHT CLERK. Years of incident notes. Final line: RULES KEEP THINGS MOVING.');
 
     world.interactables.push({
-      id: 'n5-ritual-coffee', label: 'keep coffee running', position: new pc.Vec3(6.3, 1.1, 8.4), radius: 2.2, aimRadius: 0.50,
+      // Confirmed in-engine: this previously sat at the exact same position as 'n5-coffee' above.
+      // With identical position, the aim-target scores tie exactly, and 'n5-coffee' (registered
+      // first) always won — permanently shadowing this interactable so the ritual step could never
+      // be completed, which blocked every Night 5 ending. Offset within the same coffee counter.
+      id: 'n5-ritual-coffee', label: 'keep coffee running', position: new pc.Vec3(6.3, 1.1, 8.75), radius: 2.2, aimRadius: 0.50,
       onInteract: () => this.completeRitualStep('n5-ritual-coffee', 'The brewer stays on. The hum steadies.')
     });
     world.interactables.push({

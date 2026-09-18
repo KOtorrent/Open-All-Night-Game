@@ -65,7 +65,11 @@ export class AchievementSystem {
       case 'NOBODY_HOME': return this.state.isComplete('rear-door-checked') || this.state.isComplete('n3-rear-door-safe');
       case 'WRONG_NUMBER': return this.state.isComplete('phone-answered');
       case 'PAPER_TRAIL': return this.state.isComplete('impossible-receipt-read');
-      case 'NIGHT_AUDITOR': return ['office-roster','office-incidents','office-terminal'].every((x) => this.state.isComplete(x));
+      // IDs must match what officeLoreSystem.ts actually records via state.complete() (also used by
+      // shiftEndSystem.ts's lore-read count) — this previously checked 'office-roster'/'office-
+      // incidents'/'office-terminal', none of which any system ever sets, making the achievement
+      // structurally unreachable.
+      case 'NIGHT_AUDITOR': return ['lore-roster','lore-incident-log','lore-terminal'].every((x) => this.state.isComplete(x));
       case 'LARRY': return p.anomaliesSeen.includes('larry-arrival') || this.state.isComplete('larry-conversation');
       case 'MYTHIC': return p.mythicsSeen.length > 0;
       case 'ALL_MYTHICS': return MYTHIC_ANOMALIES.every((x) => p.mythicsSeen.includes(x.id));
