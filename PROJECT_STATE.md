@@ -29,6 +29,12 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Night 5 now implements the final containment ritual (coffee, rear door, return to register), 5:60 state, Larry’s six-line shift-change conversation and ending gating; endings cannot fire until the ritual and Larry sequence are complete.
 - Endless Mode now has five escalating intensity tiers, scoring, cooldown/recurrence suppression and an expanded survival/anomaly HUD.
 - `docs/CONTENT_COVERAGE.md` tracks campaign/content completion separately from the known visual/geometry QA debt.
+- Later Nights 2-5 now have scheduled mundane retail/customer transaction cadence instead of anomaly-only pacing.
+- False Cop, Wrong Face, Customer Stayed, Wrong Door and Frozen Clock now have explicit timed verification/response interactions; campaign failures record rule breaks and Endless failures record strikes.
+- Endless Mode now has a fair three-missed-response run-over condition with summary, same-seed retry, new-run and menu controls.
+- Night 5 hidden BREAK THE RULES availability now also requires resolving Wrong Door and Frozen Clock, completing the head-count beat, reading Larry’s file, completing the final ritual and finishing Larry’s conversation.
+- Achievement triggers were audited for Night 3 Pump 7/rear-door state, Larry conversation, generalized employee mastery, and PERFECT WEEK now evaluates clean completed runs rather than permanent lifetime mistakes.
+- `docs/SMOKE_TEST_ROUTES.md` defines a deterministic pre-QA route for every night, Endless, endings and achievement validation.
 - Night 1 authored gameplay is isolated so it does not fire inside Nights 2-5 or Endless.
 - `docs/FULL_GAME_FRAMEWORK.md` is the implementation contract and later Claude bug-testing handoff guide.
 
@@ -92,13 +98,10 @@ Mythics:
 10. Framework documentation is complete enough for a second agent to implement/test individual runtime handlers.
 
 ## Next milestone
-1. Finish the remaining later-night customer/transaction loops so Nights 2-5 contain enough mundane retail rhythm between anomalies.
-2. Add more interactive implementations for currently presentation-only standard anomalies, especially False Cop, Wrong Door, Customer Stayed, Wrong Face and Frozen Clock.
-3. Add richer Night 5 ending consequences and hidden sabotage requirements while keeping the three canonical endings intact.
-4. Add Endless run-failure/restart flow and milestone summaries without introducing unfair unavoidable deaths.
-5. Audit achievement trigger IDs against the now-expanded campaign state and progression data.
-6. Build final content-complete handoff notes and automated/dev smoke routes for each mode/night.
-7. THEN move into dedicated testing, bug repair and graphics: Claude systematic QA, office/restroom rebuild, NPC overlap/pathing, freezer stock, prompts, final character/hero assets, lighting/material/post-processing polish.
+1. One final content-completion pass: add remaining optional anomaly responses/late-night mundane beats only where they materially improve pacing or rule clarity.
+2. Review the 30-achievement catalog against implemented content and remove any impossible/unintended unlock conditions.
+3. Finish the Claude QA handoff checklist with known bugs, smoke routes, expected outcomes and priority repair order.
+4. After that milestone, freeze new gameplay-framework expansion and move into dedicated testing, bug repair and graphics: office/restroom rebuild, NPC overlap/pathing, cooler stock, interaction alignment, final character/hero assets, lighting/material/post-processing polish.
 
 ## Standing rules
 - GitHub is always the source of truth.
