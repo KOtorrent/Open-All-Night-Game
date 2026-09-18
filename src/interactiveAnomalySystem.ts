@@ -73,6 +73,48 @@ export class InteractiveAnomalySystem {
       position: new pc.Vec3(-8.35, 1.58, 7.46),
       timeout: 26
     });
+    this.bind(runtime, 'coffee-rule', {
+      label: 'keep brewer running',
+      text: 'The coffee machine shuts itself off. The old note says the pot must stay running.',
+      safeText: 'You restart the brewer. The refrigeration hum settles with it.',
+      position: new pc.Vec3(6.3, 1.1, 8.4),
+      timeout: 20
+    });
+    this.bind(runtime, 'camera-desync', {
+      label: 'compare camera feed',
+      text: 'Camera 6 shows a different rear lot. Compare it against the physical door before acting.',
+      safeText: 'The live rear door is locked. Camera 6 is showing somewhere else.',
+      position: new pc.Vec3(-7.6, 1.32, -9.55),
+      timeout: 24
+    });
+    this.bind(runtime, 'duplicate-player', {
+      label: 'verify your location',
+      text: 'CCTV shows you in another aisle. Confirm your current position before following the feed.',
+      safeText: 'You stay put. The duplicate keeps moving without you.',
+      position: new pc.Vec3(-7.6, 1.32, -9.55),
+      timeout: 22
+    });
+    this.bind(runtime, 'receipt-name', {
+      label: 'discard named receipt',
+      text: 'A receipt prints with a customer name nobody told you.',
+      safeText: 'You tear the receipt off face-down and throw it away.',
+      position: new pc.Vec3(-4.25, 1.16, 7.58),
+      timeout: 18
+    });
+    this.bind(runtime, 'pump-counter-rollover', {
+      label: 'kill pump authorization',
+      text: 'A pump total is climbing with no customer at the nozzle.',
+      safeText: 'You cut authorization before the total can complete.',
+      position: new pc.Vec3(-4.35, 1.18, 7.65),
+      timeout: 20
+    });
+    this.bind(runtime, 'no-chime-exit', {
+      label: 'log silent exit',
+      text: 'A customer leaves without the exit chime. Do not follow them outside.',
+      safeText: 'You log the silent exit and stay behind the glass.',
+      position: new pc.Vec3(-4.7, 1.2, 7.7),
+      timeout: 18
+    });
   }
 
   update(dt: number): void {

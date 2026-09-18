@@ -2,6 +2,8 @@
 
 This document tracks whether each major campaign layer exists as data only, authored interaction logic, pass/fail rule logic, or final-polish content.
 
+**Gameplay/framework content status: CONTENT-COMPLETE FOR QA.** New feature expansion is frozen after this milestone except where testing proves an existing gameplay contract cannot function.
+
 ## Night 1 — FIRST SHIFT
 - Authored customer/chore loop: implemented
 - Three notebook rules: implemented with pass/fail outcomes
@@ -15,7 +17,8 @@ This document tracks whether each major campaign layer exists as data only, auth
 - Repeater rule: interactive refusal + timeout consequence
 - Head-count rule: interactive CCTV verification + timeout consequence
 - Early receipt rule: discard-without-reading response + timeout consequence
-- Smiling Woman / Wrong Face / Coffee Rule / Window Reflection / Customer Stayed: runtime events registered
+- Smiling Woman / Window Reflection: authored runtime presentation
+- Wrong Face / Customer Stayed / Coffee Rule: explicit timed player responses with pass/fail behavior
 - Later-night ordinary retail cadence: implemented with scheduled customers, register tasks, totals, tender/change and progression counts
 
 ## Night 3 — THE STORM
@@ -25,6 +28,7 @@ This document tracks whether each major campaign layer exists as data only, auth
 - Pump 7 rule: explicit DENY interaction + timeout consequence
 - Rear-door rule: Camera 6 verification required before touching rear lock
 - Storm chores/lore: implemented
+- False Cop / Frozen Clock / Wrong Door / Camera Desync: interactive verification responses implemented
 - Full rain particles / wet-surface art: graphics pass
 
 ## Night 4 — SOMEONE CHANGED THE RULES
@@ -33,7 +37,7 @@ This document tracks whether each major campaign layer exists as data only, auth
 - Corrupted-rule decision: implemented
 - False action can be obeyed and produces a recorded rule break
 - Correct verification crosses out altered instruction
-- Additional false-rule permutations: future content expansion
+- Cross-night Wrong Face / False Cop / Wrong Door / Frozen Clock / Customer Stayed responses integrate with Night 4 verification pressure
 
 ## Night 5 — OPEN ALL NIGHT
 - Timeline: implemented
@@ -43,7 +47,8 @@ This document tracks whether each major campaign layer exists as data only, auth
 - Final mundane containment ritual: coffee + rear door + return to register
 - Ending choice is locked until Larry conversation and ritual are complete
 - Three endings persist to progression and achievement system
-- Ending-specific final cinematic/art treatment: graphics/final polish pass
+- Ending-specific text consequences and campaign shift report: implemented
+- Final cinematic/art treatment: graphics/final polish pass
 
 ## Endless Mode
 - Weighted standard + mythic catalog: implemented
@@ -84,7 +89,20 @@ When campaign systems reach content-complete status, Claude should receive this 
 - Customer Stayed: refuse duplicate service
 - Wrong Door: mark impossible doorway unsafe
 - Frozen Clock: verify time against a backup source
+- Coffee Rule: restart/maintain the containment routine
+- Camera Desync: compare feed against physical store
+- Duplicate Player: verify your real location instead of following the feed
+- Receipt Name: discard the impossible named receipt
+- Pump Counter Rollover: kill unauthorized pump flow
+- No Chime Exit: log the silent exit without following outside
 - Campaign timeout/failure records a rule break; Endless timeout records a miss
 
 ## QA readiness
 - `docs/SMOKE_TEST_ROUTES.md` now defines the required developer/manual route for all five nights, Endless, endings and the achievement audit before Claude takes over systematic regression repair.
+
+## Content freeze
+- Nights 1-5 have campaign timing, mundane retail rhythm, chores/lore, anomaly sequencing, rule responses, completion and progression.
+- Night 5 has Larry, 5:60, final ritual, hidden sabotage requirements and all three ending choices.
+- Endless has weighted seeded scheduling, cooldowns, tiers, score, interactive failure strikes, run-over summary and restart paths.
+- All 30 local achievement trigger contracts are documented in `docs/ACHIEVEMENT_MATRIX.md`.
+- Remaining work is QA, bug repair, geometry/collision correction, asset replacement and graphics polish. See `docs/CLAUDE_QA_HANDOFF.md`.

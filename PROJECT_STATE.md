@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Full-game framework build. The project is intentionally prioritizing campaign architecture, all five nights, Endless Mode, endings, achievements, progression and reusable anomaly scheduling before another dedicated geometry/bug-polish pass.
+Gameplay/framework content freeze. The campaign, Endless Mode, progression, endings, achievements and reusable anomaly-response architecture are now considered content-complete enough for systematic QA. New feature expansion is frozen unless testing proves an existing gameplay contract cannot function.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -35,6 +35,11 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Night 5 hidden BREAK THE RULES availability now also requires resolving Wrong Door and Frozen Clock, completing the head-count beat, reading Larry’s file, completing the final ritual and finishing Larry’s conversation.
 - Achievement triggers were audited for Night 3 Pump 7/rear-door state, Larry conversation, generalized employee mastery, and PERFECT WEEK now evaluates clean completed runs rather than permanent lifetime mistakes.
 - `docs/SMOKE_TEST_ROUTES.md` defines a deterministic pre-QA route for every night, Endless, endings and achievement validation.
+- Cross-night timed response gameplay now also covers Coffee Rule, Camera Desync, Duplicate Player, Receipt Name, Pump Counter Rollover and No Chime Exit.
+- Nights 2-5 have ordinary scheduled register traffic with item totals/tender/change so later nights preserve mundane retail rhythm.
+- Campaign completion now produces a shift report with rule breaks, completed work, anomaly discovery, achievement count and continuation/replay/menu choices.
+- `docs/ACHIEVEMENT_MATRIX.md` documents the trigger contract for all 30 achievements.
+- `docs/CLAUDE_QA_HANDOFF.md` is the next-agent repair contract, including confirmed human-playtest P0 defects and exit criteria.
 - Night 1 authored gameplay is isolated so it does not fire inside Nights 2-5 or Endless.
 - `docs/FULL_GAME_FRAMEWORK.md` is the implementation contract and later Claude bug-testing handoff guide.
 
@@ -97,11 +102,15 @@ Mythics:
 9. Missing future anomaly handlers fail safely rather than crashing the game.
 10. Framework documentation is complete enough for a second agent to implement/test individual runtime handlers.
 
-## Next milestone
-1. One final content-completion pass: add remaining optional anomaly responses/late-night mundane beats only where they materially improve pacing or rule clarity.
-2. Review the 30-achievement catalog against implemented content and remove any impossible/unintended unlock conditions.
-3. Finish the Claude QA handoff checklist with known bugs, smoke routes, expected outcomes and priority repair order.
-4. After that milestone, freeze new gameplay-framework expansion and move into dedicated testing, bug repair and graphics: office/restroom rebuild, NPC overlap/pathing, cooler stock, interaction alignment, final character/hero assets, lighting/material/post-processing polish.
+## Next milestone — QA / repair / graphics
+1. Hand the current `main` branch to Claude for systematic smoke testing using `docs/SMOKE_TEST_ROUTES.md`.
+2. Fix P0 environment bugs first: rebuild office/restroom/staff geometry cleanly, eliminate duplicate openings/see-through walls and resolve collider overlap.
+3. Fix NPC spawn reservation, duplicate actors, route collision and shelf traversal.
+4. Fix cooler/freezer presentation and remove all default mystery/experimental props.
+5. Regression-test every prompt, register/CCTV interaction, ending gate, progression transition and Endless failure/restart path.
+6. Validate all 30 achievements using `docs/ACHIEVEMENT_MATRIX.md`.
+7. Then execute the final art pass: approved human assets, hero props, stocked coolers/shelves, exterior signage/pumps, lighting/material/post-processing polish.
+8. After the above passes, run a full Night 1-5 campaign without dev controls plus a sustained Endless session before release packaging.
 
 ## Standing rules
 - GitHub is always the source of truth.
@@ -113,3 +122,6 @@ Mythics:
 - Dark must remain playable.
 - No runtime generative-AI dialogue.
 - Never leave meaningful work only in an AI sandbox or temporary container.
+
+## Content-freeze declaration
+As of this milestone, gameplay/framework expansion is frozen. The next development phase is testing, repair and visual production. Known ugly/broken geometry or presentation is now a QA defect, not a reason to add another parallel gameplay system.
