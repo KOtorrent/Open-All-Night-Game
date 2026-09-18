@@ -62,7 +62,7 @@ export class NightFiveRuntime {
       this.state.complete('n5-ritual-complete');
       this.ui.flashWarning('SHIFT CHANGE', 1800);
       this.ui.showMessage('Coffee. Door. Counter. Someone is ready to take the shift.', 4200);
-      if (this.state.isComplete('n5-larry-file')) this.state.complete('ending-break-available');
+      if (this.canUnlockSabotage()) this.state.complete('ending-break-available');
     }
   }
 
@@ -71,6 +71,15 @@ export class NightFiveRuntime {
     if (!this.state.isComplete(id)) this.state.complete(id);
     this.ui.showMessage(text, 3200);
     return text;
+  }
+
+  private canUnlockSabotage(): boolean {
+    return this.state.isComplete('n5-larry-file') &&
+      this.state.isComplete('n5-ritual-complete') &&
+      this.state.isComplete('larry-conversation') &&
+      this.state.isComplete('n5-count') &&
+      this.state.isComplete('resolved:wrong-door') &&
+      this.state.isComplete('resolved:frozen-clock');
   }
 
   private spawnLarry(): void {
@@ -116,7 +125,7 @@ export class NightFiveRuntime {
     this.dialogueStep++;
     if (this.dialogueStep >= lines.length) {
       this.state.complete('larry-conversation');
-      if (this.state.isComplete('n5-larry-file') && this.state.isComplete('n5-ritual-complete')) this.state.complete('ending-break-available');
+      if (this.canUnlockSabotage()) this.state.complete('ending-break-available');
     }
     this.ui.showMessage(line, 3600);
     return line;
