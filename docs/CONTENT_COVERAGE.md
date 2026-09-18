@@ -16,7 +16,7 @@ This document tracks whether each major campaign layer exists as data only, auth
 - Head-count rule: interactive CCTV verification + timeout consequence
 - Early receipt rule: discard-without-reading response + timeout consequence
 - Smiling Woman / Wrong Face / Coffee Rule / Window Reflection / Customer Stayed: runtime events registered
-- Final customer presentation/transaction polish: pending
+- Later-night ordinary retail cadence: implemented with scheduled customers, register tasks, totals, tender/change and progression counts
 
 ## Night 3 — THE STORM
 - Timeline: implemented
@@ -55,7 +55,8 @@ This document tracks whether each major campaign layer exists as data only, auth
 - Survival time / anomaly count / score HUD: implemented
 - Persistent best survival/anomaly records: implemented
 - 30/60 minute and 100-anomaly achievements: implemented
-- Full interactive failure economy / run-over screen: pending
+- Interactive anomaly misses: three-miss failure economy implemented for response-based anomalies
+- Run-over summary with retry-same-seed / new-run / menu controls: implemented
 
 ## Mythics
 - Empty Bus: registered runtime presentation
@@ -76,3 +77,14 @@ The following are known and intentionally NOT treated as campaign-content blocke
 - final graphics/material/post-processing pass
 
 When campaign systems reach content-complete status, Claude should receive this file plus `docs/FULL_GAME_FRAMEWORK.md` and `PROJECT_STATE.md` as the starting QA contract.
+
+## Cross-night interactive anomaly responses
+- False Cop: verify badge/identity within response window
+- Wrong Face: verify the regular instead of blindly serving
+- Customer Stayed: refuse duplicate service
+- Wrong Door: mark impossible doorway unsafe
+- Frozen Clock: verify time against a backup source
+- Campaign timeout/failure records a rule break; Endless timeout records a miss
+
+## QA readiness
+- `docs/SMOKE_TEST_ROUTES.md` now defines the required developer/manual route for all five nights, Endless, endings and the achievement audit before Claude takes over systematic regression repair.
