@@ -23,11 +23,12 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - `AchievementSystem` now uses the full 30-achievement catalog and shared progression store rather than a five-achievement Night 1-only list.
 - Endless Mode framework uses weighted standard/mythic anomaly scheduling, per-anomaly cooldowns, immediate-repeat suppression and persistent survival/anomaly-count records.
 - Shared anomaly handlers now cover the reusable standard catalog plus all five mythics so later-night schedules and Endless no longer degrade to framework-only diagnostics for most events.
-- Authored Night 2 runtime interactables cover customer count, candy facing, coffee refresh, Daniel schedule lore and stock count.
-- Authored Night 3 runtime adds storm ambience/lightning plus door check, breaker verification, entrance mop, storm manifest and Larry incident-note tasks.
-- Authored Night 4 runtime adds notebook/camera cross-checks, rear-trash verification, Daniel corrected-rule lore and a rule-verification interaction.
-- Authored Night 5 runtime adds routine/count/coffee/Larry-file tasks plus Larry’s six-line shift-change conversation and hidden BREAK THE RULES availability gate.
-- Endless Mode now has an on-screen survival/anomaly counter.
+- Night 2 now has explicit pass/fail rule mechanics: Repeater refusal, head-count verification and early-receipt disposal all have response windows and recorded rule-break consequences.
+- Night 3 now enforces the storm rules: blackout counter containment, explicit Pump 7 denial and Camera 6 verification before touching the rear lock; storm ambience/lightning and routine tasks remain active.
+- Night 4 corrupted-rule gameplay now has a real evidence loop, an intentionally dangerous false action, timeout consequences and persistent rule-break tracking.
+- Night 5 now implements the final containment ritual (coffee, rear door, return to register), 5:60 state, Larry’s six-line shift-change conversation and ending gating; endings cannot fire until the ritual and Larry sequence are complete.
+- Endless Mode now has five escalating intensity tiers, scoring, cooldown/recurrence suppression and an expanded survival/anomaly HUD.
+- `docs/CONTENT_COVERAGE.md` tracks campaign/content completion separately from the known visual/geometry QA debt.
 - Night 1 authored gameplay is isolated so it does not fire inside Nights 2-5 or Endless.
 - `docs/FULL_GAME_FRAMEWORK.md` is the implementation contract and later Claude bug-testing handoff guide.
 
@@ -91,13 +92,13 @@ Mythics:
 10. Framework documentation is complete enough for a second agent to implement/test individual runtime handlers.
 
 ## Next milestone
-1. Deepen later-night anomaly handlers from presentation/message behavior into full interactive pass/fail mechanics where appropriate.
-2. Add Night 2 recurring-customer transaction state and explicit head-count/repeater rule consequences.
-3. Add Night 3 storm rain presentation, blackout containment checks and Camera 6 rear-door verification state.
-4. Add Night 4 notebook corruption UI and persistent rule-verification consequences.
-5. Finish Night 5 impossible-time ritual, Larry staging and ending-specific scene consequences.
-6. Expand Endless intensity tiers, score milestones, death/failure reset flow and seeded run summaries.
-7. After content coverage is complete, hand the repo to Claude for systematic bug testing and repair of environment layout, NPC overlap, collision, restroom/office, coolers, prompts and visual regressions.
+1. Finish the remaining later-night customer/transaction loops so Nights 2-5 contain enough mundane retail rhythm between anomalies.
+2. Add more interactive implementations for currently presentation-only standard anomalies, especially False Cop, Wrong Door, Customer Stayed, Wrong Face and Frozen Clock.
+3. Add richer Night 5 ending consequences and hidden sabotage requirements while keeping the three canonical endings intact.
+4. Add Endless run-failure/restart flow and milestone summaries without introducing unfair unavoidable deaths.
+5. Audit achievement trigger IDs against the now-expanded campaign state and progression data.
+6. Build final content-complete handoff notes and automated/dev smoke routes for each mode/night.
+7. THEN move into dedicated testing, bug repair and graphics: Claude systematic QA, office/restroom rebuild, NPC overlap/pathing, freezer stock, prompts, final character/hero assets, lighting/material/post-processing polish.
 
 ## Standing rules
 - GitHub is always the source of truth.
