@@ -17,6 +17,8 @@ export class GameSession {
   private endlessAnomalies = 0;
   private nextEndlessAt = 45;
   private rngState: number;
+  private readonly endlessLastSeen = new Map<string, number>();
+  private endlessLastId = '';
 
   constructor() {
     this.config = this.resolveConfig();
@@ -38,7 +40,16 @@ export class GameSession {
     this.endlessElapsed += dt;
     this.progression.recordEndless(this.endlessElapsed, this.endlessAnomalies);
     if (this.endlessElapsed < this.nextEndlessAt) return null;
-    const chosen = this.pickWeighted(this.endlessPool);
+    const eligible = this.endlessPool.filter((item) => {
+      if (item.id === this.endlessLastId) return false;
+      const last = this.endlessLastSeen.get(item.id);
+      if (last === undefined) return true;
+      const cooldownSeconds = Math.min(240, Math.max(35, item.cooldownMinutes * 2));
+      return this.endlessElapsed - last >= cooldownSeconds;
+    });
+    const chosen = this.pickWeighted(eligible.length ? eligible : this.endlessPool);
+    this.endlessLastId = chosen.id;
+    this.endlessLastSeen.set(chosen.id, this.endlessElapsed);
     this.endlessAnomalies++;
     const intensity = Math.min(1, this.endlessElapsed / 3600);
     const gap = 50 - intensity * 25 + this.random() * 22;

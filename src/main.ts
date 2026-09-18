@@ -6,6 +6,12 @@ import { GameFrameworkUI } from './gameFrameworkUI';
 import { AnomalyRuntime } from './anomalyRuntime';
 import { FrameworkNightDirector } from './frameworkNightDirector';
 import { CampaignCompletionSystem } from './campaignCompletionSystem';
+import { SharedAnomalyHandlers } from './sharedAnomalyHandlers';
+import { NightTwoRuntime } from './nightTwoRuntime';
+import { NightThreeRuntime } from './nightThreeRuntime';
+import { NightFourRuntime } from './nightFourRuntime';
+import { NightFiveRuntime } from './nightFiveRuntime';
+import { EndlessHudSystem } from './endlessHudSystem';
 import { buildStore } from './storeBuilder';
 import { buildExterior } from './exteriorBuilder';
 import { buildStaffArea } from './staffAreaBuilder';
@@ -129,7 +135,15 @@ const rearDoorRattle = new RearDoorRattleSystem(world, state, ui);
 const impossibleReceipt = new ImpossibleReceiptSystem(app, world, state, ui);
 const shiftEnd = new ShiftEndSystem(app, world, state, ui, session.progression);
 const campaignCompletion = new CampaignCompletionSystem(world, state, session, ui);
+const sharedAnomalies = new SharedAnomalyHandlers({ app, world, state, ui }, anomalyRuntime);
+const nightTwoRuntime = session.isCampaignNight(2) ? new NightTwoRuntime(world, state, ui) : undefined;
+const nightThreeRuntime = session.isCampaignNight(3) ? new NightThreeRuntime(app, world, state, ui) : undefined;
+const nightFourRuntime = session.isCampaignNight(4) ? new NightFourRuntime(world, state, ui) : undefined;
+const nightFiveRuntime = session.isCampaignNight(5) ? new NightFiveRuntime(app, world, state, ui) : undefined;
+const endlessHud = new EndlessHudSystem(session);
 void officeLore;
+void nightTwoRuntime;
+void nightFourRuntime;
 
 const runNightOneContent = session.config.mode !== 'endless' && session.config.night === 1;
 if (!runNightOneContent && !session.isEndless()) ui.showMessage(`NIGHT ${session.config.night}: ${session.night.title}`, 5000);
@@ -144,6 +158,10 @@ app.on('update', (dt: number) => {
   authoredCharacters.update();
   achievements.update();
   cctvPolish.update(safeDt);
+  sharedAnomalies.update(safeDt);
+  nightThreeRuntime?.update(safeDt);
+  nightFiveRuntime?.update();
+  endlessHud.update();
   ambience.update(camera);
 
   if (runNightOneContent) {
