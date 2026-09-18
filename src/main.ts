@@ -77,7 +77,12 @@ new GameFrameworkUI(session);
 const state = new GameState(ui, {
   startMinutes: session.night.startMinutes,
   endMinutes: session.isEndless() ? 99999 : session.night.endMinutes,
-  saveKey: `open-all-night-run-${session.config.mode}-night-${session.config.night}`
+  saveKey: `open-all-night-run-${session.config.mode}-night-${session.config.night}`,
+  baseTasks: session.isEndless()
+    ? []
+    : session.config.night === 1
+      ? undefined
+      : [{ id: 'clock-in', text: `Clock in for Night ${session.config.night}` }]
 });
 ui.onNewShift(() => {
   state.resetSave();
