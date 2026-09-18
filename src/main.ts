@@ -12,6 +12,9 @@ import { NightThreeRuntime } from './nightThreeRuntime';
 import { NightFourRuntime } from './nightFourRuntime';
 import { NightFiveRuntime } from './nightFiveRuntime';
 import { EndlessHudSystem } from './endlessHudSystem';
+import { LaterNightRetailSystem } from './laterNightRetailSystem';
+import { InteractiveAnomalySystem } from './interactiveAnomalySystem';
+import { EndlessRunSystem } from './endlessRunSystem';
 import { buildStore } from './storeBuilder';
 import { buildExterior } from './exteriorBuilder';
 import { buildStaffArea } from './staffAreaBuilder';
@@ -141,6 +144,9 @@ const nightThreeRuntime = session.isCampaignNight(3) ? new NightThreeRuntime(app
 const nightFourRuntime = session.isCampaignNight(4) ? new NightFourRuntime(world, state, ui, session.progression) : undefined;
 const nightFiveRuntime = session.isCampaignNight(5) ? new NightFiveRuntime(app, world, state, ui) : undefined;
 const endlessHud = new EndlessHudSystem(session);
+const laterRetail = new LaterNightRetailSystem(world, session, state, ui);
+const interactiveAnomalies = new InteractiveAnomalySystem(world, session, state, ui, anomalyRuntime);
+const endlessRun = new EndlessRunSystem(session, state, player);
 void officeLore;
 
 const runNightOneContent = session.config.mode !== 'endless' && session.config.night === 1;
@@ -162,6 +168,9 @@ app.on('update', (dt: number) => {
   nightFourRuntime?.update(safeDt);
   nightFiveRuntime?.update();
   endlessHud.update();
+  laterRetail.update();
+  interactiveAnomalies.update(safeDt);
+  endlessRun.update();
   ambience.update(camera);
 
   if (runNightOneContent) {
