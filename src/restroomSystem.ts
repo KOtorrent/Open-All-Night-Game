@@ -120,8 +120,11 @@ export class RestroomSystem {
     light.addComponent('light', {
       type: 'omni',
       color: new pc.Color(0.82, 0.90, 0.88),
-      intensity: 0.88,
-      range: 4.2,
+      // Boosted from 0.88: at that intensity the enclosed restroom rendered as crushed-black despite
+      // the fixture being present, a confirmed human-playtest complaint. See staffAreaBuilder.ts for
+      // the same empirically-verified intensity/range scale used across the staff area.
+      intensity: 3.6,
+      range: 5.0,
       castShadows: false
     });
     light.setPosition(cx, 2.72, -10.0);

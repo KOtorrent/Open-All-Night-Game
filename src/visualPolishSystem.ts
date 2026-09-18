@@ -204,6 +204,16 @@ export class VisualPolishSystem {
     addFillLight(this.app, 'CoolerReadableFill', new pc.Vec3(4.8, 2.35, -8.9), coolerBlue, 0.36, 6.2);
     addFillLight(this.app, 'StaffThresholdFill', new pc.Vec3(-4.5, 2.4, -7.0), coolRetail, 0.25, 4.6);
 
+    // The staff corridor, office and restroom sit well behind the sales-floor fill lights above and
+    // each currently relies on a single fixture light. In-engine testing showed the intensity scale
+    // used elsewhere in this method (under ~0.4) is nearly invisible on these walls — that was a
+    // confirmed human-playtest complaint, not just a stylistic choice. These extend readable fill
+    // into the staff area interior at the same empirically-verified brightness used in
+    // staffAreaBuilder.ts's primary fixtures, just dialed back since fills are meant to be secondary.
+    addFillLight(this.app, 'CorridorReadableFill', new pc.Vec3(-4.5, 2.5, -10.2), coolRetail, 1.4, 5.6);
+    addFillLight(this.app, 'OfficeReadableFill', new pc.Vec3(-7.75, 2.5, -9.9), warmCounter, 1.6, 5.8);
+    addFillLight(this.app, 'RestroomReadableFill', new pc.Vec3(-1.25, 2.5, -10.0), coolRetail, 1.4, 5.2);
+
     // Exterior sign/facade wash. This is subtle enough to keep the road dark but makes the store
     // itself unmistakable when the player turns around from the pumps.
     addFillLight(this.app, 'FrontBrandWash', new pc.Vec3(0, 3.4, 13.3), warmCounter, 0.42, 7.2);

@@ -110,6 +110,12 @@ camera.addComponent('camera', { clearColor: new pc.Color(0.006, 0.009, 0.012), n
 camera.setPosition(world.spawn);
 app.root.addChild(camera);
 
+if (new URLSearchParams(window.location.search).get('dev') === '1') {
+  // QA-only hook: lets an automated screenshot/inspection pass reposition the camera
+  // without wiring up pointer-lock mouse look. Never active outside ?dev=1.
+  (window as unknown as { __oanDebug?: unknown }).__oanDebug = { app, world, state, session, camera };
+}
+
 const player = new PlayerController(camera, canvas, world.colliders, world.interactables, ui, world.spawnYaw);
 const playerAvatar = new PlayerAvatar(app, player);
 const frontDoor = new FrontDoorSystem(app, player);

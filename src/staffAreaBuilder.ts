@@ -119,10 +119,14 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
   for (let i = 0; i < 4; i++) box(app, `OfficePaper-${i}`, -9.59, 1.45 + (i % 2) * 0.52, -10.57 + Math.floor(i / 2) * 0.78, 0.018, 0.36, 0.54, paper);
   box(app, 'OfficeMonitorGlow', -7.65, 1.26, -10.34, 0.54, 0.36, 0.018, screen);
 
-  addFixtureLight(app, 'ManagerOfficeCeilingLight', -7.65, -9.65, 0.95, 5.2, fixtureMat, true);
+  // Human playtesting confirmed the staff area reads as crushed-black despite these fixtures being
+  // present: PlayCanvas omni-light falloff at the intensity scale used elsewhere in this file (under
+  // ~1.0) is nearly invisible on these mid-gray diffuse walls. Empirically verified in-engine that an
+  // intensity around 4 on a ~6m range is what actually reads as "lit room" without blowing out.
+  addFixtureLight(app, 'ManagerOfficeCeilingLight', -7.65, -9.65, 4.0, 6.0, fixtureMat, true);
   const deskLamp = new pc.Entity('ManagerDeskLamp');
   deskLamp.addComponent('light', {
-    type: 'omni', color: new pc.Color(0.94, 0.74, 0.48), intensity: 0.38, range: 2.7,
+    type: 'omni', color: new pc.Color(0.94, 0.74, 0.48), intensity: 1.6, range: 3.4,
     castShadows: false
   });
   deskLamp.setPosition(-7.45, 1.72, -10.35);
@@ -139,8 +143,8 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
     rearDoor.aimRadius = 0.52;
   }
 
-  addFixtureLight(app, 'StockRoomFrontLight', -4.25, -8.45, 0.68, 4.6, fixtureMat, false);
-  addFixtureLight(app, 'StockRoomRearLight', -3.65, -10.65, 0.58, 4.2, fixtureMat, false);
+  addFixtureLight(app, 'StockRoomFrontLight', -4.25, -8.45, 2.8, 5.6, fixtureMat, false);
+  addFixtureLight(app, 'StockRoomRearLight', -3.65, -10.65, 2.4, 5.2, fixtureMat, false);
 
   const oldBackLight = app.root.findByName('BackHallLight') as pc.Entity | null;
   if (oldBackLight?.light) oldBackLight.light.intensity = 0.18;
