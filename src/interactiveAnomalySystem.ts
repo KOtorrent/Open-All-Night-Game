@@ -31,7 +31,7 @@ export class InteractiveAnomalySystem {
     this.action = {
       id: 'shared-anomaly-response',
       label: 'verify anomaly',
-      position: new pc.Vec3(-4.7, 1.2, 7.7),
+      position: new pc.Vec3(999, 999, 999),
       radius: 2.5,
       aimRadius: 0.56,
       onInteract: () => this.respond()
@@ -107,6 +107,7 @@ export class InteractiveAnomalySystem {
     this.ui.flashWarning('VERIFIED', 1000);
     this.active = undefined;
     this.action.label = 'verify anomaly';
+    this.action.position.set(999, 999, 999);
     return challenge.safeText;
   }
 
@@ -127,5 +128,6 @@ export class InteractiveAnomalySystem {
     }
     this.active = undefined;
     this.action.label = 'verify anomaly';
+    this.action.position.set(999, 999, 999);
   }
 }
