@@ -37,7 +37,13 @@ export class StoreSignageSystem {
     // deliberately not visible as a second doorway from the sales floor.
     this.createWallSign('RestroomSign', new pc.Vec3(-2.56, 2.22, -9.62), new pc.Vec2(1.20, 0.40), new pc.Vec3(0, 90, 0), 'RESTROOM', '', utilityStyle);
 
-    this.createWallSign('CasesFrontBrand', new pc.Vec3(0, 3.48, 12.24), new pc.Vec2(5.8, 1.02), new pc.Vec3(0, 180, 0), "CASE'S COUNTRY GAS STOP", 'FOOD • FUEL • OPEN 24 HOURS', exteriorStyle, 1.35);
+    // z pushed out from the original 12.24 to 12.55: visualPolishSystem.ts's facade fascia
+    // (StorefrontFasciaCap/GreenBand/CreamStripe) sits at z 12.07-12.25 in almost the same y-band as
+    // this sign, added independently by a different system. The two were nearly coincident in depth,
+    // so the fascia's solid green band was burying the sign's face - confirmed via runtime screenshot
+    // showing no readable branding at all above the entrance even a few meters out. This is the
+    // exact "large illuminated facade branding... unmistakable from outside" identity requirement.
+    this.createWallSign('CasesFrontBrand', new pc.Vec3(0, 3.48, 12.55), new pc.Vec2(5.8, 1.02), new pc.Vec3(0, 180, 0), "CASE'S COUNTRY GAS STOP", 'FOOD • FUEL • OPEN 24 HOURS', exteriorStyle, 1.35);
     this.createWallSign('FrontWindowCoffeeDecal', new pc.Vec3(4.2, 2.15, 12.02), new pc.Vec2(1.50, 0.44), new pc.Vec3(0, 180, 0), 'HOT COFFEE', 'ALL NIGHT', serviceStyle, 0.95);
     this.createWallSign('FrontWindowAtmDecal', new pc.Vec3(-4.2, 2.15, 12.02), new pc.Vec2(1.20, 0.44), new pc.Vec3(0, 180, 0), 'ATM', 'INSIDE', utilityStyle, 0.82);
     this.createDoubleSign('RoadsideBrand', new pc.Vec3(-11.5, 5.0, 36.84), new pc.Vec2(3.9, 1.62), "CASE'S", 'COUNTRY GAS • OPEN 24 HOURS', exteriorStyle, 1.20);
@@ -75,12 +81,31 @@ export class StoreSignageSystem {
 
   private createWallSign(name: string, pos: pc.Vec3, size: pc.Vec2, rotation: pc.Vec3, title: string, subtitle: string, style: SignStyle, emission = 0.72): void {
     const material = this.makeSignMaterial(title, subtitle, style, emission);
-    this.makeBacking(name, pos, new pc.Vec3(size.x + 0.08, size.y + 0.08, 0.055));
-    const plane = this.makePlane(`${name}-Face`, material, pos, size);
-    plane.setEulerAngles(90 + rotation.x, rotation.y, rotation.z);
+    // Root cause of CasesFrontBrand (the main storefront sign) rendering as a plain black rectangle
+    // instead of its texture, confirmed by moving just the face entity to a known-good interior spot
+    // where it rendered perfectly: makeBacking's box was never rotated to match the sign's facing
+    // direction, so for a Z-facing sign its unrotated 0.055-deep backing sat centered on the exact
+    // same point as the (then paper-thin) face plane - and being deeper, its near surface ended up
+    // slightly closer to the viewer than the face, burying it. For the one X-facing sign
+    // (RestroomSign) the un-rotated backing was worse: 1.28m thick along the actual viewing axis
+    // instead of the face's 0.03m, swallowing it entirely.
+    // Rotating the backing to match fixes the second problem. For the first, rather than nudging the
+    // face forward (which direction is "forward" depends on rotation.y in a way this call site
+    // doesn't reliably encode - an offset that happened to work for one sign buried another), the
+    // face is simply made thicker than the backing and centered on the same point, so it pokes out
+    // past the backing on both sides regardless of which way the sign is rotated. Combined with the
+    // material's cull:NONE, the sign face is always the outermost, always-visible surface.
+    this.makeBacking(name, pos, new pc.Vec3(size.x + 0.08, size.y + 0.08, 0.05), rotation.y);
+    const face = new pc.Entity(`${name}-Face`);
+    face.addComponent('render', { type: 'box' });
+    face.setPosition(pos);
+    face.setEulerAngles(0, rotation.y, 0);
+    face.setLocalScale(size.x, size.y, 0.09);
+    if (face.render) face.render.material = material;
+    this.app.root.addChild(face);
   }
 
-  private makeBacking(name: string, pos: pc.Vec3, scale: pc.Vec3): pc.Entity {
+  private makeBacking(name: string, pos: pc.Vec3, scale: pc.Vec3, yaw = 0): pc.Entity {
     const material = new pc.StandardMaterial();
     material.diffuse = new pc.Color(0.025, 0.027, 0.025);
     material.gloss = 0.16;
@@ -88,6 +113,7 @@ export class StoreSignageSystem {
     const e = new pc.Entity(`${name}-Backing`);
     e.addComponent('render', { type: 'box' });
     e.setPosition(pos);
+    e.setEulerAngles(0, yaw, 0);
     e.setLocalScale(scale);
     if (e.render) e.render.material = material;
     this.app.root.addChild(e);
@@ -143,6 +169,11 @@ export class StoreSignageSystem {
     material.emissive = new pc.Color(1, 1, 1);
     material.emissiveIntensity = emission;
     material.gloss = 0.12;
+    // Double-sided so a single-plane wall sign (createWallSign) never depends on getting its facing
+    // direction exactly right, and so it keeps working now that createWallSign's face box is
+    // rotated per-instance (see there for the actual bug this uncovered and fixed: the backing box
+    // burying the face, not culling).
+    material.cull = pc.CULLFACE_NONE;
     material.update();
     return material;
   }

@@ -38,7 +38,6 @@ export class StaffDetailSystem {
     const yellow = mat(new pc.Color(0.56, 0.43, 0.06), 0.12, 0.20);
     const red = mat(new pc.Color(0.42, 0.06, 0.045), 0.22, 0.22);
     const blue = mat(new pc.Color(0.06, 0.16, 0.25), 0.18, 0.18);
-    const paper = mat(new pc.Color(0.68, 0.66, 0.55), 0, 0.05);
 
     // Two dented employee lockers in the utility corridor.
     for (let i = 0; i < 2; i++) {
@@ -73,20 +72,11 @@ export class StaffDetailSystem {
       cardboard.setEulerAngles(0, 9 - i * 6, -68 + i * 3);
     }
 
-    // Office clutter: filing cabinet, corkboard, coffee mug and paper stack.
-    box(app, 'OfficeFilingCabinet', new pc.Vec3(-9.23, 0.72, -9.20), new pc.Vec3(0.72, 1.42, 0.62), steel);
-    for (let i = 0; i < 3; i++) {
-      box(app, `OfficeDrawerPull-${i}`, new pc.Vec3(-9.23, 0.36 + i * 0.43, -8.87), new pc.Vec3(0.25, 0.035, 0.03), dark);
-    }
-    box(app, 'OfficeCorkboard', new pc.Vec3(-9.66, 1.87, -10.30), new pc.Vec3(0.035, 1.02, 1.42), mat(new pc.Color(0.36, 0.21, 0.09), 0, 0.08));
-    for (let i = 0; i < 5; i++) {
-      const note = box(app, `OfficeBoardNote-${i}`, new pc.Vec3(-9.63, 1.58 + (i % 2) * 0.38, -10.76 + i * 0.23), new pc.Vec3(0.018, 0.24, 0.18), paper);
-      note.setEulerAngles(0, 0, -5 + i * 3);
-    }
-    cyl(app, 'OfficeMug', new pc.Vec3(-8.62, 1.21, -10.18), new pc.Vec3(0.14, 0.20, 0.14), red);
-    for (let i = 0; i < 4; i++) {
-      const sheet = box(app, `OfficeLoosePaper-${i}`, new pc.Vec3(-7.68 + i * 0.03, 1.20 + i * 0.008, -10.12 + i * 0.02), new pc.Vec3(0.46, 0.009, 0.62), paper);
-      sheet.setEulerAngles(0, -8 + i * 5, 0);
-    }
+    // Office filing cabinet, corkboard, mug and loose paper used to be added here too, at
+    // coordinates from before the office was rebuilt in staffAreaBuilder.ts. That rebuild moved the
+    // desk and added its own file cabinet and bulletin board with papers, so this system's copies
+    // were landing almost exactly on top of them (two cork boards sharing the same stretch of wall)
+    // while the mug/loose-paper set dressing no longer lined up with the relocated desk at all.
+    // Removed as stale duplicates; staffAreaBuilder.ts's office furniture is the current one.
   }
 }

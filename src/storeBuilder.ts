@@ -137,6 +137,11 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI): B
   colliderFromBox(colliders, 6.5, 8.8, 4.5, 1.15, 'Coffee counter');
   addBox(app, 'CoffeeMachine', new pc.Vec3(6.1, 1.78, 8.85), new pc.Vec3(0.9, 0.92, 0.62), darkSteel);
   addBox(app, 'CoffeeFace', new pc.Vec3(6.1, 1.86, 8.52), new pc.Vec3(0.58, 0.42, 0.05), steel);
+  // A small "brewing" indicator light. The dark-steel housing has such a low diffuse albedo that no
+  // reasonable fill-light intensity reads as anything but a near-black silhouette (confirmed via
+  // runtime screenshot); a warm emissive accent gives the eye something to land on without having to
+  // blow out the rest of the counter to compensate, and doubles as a nice "always on" horror detail.
+  addBox(app, 'CoffeeBrewLight', new pc.Vec3(6.1, 1.62, 8.53), new pc.Vec3(0.30, 0.035, 0.02), mat(new pc.Color(0.62, 0.32, 0.08), 0, 0.2, new pc.Color(0.85, 0.45, 0.10)));
   addCylinder(app, 'CoffeePot', new pc.Vec3(6.1, 1.48, 8.47), new pc.Vec3(0.46, 0.48, 0.46), coolerGlass);
   for (let i = 0; i < 5; i++) addCylinder(app, `Cup-${i}`, new pc.Vec3(7.12, 1.47 + i * 0.08, 8.63), new pc.Vec3(0.32, 0.22, 0.32), cream);
   interactables.push({

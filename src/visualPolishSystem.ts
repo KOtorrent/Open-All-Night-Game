@@ -200,7 +200,11 @@ export class VisualPolishSystem {
     }
 
     addFillLight(this.app, 'CheckoutReadableFill', new pc.Vec3(-5.4, 2.55, 7.0), warmCounter, 0.38, 5.0);
-    addFillLight(this.app, 'CoffeeReadableFill', new pc.Vec3(6.2, 2.45, 7.8), warmCounter, 0.30, 4.3);
+    // The coffee machine's own dark-steel housing (see storeBuilder.ts's CoffeeMachine/CoffeeFace)
+    // reads almost as a black silhouette under the same fill level used at checkout — confirmed via
+    // runtime screenshot, where it was noticeably darker than every other counter in the store even
+    // though VISUAL_TARGET.md calls for the coffee area to read "slightly warm", not underlit.
+    addFillLight(this.app, 'CoffeeReadableFill', new pc.Vec3(6.2, 2.45, 7.8), warmCounter, 0.85, 4.6);
     // Boosted alongside CoolerInteriorLight-* in nightOneDirector.ts: at 0.36 the cooler bank's
     // stocked shelf props were effectively invisible, matching the "cooler doors appear empty"
     // human-playtest complaint.
