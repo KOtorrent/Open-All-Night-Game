@@ -136,14 +136,12 @@ const impossibleReceipt = new ImpossibleReceiptSystem(app, world, state, ui);
 const shiftEnd = new ShiftEndSystem(app, world, state, ui, session.progression);
 const campaignCompletion = new CampaignCompletionSystem(world, state, session, ui);
 const sharedAnomalies = new SharedAnomalyHandlers({ app, world, state, ui }, anomalyRuntime);
-const nightTwoRuntime = session.isCampaignNight(2) ? new NightTwoRuntime(world, state, ui) : undefined;
-const nightThreeRuntime = session.isCampaignNight(3) ? new NightThreeRuntime(app, world, state, ui) : undefined;
-const nightFourRuntime = session.isCampaignNight(4) ? new NightFourRuntime(world, state, ui) : undefined;
+const nightTwoRuntime = session.isCampaignNight(2) ? new NightTwoRuntime(world, state, ui, session.progression) : undefined;
+const nightThreeRuntime = session.isCampaignNight(3) ? new NightThreeRuntime(app, world, state, ui, session.progression, camera) : undefined;
+const nightFourRuntime = session.isCampaignNight(4) ? new NightFourRuntime(world, state, ui, session.progression) : undefined;
 const nightFiveRuntime = session.isCampaignNight(5) ? new NightFiveRuntime(app, world, state, ui) : undefined;
 const endlessHud = new EndlessHudSystem(session);
 void officeLore;
-void nightTwoRuntime;
-void nightFourRuntime;
 
 const runNightOneContent = session.config.mode !== 'endless' && session.config.night === 1;
 if (!runNightOneContent && !session.isEndless()) ui.showMessage(`NIGHT ${session.config.night}: ${session.night.title}`, 5000);
@@ -159,7 +157,9 @@ app.on('update', (dt: number) => {
   achievements.update();
   cctvPolish.update(safeDt);
   sharedAnomalies.update(safeDt);
+  nightTwoRuntime?.update(safeDt);
   nightThreeRuntime?.update(safeDt);
+  nightFourRuntime?.update(safeDt);
   nightFiveRuntime?.update();
   endlessHud.update();
   ambience.update(camera);
