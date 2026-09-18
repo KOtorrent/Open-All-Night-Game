@@ -108,6 +108,11 @@ const authoredCharacters = new AuthoredCharacterSystem(app);
 
 const camera = new pc.Entity('PlayerCamera');
 camera.addComponent('camera', { clearColor: new pc.Color(0.006, 0.009, 0.012), nearClip: 0.05, farClip: 180, fov: 70 });
+// The engine defaults to TONEMAP_LINEAR, which hard-clips: fixture lights placed close enough to
+// read as "lit room" were blowing straight to solid white a couple meters out while everywhere
+// else fell off a cliff to pure black a few meters further, confirmed via runtime screenshots of
+// the staff area. ACES gives the same fixtures a soft highlight rolloff instead of a hard clip.
+if (camera.camera) camera.camera.toneMapping = pc.TONEMAP_ACES;
 camera.setPosition(world.spawn);
 app.root.addChild(camera);
 

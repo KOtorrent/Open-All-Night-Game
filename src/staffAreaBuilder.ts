@@ -79,11 +79,24 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
   const doorMat = mat(new pc.Color(0.13, 0.14, 0.14), 0.55, 0.24);
   const fixtureMat = mat(new pc.Color(0.76, 0.80, 0.78), 0, 0.18, new pc.Color(0.18, 0.22, 0.21));
 
+  // These shelves previously sat at z=-9.55/-10.15, which put their collider fully across the
+  // manager office's only doorway (door gap z -10.2 to -9.0) with just a 0.32m sliver to the wall
+  // on either side — narrower than the player's 0.56m collision width. A BFS reachability check
+  // over the actual world.colliders confirmed the office (and its lore interactables) was
+  // completely unreachable on foot. Tucking the shelves into the back-wall corner instead, clear
+  // of the door's z-band, restores a walkable corridor while keeping them in the same stockroom nook.
   removeCollider(world, 'Stock shelf A', 'Stock shelf B');
-  app.root.findByName('StockShelfA')?.setPosition(-5.05, 1.35, -9.55);
-  app.root.findByName('StockShelfB')?.setPosition(-4.35, 1.35, -10.15);
+  // The back-wall nook available here is only ~1.6m deep (back wall at z=-11.82 to the office
+  // door's z-band starting at -10.2), far shallower than these shelves' original 4.0m/2.6m length,
+  // so they are shortened to actually fit the nook instead of sticking out across the doorway again.
+  const stockShelfA = app.root.findByName('StockShelfA') as pc.Entity | null;
+  stockShelfA?.setPosition(-5.05, 1.35, -11.15);
+  stockShelfA?.setLocalScale(0.7, 2.6, 1.3);
+  const stockShelfB = app.root.findByName('StockShelfB') as pc.Entity | null;
+  stockShelfB?.setPosition(-4.35, 1.35, -11.05);
+  stockShelfB?.setLocalScale(0.7, 2.6, 1.0);
   for (let i = 0; i < 7; i++) {
-    app.root.findByName(`StockBox-${i}`)?.setPosition(-4.85 + (i % 2) * 0.62, 0.45 + (i % 3) * 0.58, -10.85 + (i % 2) * 1.05);
+    app.root.findByName(`StockBox-${i}`)?.setPosition(-4.85 + (i % 2) * 0.62, 0.45 + (i % 3) * 0.58, -11.35 + (i % 2) * 0.55);
   }
 
   app.root.findByName('OfficeDesk')?.setPosition(-7.65, 0.75, -10.45);
@@ -132,8 +145,8 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
   deskLamp.setPosition(-7.45, 1.72, -10.35);
   app.root.addChild(deskLamp);
 
-  collider(world, -5.05, -9.55, 0.70, 4.0, 'Relocated stock shelf A');
-  collider(world, -4.35, -10.15, 0.70, 2.6, 'Relocated stock shelf B');
+  collider(world, -5.05, -11.15, 0.70, 1.3, 'Relocated stock shelf A');
+  collider(world, -4.35, -11.05, 0.70, 1.0, 'Relocated stock shelf B');
   box(app, 'RearDeliveryDoor', -3.35, 1.45, -11.86, 1.20, 2.85, 0.09, doorMat);
   box(app, 'RearDoorPushBar', -3.35, 1.25, -11.79, 0.68, 0.08, 0.06, steel);
   const rearDoor = world.interactables.find((x) => x.id === 'back-door');

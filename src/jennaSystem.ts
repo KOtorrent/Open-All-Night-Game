@@ -79,6 +79,12 @@ export class JennaSystem {
     part(root, 'LegR', 'capsule', new pc.Vec3(0.18, 0.48, 0), new pc.Vec3(0.21, 0.60, 0.21), jeans);
     part(root, 'ArmL', 'capsule', new pc.Vec3(-0.39, 1.15, 0), new pc.Vec3(0.16, 0.58, 0.16), jacket);
     part(root, 'ArmR', 'capsule', new pc.Vec3(0.39, 1.15, 0), new pc.Vec3(0.16, 0.58, 0.16), jacket);
+    // Every other Night 1 customer (Earl, LateNightTraveler, Dale, Marcus) applies a ~0.86-0.88
+    // root scale to land at normal adult height; Jenna was missing this, so she rendered noticeably
+    // taller than every other customer — the "accidental asset scaling" VISUAL_TARGET.md's character
+    // rule explicitly calls out as unacceptable, confirmed by comparing her un-scaled head-top height
+    // against the others' scaled height.
+    root.setLocalScale(0.86, 0.86, 0.86);
     root.setPosition(0, 0, 14.0);
     root.setEulerAngles(0, 180, 0);
     this.app.root.addChild(root);
