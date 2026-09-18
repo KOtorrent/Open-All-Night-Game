@@ -9,6 +9,7 @@ export class CampaignCompletionSystem {
   private prompted = false;
   private completed = false;
   private endingOverlay?: HTMLDivElement;
+  private reportOverlay?: HTMLDivElement;
   private readonly clock: Interactable;
 
   constructor(
@@ -89,6 +90,45 @@ export class CampaignCompletionSystem {
     } else {
       this.ui.showMessage(`Night ${night} complete. Night ${Math.min(5, night + 1)} unlocked.`, 5200);
     }
+    window.setTimeout(() => this.showRunReport(endingId, ruleBreaks, choreCount), 900);
+  }
+
+  private showRunReport(endingId: string | undefined, ruleBreaks: number, choreCount: number): void {
+    if (this.reportOverlay) return;
+    const night = this.session.config.night;
+    const progress = this.session.progression.snapshot();
+    const anomalies = progress.anomaliesSeen.length;
+    const endingTitle = endingId ? (endingId === ENDINGS.clockOut.id ? 'CLOCK OUT' : endingId === ENDINGS.stay.id ? 'OPEN ALL NIGHT' : 'BREAK THE RULES') : undefined;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:85;display:grid;place-items:center;background:rgba(0,0,0,.92);color:#e8dfb3;font-family:ui-monospace,SFMono-Regular,Consolas,monospace';
+    overlay.innerHTML = `<div style="width:min(620px,92vw);padding:30px;background:#090b09;border:1px solid #6c6440;box-shadow:0 24px 80px rgba(0,0,0,.75)">
+      <div style="font-size:10px;letter-spacing:3px;color:#b7a45d">SHIFT REPORT</div>
+      <div style="font-size:28px;margin:6px 0 18px">NIGHT ${night} — ${this.session.night.title}</div>
+      ${endingTitle ? `<div style="margin-bottom:14px;color:#c8b66d">ENDING: <b>${endingTitle}</b></div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;color:#bbb493;line-height:1.7;margin-bottom:18px">
+        <div>RULE BREAKS <b style="float:right;color:#eee2ac">${ruleBreaks}</b></div>
+        <div>WORK COMPLETED <b style="float:right;color:#eee2ac">${choreCount}</b></div>
+        <div>ANOMALIES DISCOVERED <b style="float:right;color:#eee2ac">${anomalies}</b></div>
+        <div>ACHIEVEMENTS <b style="float:right;color:#eee2ac">${progress.unlockedAchievements.length}/30</b></div>
+      </div>
+      ${night < 5 ? `<button data-next style="${this.buttonCss()}">CONTINUE — NIGHT ${night + 1}</button>` : ''}
+      <button data-replay style="${this.buttonCss()}">REPLAY NIGHT ${night}</button>
+      <button data-menu style="${this.buttonCss()}">CHAPTER / ENDLESS MENU</button>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector<HTMLButtonElement>('[data-next]')?.addEventListener('click', () => this.navigate(night + 1, 'campaign'));
+    overlay.querySelector<HTMLButtonElement>('[data-replay]')?.addEventListener('click', () => this.navigate(night, 'chapter'));
+    overlay.querySelector<HTMLButtonElement>('[data-menu]')?.addEventListener('click', () => this.navigate(night, 'campaign', true));
+    this.reportOverlay = overlay;
+  }
+
+  private navigate(night: number, mode: 'campaign' | 'chapter', menu = false): void {
+    const url = new URL(window.location.href);
+    url.searchParams.set('mode', mode);
+    url.searchParams.set('night', String(Math.min(5, Math.max(1, night))));
+    if (menu) url.searchParams.set('menu', '1');
+    else url.searchParams.delete('menu');
+    window.location.href = url.toString();
   }
 
   private showEndingChoice(): void {
