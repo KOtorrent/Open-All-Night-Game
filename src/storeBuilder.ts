@@ -3,7 +3,7 @@ import type { BuiltWorld, Collider2D, Interactable } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
 
-function mat(color: pc.Color, metalness = 0, gloss = 0.25, emissive?: pc.Color): pc.StandardMaterial {
+function mat(color: pc.Color, metalness = 0, gloss = 0.25, emissive?: pc.Color, opacity = 1): pc.StandardMaterial {
   const m = new pc.StandardMaterial();
   m.diffuse = color;
   m.metalness = metalness;
@@ -11,6 +11,15 @@ function mat(color: pc.Color, metalness = 0, gloss = 0.25, emissive?: pc.Color):
   if (emissive) {
     m.emissive = emissive;
     m.emissiveIntensity = 1;
+  }
+  if (opacity < 1) {
+    // Without this, StandardMaterial defaults to BLEND_NONE and renders fully opaque regardless of
+    // the opacity value — confirmed in-engine to be why the cooler bank's stocked shelf props were
+    // completely invisible behind "glass" doors that were actually solid. See frontDoorSystem.ts for
+    // the same pattern already used correctly there.
+    m.opacity = opacity;
+    m.blendType = pc.BLEND_NORMAL;
+    m.depthWrite = false;
   }
   m.update();
   return m;
@@ -69,7 +78,7 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI): B
   const blue = mat(new pc.Color(0.10, 0.23, 0.32), 0, 0.25);
   const white = mat(new pc.Color(0.78, 0.81, 0.78), 0, 0.18);
   const screen = mat(new pc.Color(0.025, 0.08, 0.07), 0, 0.55, new pc.Color(0.015, 0.11, 0.085));
-  const coolerGlass = mat(new pc.Color(0.08, 0.14, 0.16), 0.05, 0.72);
+  const coolerGlass = mat(new pc.Color(0.08, 0.14, 0.16), 0.05, 0.72, undefined, 0.32);
 
   // Main shell: 20m x 24m, player-height authored around real-world scale.
   addBox(app, 'Floor', new pc.Vec3(0, -0.08, 0), new pc.Vec3(20, 0.16, 24), floor);

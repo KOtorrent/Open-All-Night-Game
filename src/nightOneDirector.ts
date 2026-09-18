@@ -312,8 +312,10 @@ export class NightOneDirector {
       light.addComponent('light', {
         type: 'omni',
         color: new pc.Color(0.58, 0.80, 0.92),
-        intensity: 0.55,
-        range: 3.8,
+        // Boosted alongside the staff-area lighting fix: 0.55 read as an empty/unlit cooler despite
+        // stocked shelf props existing in code, matching the "cooler doors appear empty" complaint.
+        intensity: 2.4,
+        range: 4.6,
         castShadows: false
       });
       light.setPosition(2.1 + i * 2.6, 2.2, -9.65);
@@ -333,7 +335,7 @@ export class NightOneDirector {
     this.anomalyTimer -= dt;
     const on = Math.floor(this.anomalyTimer * 7) % 2 === 0;
     for (const entity of this.coolerLights) {
-      if (entity.light) entity.light.intensity = on ? 0.7 : 0.015;
+      if (entity.light) entity.light.intensity = on ? 3.0 : 0.05;
     }
 
     const p = this.camera.getPosition();
@@ -347,7 +349,7 @@ export class NightOneDirector {
     }
 
     if (this.anomalyTimer <= 0) {
-      for (const entity of this.coolerLights) if (entity.light) entity.light.intensity = 0.55;
+      for (const entity of this.coolerLights) if (entity.light) entity.light.intensity = 2.4;
       this.anomalyFinished = true;
       if (this.freezerViolationSeconds > 4) {
         this.state.complete('freezer-rule-broken');

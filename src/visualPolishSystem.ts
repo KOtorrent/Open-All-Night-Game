@@ -201,7 +201,10 @@ export class VisualPolishSystem {
 
     addFillLight(this.app, 'CheckoutReadableFill', new pc.Vec3(-5.4, 2.55, 7.0), warmCounter, 0.38, 5.0);
     addFillLight(this.app, 'CoffeeReadableFill', new pc.Vec3(6.2, 2.45, 7.8), warmCounter, 0.30, 4.3);
-    addFillLight(this.app, 'CoolerReadableFill', new pc.Vec3(4.8, 2.35, -8.9), coolerBlue, 0.36, 6.2);
+    // Boosted alongside CoolerInteriorLight-* in nightOneDirector.ts: at 0.36 the cooler bank's
+    // stocked shelf props were effectively invisible, matching the "cooler doors appear empty"
+    // human-playtest complaint.
+    addFillLight(this.app, 'CoolerReadableFill', new pc.Vec3(4.8, 2.35, -8.9), coolerBlue, 1.5, 6.2);
     addFillLight(this.app, 'StaffThresholdFill', new pc.Vec3(-4.5, 2.4, -7.0), coolRetail, 0.25, 4.6);
 
     // The staff corridor, office and restroom sit well behind the sales-floor fill lights above and
