@@ -56,7 +56,7 @@ export class JennaSystem {
         this.state.complete('jenna-sale');
         this.clearItems();
         this.actor.phase = 'leaving';
-        this.actor.route = [new pc.Vec3(-2.3, 0, 8.5), new pc.Vec3(0, 0, 10.4), new pc.Vec3(0, 0, 13.8)];
+        this.actor.route = [new pc.Vec3(-2.05, 0, 8.5), new pc.Vec3(0, 0, 10.4), new pc.Vec3(0, 0, 13.8)];
         this.actor.waypoint = 0;
         return 'Milk, aspirin, and crackers — $9.41. Cash $20.00. Change $10.59.  Jenna says, "My kid picked a hell of a night to get sick."';
       }
@@ -85,7 +85,7 @@ export class JennaSystem {
     this.actor = {
       root,
       phase: 'entering',
-      route: [new pc.Vec3(0, 0, 10.2), new pc.Vec3(5.2, 0, 5.1), new pc.Vec3(5.0, 0, -3.8), new pc.Vec3(-1.8, 0, 0.3), new pc.Vec3(-3.65, 0, 7.35)],
+      route: [new pc.Vec3(0, 0, 10.2), new pc.Vec3(5.2, 0, 5.1), new pc.Vec3(5.0, 0, -3.8), new pc.Vec3(-1.8, 0, 0.3), new pc.Vec3(-3.40, 0, 7.45)],
       waypoint: 0,
       speed: 1.55
     };
@@ -123,9 +123,9 @@ export class JennaSystem {
     const blue = mat(new pc.Color(0.10, 0.26, 0.42), 0.14);
     const red = mat(new pc.Color(0.52, 0.08, 0.06), 0.12);
     const specs: Array<[string, pc.Vec3, pc.Vec3, pc.StandardMaterial]> = [
-      ['JennaMilk', new pc.Vec3(-4.30, 1.46, 8.12), new pc.Vec3(0.28, 0.58, 0.28), white],
-      ['JennaAspirin', new pc.Vec3(-3.90, 1.44, 8.14), new pc.Vec3(0.24, 0.34, 0.18), blue],
-      ['JennaCrackers', new pc.Vec3(-3.54, 1.44, 8.12), new pc.Vec3(0.34, 0.42, 0.16), red]
+      ['JennaMilk', new pc.Vec3(-4.05, 1.46, 8.12), new pc.Vec3(0.28, 0.58, 0.28), white],
+      ['JennaAspirin', new pc.Vec3(-3.65, 1.44, 8.14), new pc.Vec3(0.24, 0.34, 0.18), blue],
+      ['JennaCrackers', new pc.Vec3(-3.29, 1.44, 8.12), new pc.Vec3(0.34, 0.42, 0.16), red]
     ];
     for (const [name, pos, scale, material] of specs) {
       const e = new pc.Entity(name); e.addComponent('render', { type: 'box' }); e.setPosition(pos); e.setLocalScale(scale); if (e.render) e.render.material = material; this.app.root.addChild(e); this.items.push(e);

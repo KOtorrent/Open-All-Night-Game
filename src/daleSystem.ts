@@ -70,7 +70,7 @@ export class DaleSystem {
         this.removeTalk();
         this.clearItems();
         this.actor.phase = 'leaving';
-        this.actor.route = [new pc.Vec3(-2.0, 0, 8.4), new pc.Vec3(0, 0, 10.4), new pc.Vec3(0, 0, 13.8)];
+        this.actor.route = [new pc.Vec3(-0.85, 0, 8.4), new pc.Vec3(0, 0, 10.4), new pc.Vec3(0, 0, 13.8)];
         this.actor.waypoint = 0;
         this.beep();
         return 'Jerky and a root beer — $5.84.  Dale counts exact change twice, nods, and says, "Long night."';
@@ -112,7 +112,7 @@ export class DaleSystem {
         new pc.Vec3(-5.0, 0, -4.8),
         new pc.Vec3(4.9, 0, -7.1),
         new pc.Vec3(4.9, 0, -8.3),
-        new pc.Vec3(-3.55, 0, 7.35)
+        new pc.Vec3(-2.40, 0, 7.45)
       ],
       waypoint: 0,
       speed: 1.45
@@ -160,7 +160,7 @@ export class DaleSystem {
     this.talk = {
       id: 'dale-talk',
       label: 'talk to Dale',
-      position: new pc.Vec3(-3.55, 1.55, 7.35),
+      position: new pc.Vec3(-2.40, 1.55, 7.45),
       radius: 2.5,
       aimRadius: 0.42,
       onInteract: () => {
@@ -186,12 +186,12 @@ export class DaleSystem {
     const bottle = new pc.Entity('DaleRootBeer');
     part(bottle, 'Bottle', 'cylinder', new pc.Vec3(0, 0.17, 0), new pc.Vec3(0.20, 0.34, 0.20), brown);
     part(bottle, 'Cap', 'cylinder', new pc.Vec3(0, 0.39, 0), new pc.Vec3(0.11, 0.05, 0.11), cream);
-    bottle.setPosition(-4.20, 1.39, 8.16);
+    bottle.setPosition(-3.05, 1.39, 8.16);
     this.app.root.addChild(bottle);
 
     const jerky = new pc.Entity('DaleJerky');
     part(jerky, 'Bag', 'box', new pc.Vec3(0, 0.13, 0), new pc.Vec3(0.34, 0.26, 0.10), darkRed).setLocalEulerAngles(0, -10, 4);
-    jerky.setPosition(-3.72, 1.39, 8.13);
+    jerky.setPosition(-2.57, 1.39, 8.13);
     this.app.root.addChild(jerky);
     this.items.push(bottle, jerky);
   }

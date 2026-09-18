@@ -18,6 +18,14 @@ interface ActorHost {
  * of shelf footprints. This guard replaces only the initial shopping route for each known Night 1
  * actor with paths that stay in the actual walkable corridors between fixtures.
  *
+ * It also fixes a confirmed human-playtest bug: every customer's final checkout waypoint used to
+ * land on nearly the identical spot (~x=-3.5..-3.7, z=7.35). Because customer spawn timing is not
+ * strictly serialized (e.g. Jenna can arrive before Earl has been served), two customers could end
+ * up standing in the exact same position at the counter. Each named actor now gets its own queue
+ * slot along the counter (0.5m spacing, x=-3.90/-3.40/-2.90/-2.40), forming a short line instead of
+ * stacking. Item props and register-served "leaving" routes for each customer were shifted by the
+ * same offset in their own system files to match.
+ *
  * Leaving routes remain owned by the individual customer systems.
  */
 export class CustomerRouteSafetySystem {
@@ -52,7 +60,7 @@ export class CustomerRouteSafetySystem {
           new pc.Vec3(3.4, 0, 1.8),
           new pc.Vec3(3.4, 0, 5.8),
           new pc.Vec3(0, 0, 5.8),
-          new pc.Vec3(-3.7, 0, 7.45)
+          new pc.Vec3(-3.90, 0, 7.45)
         ];
       case 'Silent-Customer':
         return [
@@ -67,7 +75,7 @@ export class CustomerRouteSafetySystem {
           new pc.Vec3(3.4, 0, -2.8),
           new pc.Vec3(0, 0, -4.8),
           new pc.Vec3(0, 0, 5.8),
-          new pc.Vec3(-3.65, 0, 7.35)
+          new pc.Vec3(-3.40, 0, 7.45)
         ];
       case 'LateNightTraveler':
         return [
@@ -76,7 +84,7 @@ export class CustomerRouteSafetySystem {
           new pc.Vec3(3.4, 0, 1.5),
           new pc.Vec3(0, 0, -4.8),
           new pc.Vec3(0, 0, 5.8),
-          new pc.Vec3(-3.6, 0, 7.35)
+          new pc.Vec3(-2.90, 0, 7.45)
         ];
       case 'Dale':
         return [
@@ -88,7 +96,7 @@ export class CustomerRouteSafetySystem {
           new pc.Vec3(3.4, 0, -7.3),
           new pc.Vec3(3.4, 0, -4.8),
           new pc.Vec3(0, 0, 5.8),
-          new pc.Vec3(-3.55, 0, 7.35)
+          new pc.Vec3(-2.40, 0, 7.45)
         ];
       case 'Marcus-Regular':
         return [

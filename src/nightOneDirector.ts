@@ -115,7 +115,7 @@ export class NightOneDirector {
         this.customer.served = true;
         this.customer.phase = 'leaving';
         this.customer.route = [
-          new pc.Vec3(-3.1, 0, 8.0),
+          new pc.Vec3(-3.3, 0, 8.0),
           new pc.Vec3(0.0, 0, 10.0),
           new pc.Vec3(0.0, 0, 13.6)
         ];
@@ -146,7 +146,7 @@ export class NightOneDirector {
         new pc.Vec3(2.3, 0, 5.6),
         new pc.Vec3(2.3, 0, 2.4),
         new pc.Vec3(-2.8, 0, 5.2),
-        new pc.Vec3(-3.7, 0, 7.45)
+        new pc.Vec3(-3.90, 0, 7.45)
       ]
     };
     this.playChime();
@@ -183,7 +183,7 @@ export class NightOneDirector {
     addPrimitive(bottleRoot, 'BottleBody', 'cylinder', new pc.Vec3(0, 0.17, 0), new pc.Vec3(0.20, 0.34, 0.20), bottle);
     addPrimitive(bottleRoot, 'BottleNeck', 'cylinder', new pc.Vec3(0, 0.39, 0), new pc.Vec3(0.10, 0.14, 0.10), bottle);
     addPrimitive(bottleRoot, 'BottleCap', 'cylinder', new pc.Vec3(0, 0.49, 0), new pc.Vec3(0.12, 0.06, 0.12), cap);
-    bottleRoot.setPosition(-4.25, 1.39, 8.18);
+    bottleRoot.setPosition(-4.45, 1.39, 8.18);
     this.app.root.addChild(bottleRoot);
 
     const candyRoot = new pc.Entity('Checkout-Candy');
@@ -193,7 +193,7 @@ export class NightOneDirector {
     bar.setLocalEulerAngles(0, -11, 0);
     const stripeMesh = addPrimitive(candyRoot, 'CandyStripe', 'box', new pc.Vec3(0, 0.075, 0), new pc.Vec3(0.20, 0.012, 0.225), stripe);
     stripeMesh.setLocalEulerAngles(0, -11, 0);
-    candyRoot.setPosition(-3.74, 1.39, 8.12);
+    candyRoot.setPosition(-3.94, 1.39, 8.12);
     this.app.root.addChild(candyRoot);
 
     this.checkoutItems.push(bottleRoot, candyRoot);

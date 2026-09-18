@@ -71,7 +71,7 @@ export class LateCustomerSystem {
         this.state.complete('late-sale');
         this.actor.phase = 'leaving';
         this.actor.route = [
-          new pc.Vec3(-2.8, 0, 8.0),
+          new pc.Vec3(-2.1, 0, 8.0),
           new pc.Vec3(0.0, 0, 10.3),
           new pc.Vec3(0.0, 0, 13.8)
         ];
@@ -116,7 +116,7 @@ export class LateCustomerSystem {
         new pc.Vec3(5.8, 0, 7.0),
         new pc.Vec3(5.0, 0, 1.5),
         new pc.Vec3(1.8, 0, -4.2),
-        new pc.Vec3(-3.6, 0, 7.35)
+        new pc.Vec3(-2.90, 0, 7.45)
       ]
     };
 
@@ -167,18 +167,18 @@ export class LateCustomerSystem {
     const bottle = new pc.Entity('LateSaleWater');
     part(bottle, 'Body', 'cylinder', new pc.Vec3(0, 0.16, 0), new pc.Vec3(0.18, 0.32, 0.18), water);
     part(bottle, 'Cap', 'cylinder', new pc.Vec3(0, 0.35, 0), new pc.Vec3(0.10, 0.06, 0.10), cap);
-    bottle.setPosition(-4.20, 1.39, 8.15);
+    bottle.setPosition(-3.50, 1.39, 8.15);
     this.app.root.addChild(bottle);
 
     const bag = new pc.Entity('LateSaleChips');
     const bagMesh = part(bag, 'Bag', 'box', new pc.Vec3(0, 0.12, 0), new pc.Vec3(0.40, 0.24, 0.13), chips);
     bagMesh.setLocalEulerAngles(0, 18, -6);
-    bag.setPosition(-3.72, 1.39, 8.12);
+    bag.setPosition(-3.02, 1.39, 8.12);
     this.app.root.addChild(bag);
 
     const ticket = new pc.Entity('LateSaleLotterySlip');
     part(ticket, 'Slip', 'box', new pc.Vec3(0, 0.012, 0), new pc.Vec3(0.22, 0.018, 0.42), paper);
-    ticket.setPosition(-3.35, 1.405, 8.15);
+    ticket.setPosition(-2.65, 1.405, 8.15);
     ticket.setEulerAngles(0, -12, 0);
     this.app.root.addChild(ticket);
 
