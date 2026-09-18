@@ -59,7 +59,12 @@ export const ANOMALIES: AnomalyDefinition[] = [
   standard('empty-queue', 'Empty Queue', 'customer', [2,3,4,5], 4, 55, 'Register queue sound/transaction state with no customer.'),
   standard('door-chime-false', 'False Door Chime', 'store', [1,2,3,4,5], 5, 45, 'Door chimes with nobody entering.'),
   standard('cctv-time-slip', 'CCTV Time Slip', 'cctv', [3,4,5], 4, 75, 'Camera timestamp leads/lags world time.'),
-  standard('five-sixty', '5:60', 'time', [5], 9, 999, 'Night 5 impossible final minute.'),
+  // category is 'finale' (not 'time') to match its sibling 'larry-arrival' below: gameSession.ts's
+  // Endless pool filter excludes category 'finale'. Confirmed in-engine that with the old 'time'
+  // category, '5:60' — a one-time Night 5 story beat with no generic anomaly handler registered —
+  // could be randomly selected in Endless Mode, silently consuming an anomaly slot with no visible
+  // effect (no handler exists for it outside nightFiveRuntime.ts's own campaign-specific logic).
+  standard('five-sixty', '5:60', 'finale', [5], 9, 999, 'Night 5 impossible final minute.'),
   standard('larry-arrival', 'Larry Arrival', 'finale', [5], 9, 999, 'Final shift-change encounter.'),
 
   mythic('empty-bus', 'Empty Bus', 'exterior', [3,4,5], 1, 240, 'Bus arrives with doors open and nobody aboard.'),
