@@ -113,10 +113,14 @@ app.root.addChild(camera);
 if (new URLSearchParams(window.location.search).get('dev') === '1') {
   // QA-only hook: lets an automated screenshot/inspection pass reposition the camera
   // without wiring up pointer-lock mouse look. Never active outside ?dev=1.
-  (window as unknown as { __oanDebug?: unknown }).__oanDebug = { app, world, state, session, camera };
+  (window as unknown as { __oanDebug?: unknown }).__oanDebug = { app, world, state, session, camera, ui };
 }
 
 const player = new PlayerController(camera, canvas, world.colliders, world.interactables, ui, world.spawnYaw);
+
+if (new URLSearchParams(window.location.search).get('dev') === '1') {
+  (window as unknown as { __oanDebug: Record<string, unknown> }).__oanDebug.player = player;
+}
 const playerAvatar = new PlayerAvatar(app, player);
 const frontDoor = new FrontDoorSystem(app, player);
 const interactionPolish = new InteractionPolishSystem(app, world, state);

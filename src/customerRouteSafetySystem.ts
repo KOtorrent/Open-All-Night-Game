@@ -73,6 +73,12 @@ export class CustomerRouteSafetySystem {
           new pc.Vec3(0, 0, 10.2),
           new pc.Vec3(3.4, 0, 5.8),
           new pc.Vec3(3.4, 0, -2.8),
+          // Aisle z-band is roughly [-3.75, 4.55]; cutting straight from x=3.4 to x=0 while still
+          // inside that band clipped through Aisle 3 (confirmed geometrically: ~50% of the old
+          // segment's length was inside the collider). Hold the safe x=3.4 corridor until z clears
+          // the band, then cross at x=0, which is a safe corridor for any z.
+          new pc.Vec3(3.4, 0, -4.2),
+          new pc.Vec3(0, 0, -4.2),
           new pc.Vec3(0, 0, -4.8),
           new pc.Vec3(0, 0, 5.8),
           new pc.Vec3(-3.40, 0, 7.45)
@@ -82,6 +88,9 @@ export class CustomerRouteSafetySystem {
           new pc.Vec3(0, 0, 10.3),
           new pc.Vec3(3.4, 0, 5.8),
           new pc.Vec3(3.4, 0, 1.5),
+          // Same aisle-clip fix as Jenna's route above.
+          new pc.Vec3(3.4, 0, -4.2),
+          new pc.Vec3(0, 0, -4.2),
           new pc.Vec3(0, 0, -4.8),
           new pc.Vec3(0, 0, 5.8),
           new pc.Vec3(-2.90, 0, 7.45)
@@ -91,10 +100,18 @@ export class CustomerRouteSafetySystem {
           new pc.Vec3(0, 0, 10.3),
           new pc.Vec3(-3.4, 0, 5.8),
           new pc.Vec3(-3.4, 0, -2.8),
+          // Same aisle-clip fix, mirrored to the west corridor (Aisle 2).
+          new pc.Vec3(-3.4, 0, -4.2),
+          new pc.Vec3(0, 0, -4.2),
           new pc.Vec3(0, 0, -4.8),
           new pc.Vec3(3.4, 0, -4.8),
           new pc.Vec3(3.4, 0, -7.3),
           new pc.Vec3(3.4, 0, -4.8),
+          // Return leg previously cut from x=3.4 to x=0 while climbing through both the lower and
+          // upper aisle z-band (confirmed geometrically: ~80% of the old segment was inside Aisle 3).
+          // Hold x=3.4 until below the band, cross at a safe x, then climb at x=0 the whole way up.
+          new pc.Vec3(3.4, 0, -4.2),
+          new pc.Vec3(0, 0, -4.2),
           new pc.Vec3(0, 0, 5.8),
           new pc.Vec3(-2.40, 0, 7.45)
         ];
@@ -105,6 +122,9 @@ export class CustomerRouteSafetySystem {
           new pc.Vec3(7.5, 0, 6.1),
           new pc.Vec3(3.4, 0, 6.1),
           new pc.Vec3(3.4, 0, 2.0),
+          // Same aisle-clip fix as above, mirrored above the band instead of below it: hold x=3.4
+          // until z clears the aisle's north edge (4.55) before cutting across to x=0.
+          new pc.Vec3(3.4, 0, 5.0),
           new pc.Vec3(0, 0, 5.8),
           new pc.Vec3(-3.55, 0, 7.35)
         ];

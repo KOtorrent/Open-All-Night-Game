@@ -51,6 +51,18 @@ export class PlayerController {
     return this.yaw;
   }
 
+  /**
+   * QA-only: mouselook only updates yaw/pitch through the mousemove listener, which headless
+   * interaction testing can't trigger without real OS-level pointer lock. This keeps the internal
+   * aim state and the camera transform in sync so automated tests can aim at a specific target the
+   * same way a player turning the mouse would.
+   */
+  setAim(pitch: number, yaw: number): void {
+    this.pitch = Math.max(-82, Math.min(82, pitch));
+    this.yaw = yaw;
+    this.camera.setLocalEulerAngles(this.pitch, this.yaw, 0);
+  }
+
   getPosition(): pc.Vec3 {
     return this.camera.getPosition().clone();
   }
