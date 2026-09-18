@@ -151,13 +151,30 @@ const windowWatcher = new WindowWatcherSystem(app, state, ui, camera);
 const storePhone = new StorePhoneSystem(app, world, state, ui);
 const rearDoorRattle = new RearDoorRattleSystem(world, state, ui);
 const impossibleReceipt = new ImpossibleReceiptSystem(app, world, state, ui);
-const shiftEnd = new ShiftEndSystem(app, world, state, ui, session.progression);
+// Night-1-only: its interactable ("shift-time-clock") previously registered unconditionally on
+// every night at the exact same position as CampaignCompletionSystem's own night-aware clock
+// interactable ("framework-shift-clock"). Because ShiftEndSystem was constructed first, its
+// interactable won the aim-target tie-break on Nights 2-5, and its clockOut() unconditionally
+// calls progression.completeNight(1, {night: 1, ...}) — silently recording Night 1's completion
+// instead of the actual current night every time a later night was clocked out. Confirmed via
+// runtime testing: clocking out of Night 2 left completedNights=[1] instead of [2].
+const shiftEnd = session.config.night === 1 && !session.isEndless()
+  ? new ShiftEndSystem(app, world, state, ui, session.progression)
+  : undefined;
 const campaignCompletion = new CampaignCompletionSystem(world, state, session, ui);
 const sharedAnomalies = new SharedAnomalyHandlers({ app, world, state, ui }, anomalyRuntime);
 const nightTwoRuntime = session.isCampaignNight(2) ? new NightTwoRuntime(world, state, ui, session.progression) : undefined;
 const nightThreeRuntime = session.isCampaignNight(3) ? new NightThreeRuntime(app, world, state, ui, session.progression, camera) : undefined;
 const nightFourRuntime = session.isCampaignNight(4) ? new NightFourRuntime(world, state, ui, session.progression) : undefined;
 const nightFiveRuntime = session.isCampaignNight(5) ? new NightFiveRuntime(app, world, state, ui) : undefined;
+
+if (new URLSearchParams(window.location.search).get('dev') === '1') {
+  // QA-only: exposes night-runtime instances so automated tests can inspect internal timer state
+  // directly (e.g. instance['someTimer']) instead of guessing real-time vs simulated-time ratios.
+  Object.assign((window as unknown as { __oanDebug: Record<string, unknown> }).__oanDebug, {
+    nightTwoRuntime, nightThreeRuntime, nightFourRuntime, nightFiveRuntime
+  });
+}
 const endlessHud = new EndlessHudSystem(session);
 const laterRetail = new LaterNightRetailSystem(world, session, state, ui);
 const interactiveAnomalies = new InteractiveAnomalySystem(world, session, state, ui, anomalyRuntime);
@@ -211,7 +228,7 @@ app.on('update', (dt: number) => {
     storePhone.update(safeDt);
     rearDoorRattle.update(safeDt);
     impossibleReceipt.update();
-    shiftEnd.update();
+    shiftEnd?.update();
   } else if (session.isEndless()) {
     const anomaly = session.updateEndless(dt);
     if (anomaly) void anomalyRuntime.trigger(anomaly);
