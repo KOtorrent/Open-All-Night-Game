@@ -131,6 +131,10 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
   box(app, 'OfficeBulletinBoard', -9.63, 1.80, -10.15, 0.035, 1.20, 1.55, cork);
   for (let i = 0; i < 4; i++) box(app, `OfficePaper-${i}`, -9.59, 1.45 + (i % 2) * 0.52, -10.57 + Math.floor(i / 2) * 0.78, 0.018, 0.36, 0.54, paper);
   box(app, 'OfficeMonitorGlow', -7.65, 1.26, -10.34, 0.54, 0.36, 0.018, screen);
+  // Keyboard and mug on the clear right-hand side of the desk, away from the monitor and the
+  // roster/incident-folder/terminal props officeLoreSystem.ts already lays out on the left side.
+  box(app, 'OfficeKeyboard', -6.95, 0.825, -10.30, 0.42, 0.02, 0.16, trim).setEulerAngles(0, -6, 0);
+  cylinder(app, 'OfficeMug', -6.85, 0.87, -10.55, 0.11, 0.14, 0.11, mat(new pc.Color(0.42, 0.06, 0.05), 0.15, 0.2));
 
   // Human playtesting confirmed the staff area reads as crushed-black despite these fixtures being
   // present: PlayCanvas omni-light falloff at the intensity scale used elsewhere in this file (under

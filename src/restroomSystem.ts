@@ -116,6 +116,14 @@ export class RestroomSystem {
     cylinder(this.app, 'RestroomFaucet', new pc.Vec3(-0.62, 1.08, -10.18), new pc.Vec3(0.07, 0.22, 0.07), steel);
     box(this.app, 'RestroomMirror', new pc.Vec3(-0.14, 1.78, -10.02), new pc.Vec3(0.05, 0.95, 0.78), steel);
 
+    // Recognizable restroom hardware beyond the three big fixtures: dispensers, a trash can and a
+    // soap pump, so the room reads as a real gas-station bathroom rather than an empty tiled box.
+    box(this.app, 'ToiletPaperDispenser', new pc.Vec3(-2.30, 0.62, -11.15), new pc.Vec3(0.06, 0.22, 0.22), steel);
+    cylinder(this.app, 'ToiletPaperRoll', new pc.Vec3(-2.24, 0.62, -11.15), new pc.Vec3(0.16, 0.20, 0.16), mat(new pc.Color(0.82, 0.80, 0.74), 0, 0.15)).setEulerAngles(0, 0, 90);
+    box(this.app, 'PaperTowelDispenser', new pc.Vec3(-0.12, 1.55, -9.35), new pc.Vec3(0.08, 0.36, 0.30), steel);
+    box(this.app, 'TrashCan', new pc.Vec3(-0.35, 0.28, -9.15), new pc.Vec3(0.34, 0.56, 0.34), mat(new pc.Color(0.16, 0.17, 0.16), 0.3, 0.2));
+    cylinder(this.app, 'SoapDispenser', new pc.Vec3(-0.30, 1.02, -10.12), new pc.Vec3(0.09, 0.20, 0.09), mat(new pc.Color(0.62, 0.66, 0.30), 0, 0.4));
+
     const light = new pc.Entity('RestroomCeilingLight');
     light.addComponent('light', {
       type: 'omni',
