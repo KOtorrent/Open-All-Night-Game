@@ -131,6 +131,35 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI): B
     }
   });
 
+  // Impulse-buy rack, lottery display and register clutter, all resting on the real countertop
+  // surface (CounterTop is centered y=1.30 with 0.13 height, so its top face is at y=1.365) rather
+  // than floating or clipping into the counter body. Purely decorative - none of it overlaps the
+  // register/notebook/scanner interactable positions above, so their prompts/aim targets are
+  // unaffected.
+  const ticketColors = [red, blue, green, cream];
+  const candyColors = [red, blue, green];
+  const counterTopY = 1.365;
+  addBox(app, 'CandyRackFrame', new pc.Vec3(-3.05, counterTopY + 0.325, 8.30), new pc.Vec3(0.62, 0.65, 0.30), darkSteel);
+  for (let tier = 0; tier < 3; tier++) {
+    const shelfY = counterTopY + 0.10 + tier * 0.20;
+    addBox(app, `CandyRackShelf-${tier}`, new pc.Vec3(-3.05, shelfY, 8.20), new pc.Vec3(0.56, 0.02, 0.20), steel);
+    for (let i = 0; i < 3; i++) {
+      addBox(app, `CandyBar-${tier}-${i}`, new pc.Vec3(-3.24 + i * 0.19, shelfY + 0.09, 8.20), new pc.Vec3(0.15, 0.16, 0.03), candyColors[(tier + i) % candyColors.length]);
+    }
+  }
+  addBox(app, 'LotteryPanel', new pc.Vec3(-7.85, counterTopY + 0.31, 7.85), new pc.Vec3(0.05, 0.62, 0.92), darkSteel).setEulerAngles(0, 8, 0);
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 2; col++) {
+      addBox(app, `LotteryTicket-${row}-${col}`, new pc.Vec3(-7.82, counterTopY + 0.10 + row * 0.14, 7.55 + col * 0.30), new pc.Vec3(0.012, 0.11, 0.24), ticketColors[(row + col) % ticketColors.length]).setEulerAngles(0, 8, 0);
+    }
+  }
+  addBox(app, 'ReceiptClutter-0', new pc.Vec3(-3.72, counterTopY + 0.003, 8.20), new pc.Vec3(0.20, 0.006, 0.30), cream).setEulerAngles(0, -12, 0);
+  addBox(app, 'ReceiptClutter-1', new pc.Vec3(-3.68, counterTopY + 0.007, 8.16), new pc.Vec3(0.20, 0.006, 0.30), cream).setEulerAngles(0, 6, 0);
+  // Employee-side storage cubby, facing away from the customer aisle under the counter.
+  addBox(app, 'EmployeeShelfUnder', new pc.Vec3(-5.6, 0.30, 8.35), new pc.Vec3(5.6, 0.05, 0.55), darkSteel);
+  addBox(app, 'EmployeeBoxA', new pc.Vec3(-7.1, 0.52, 8.35), new pc.Vec3(0.55, 0.40, 0.45), mat(new pc.Color(0.33, 0.20, 0.09), 0, 0.06));
+  addBox(app, 'EmployeeBoxB', new pc.Vec3(-6.3, 0.48, 8.35), new pc.Vec3(0.45, 0.32, 0.42), mat(new pc.Color(0.30, 0.18, 0.08), 0, 0.06));
+
   // Coffee station, front-right.
   addBox(app, 'CoffeeCounter', new pc.Vec3(6.5, 0.62, 8.8), new pc.Vec3(4.5, 1.24, 1.15), counter);
   addBox(app, 'CoffeeTop', new pc.Vec3(6.5, 1.30, 8.8), new pc.Vec3(4.7, 0.12, 1.32), laminate);
