@@ -88,19 +88,46 @@ export class NightFiveRuntime {
 
   private spawnLarry(): void {
     this.spawned = true;
-    const material = new pc.StandardMaterial();
-    material.diffuse = new pc.Color(0.15, 0.16, 0.14);
-    material.gloss = 0.10;
-    material.update();
+    // Larry used to be a single bare capsule with no head, limbs or clothing - by far the crudest
+    // model in the game despite being the finale character. Rebuilt with the same
+    // torso/head/hair/legs/arms construction the other named characters use, kept deliberately plain
+    // (gray work shirt, no cap, thin gray hair) so he reads as the store's own long-serving night
+    // clerk rather than another customer - never supernatural-looking, still just Larry.
+    const mat = (color: pc.Color, gloss = 0.14): pc.StandardMaterial => {
+      const m = new pc.StandardMaterial();
+      m.diffuse = color;
+      m.gloss = gloss;
+      m.update();
+      return m;
+    };
+    const part = (parent: pc.Entity, name: string, type: 'sphere' | 'capsule', pos: pc.Vec3, scale: pc.Vec3, material: pc.StandardMaterial): pc.Entity => {
+      const e = new pc.Entity(name);
+      e.addComponent('render', { type });
+      e.setLocalPosition(pos);
+      e.setLocalScale(scale);
+      if (e.render) e.render.material = material;
+      parent.addChild(e);
+      return e;
+    };
+
+    const skin = mat(new pc.Color(0.58, 0.51, 0.45));
+    const shirt = mat(new pc.Color(0.30, 0.31, 0.28), 0.12);
+    const pants = mat(new pc.Color(0.10, 0.10, 0.11), 0.10);
+    const hair = mat(new pc.Color(0.52, 0.51, 0.49), 0.08);
 
     const root = new pc.Entity('LarryCase');
     const body = new pc.Entity('LarryBody');
-    body.addComponent('render', { type: 'capsule' });
-    body.setLocalScale(0.62, 1.62, 0.62);
-    body.setLocalPosition(0, 0.85, 0);
-    if (body.render) body.render.material = material;
+    part(body, 'Torso', 'capsule', new pc.Vec3(0, 1.12, 0), new pc.Vec3(0.70, 0.84, 0.48), shirt);
+    part(body, 'Head', 'sphere', new pc.Vec3(0, 1.88, 0), new pc.Vec3(0.42, 0.48, 0.42), skin);
+    part(body, 'Hair', 'sphere', new pc.Vec3(0, 2.03, -0.02), new pc.Vec3(0.41, 0.16, 0.41), hair);
+    part(body, 'LegL', 'capsule', new pc.Vec3(-0.19, 0.48, 0), new pc.Vec3(0.23, 0.62, 0.23), pants);
+    part(body, 'LegR', 'capsule', new pc.Vec3(0.19, 0.48, 0), new pc.Vec3(0.23, 0.62, 0.23), pants);
+    part(body, 'ArmL', 'capsule', new pc.Vec3(-0.43, 1.17, 0), new pc.Vec3(0.18, 0.62, 0.18), shirt).setLocalEulerAngles(0, 0, 7);
+    part(body, 'ArmR', 'capsule', new pc.Vec3(0.43, 1.17, 0), new pc.Vec3(0.18, 0.62, 0.18), shirt).setLocalEulerAngles(0, 0, -7);
+    body.setLocalScale(0.87, 0.87, 0.87);
     root.addChild(body);
     root.setPosition(0, 0, 7.9);
+    root.setEulerAngles(0, 180, 0);
     this.app.root.addChild(root);
     this.larry = root;
 
