@@ -116,6 +116,18 @@ if (camera.camera) camera.camera.toneMapping = pc.TONEMAP_ACES;
 camera.setPosition(world.spawn);
 app.root.addChild(camera);
 
+// A restrained CSS vignette over the game canvas rather than an engine post-processing pass:
+// PlayCanvas's bloom/vignette pipeline (CameraFrame) needs an HDR render target and only ships
+// from a non-standard deep import path in this engine version, which risks silently breaking on
+// a future PlayCanvas bump and could double up with the ACES tonemap set above. A flat DOM overlay
+// gets the same subtle darkened-corners horror-game framing with zero rendering risk, at z-index 2
+// (above the canvas, below GameUI's z-index 10 so prompts/HUD text stay crisp) and does not sit in
+// front of the CCTV overlay, which renders its own separate digital treatment above the HUD.
+const vignette = document.createElement('div');
+vignette.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2;' +
+  'background:radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.38) 100%)';
+document.body.appendChild(vignette);
+
 if (new URLSearchParams(window.location.search).get('dev') === '1') {
   // QA-only hook: lets an automated screenshot/inspection pass reposition the camera
   // without wiring up pointer-lock mouse look. Never active outside ?dev=1.
