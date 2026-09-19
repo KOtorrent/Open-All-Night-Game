@@ -173,6 +173,16 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI): B
   addBox(app, 'CoffeeBrewLight', new pc.Vec3(6.1, 1.62, 8.53), new pc.Vec3(0.30, 0.035, 0.02), mat(new pc.Color(0.62, 0.32, 0.08), 0, 0.2, new pc.Color(0.85, 0.45, 0.10)));
   addCylinder(app, 'CoffeePot', new pc.Vec3(6.1, 1.48, 8.47), new pc.Vec3(0.46, 0.48, 0.46), coolerGlass);
   for (let i = 0; i < 5; i++) addCylinder(app, `Cup-${i}`, new pc.Vec3(7.12, 1.47 + i * 0.08, 8.63), new pc.Vec3(0.32, 0.22, 0.32), cream);
+  addCylinder(app, 'CupLidStack', new pc.Vec3(7.12, 1.47 + 5 * 0.08 + 0.02, 8.63), new pc.Vec3(0.34, 0.05, 0.34), white);
+  // Napkin holder, stir sticks and a small condiment tray so the station reads as a real self-serve
+  // counter rather than just a brewer - all thin, reused-material primitives beside the cups.
+  addBox(app, 'NapkinHolder', new pc.Vec3(7.75, 1.44, 8.60), new pc.Vec3(0.22, 0.16, 0.16), white);
+  addBox(app, 'NapkinHolderSlot', new pc.Vec3(7.75, 1.51, 8.60), new pc.Vec3(0.16, 0.02, 0.10), cream);
+  addCylinder(app, 'StirStickCup', new pc.Vec3(8.05, 1.44, 8.55), new pc.Vec3(0.10, 0.16, 0.10), darkSteel);
+  const condimentColors = [blue, red, cream];
+  for (let i = 0; i < 3; i++) {
+    addBox(app, `CondimentPacket-${i}`, new pc.Vec3(8.30 + (i % 2) * 0.09, 1.365 + 0.008 + Math.floor(i / 2) * 0.016, 8.50 - (i % 2) * 0.09), new pc.Vec3(0.08, 0.016, 0.05), condimentColors[i]).setEulerAngles(0, i * 25, 0);
+  }
   interactables.push({
     id: 'coffee', label: 'brew coffee', position: new pc.Vec3(6.1, 1.65, 8.15), radius: 2.5,
     onInteract: () => {
