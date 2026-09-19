@@ -87,6 +87,13 @@ export function buildExterior(app: pc.Application, colliders: Collider2D[]): voi
         box(app, `Pump-${n}-CardReader`, new pc.Vec3(px + 0.16, 1.27, z - 0.36), new pc.Vec3(0.14, 0.12, 0.02), dark);
         cylinder(app, `Pump-${n}-BollardL`, new pc.Vec3(px - 0.62, 0.54, z), new pc.Vec3(0.18, 1.08, 0.18), red);
         cylinder(app, `Pump-${n}-BollardR`, new pc.Vec3(px + 0.62, 0.54, z), new pc.Vec3(0.18, 1.08, 0.18), red);
+        // A simple hose and nozzle hanging toward the island's other pump - two cheap primitives
+        // per pump, no curve geometry, but enough to stop the pump body reading as a bare box.
+        const hoseSide = offset < 0 ? 1 : -1;
+        cylinder(app, `Pump-${n}-HoseMount`, new pc.Vec3(px + hoseSide * 0.42, 1.55, z), new pc.Vec3(0.08, 0.08, 0.08), dark);
+        const hose = cylinder(app, `Pump-${n}-Hose`, new pc.Vec3(px + hoseSide * 0.55, 1.05, z), new pc.Vec3(0.045, 1.0, 0.045), dark);
+        hose.setEulerAngles(0, 0, hoseSide * 18);
+        box(app, `Pump-${n}-Nozzle`, new pc.Vec3(px + hoseSide * 0.70, 0.58, z), new pc.Vec3(0.10, 0.28, 0.09), dark);
         collider(colliders, px, z, 0.95, 0.78, `Pump ${n}`);
       }
     }
