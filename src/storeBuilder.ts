@@ -155,6 +155,8 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI): B
   // Four central aisles with thinner retail fixtures and deliberately varied merchandise.
   const aisleXs = [-5.1, -1.7, 1.7, 5.1];
   const productMats = [red, cream, blue, green, mat(new pc.Color(0.42, 0.22, 0.06)), mat(new pc.Color(0.15, 0.35, 0.22))];
+  const capMat = mat(new pc.Color(0.62, 0.63, 0.60), 0.3, 0.35);
+  const labelMat = mat(new pc.Color(0.86, 0.83, 0.72), 0, 0.1);
   aisleXs.forEach((x, aisleIndex) => {
     const z = 0.4;
     addBox(app, `Aisle${aisleIndex + 1}-Base`, new pc.Vec3(x, 0.12, z), new pc.Vec3(2.15, 0.24, 8.3), darkSteel);
@@ -169,10 +171,19 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI): B
           const pz = -3.25 + item * 0.80;
           const pm = productMats[(item + tier * 2 + aisleIndex) % productMats.length];
           const h = 0.27 + ((item + tier + aisleIndex) % 3) * 0.08;
-          if ((item + aisleIndex) % 3 === 0) {
-            addCylinder(app, `A${aisleIndex + 1}-Can-${side}-${tier}-${item}`, new pc.Vec3(shelfX - side * 0.06, y + h / 2 + 0.035, pz), new pc.Vec3(0.22, h, 0.22), pm);
+          const px = shelfX - side * 0.06;
+          const kind = (item + aisleIndex) % 3;
+          // Three repeated low-poly silhouettes (bottle/can, boxed good, bagged good) cycling by
+          // shelf position instead of one plain box shape everywhere - still just two primitive
+          // types and the same shared materials, no new geometry cost per item.
+          if (kind === 0) {
+            addCylinder(app, `A${aisleIndex + 1}-Can-${side}-${tier}-${item}`, new pc.Vec3(px, y + h / 2 + 0.035, pz), new pc.Vec3(0.22, h, 0.22), pm);
+            addCylinder(app, `A${aisleIndex + 1}-Cap-${side}-${tier}-${item}`, new pc.Vec3(px, y + h + 0.075, pz), new pc.Vec3(0.10, 0.06, 0.10), capMat);
+          } else if (kind === 1) {
+            addBox(app, `A${aisleIndex + 1}-Box-${side}-${tier}-${item}`, new pc.Vec3(px, y + h / 2 + 0.035, pz), new pc.Vec3(0.28, h, 0.20), pm);
+            addBox(app, `A${aisleIndex + 1}-Label-${side}-${tier}-${item}`, new pc.Vec3(px - side * 0.145, y + h / 2 + 0.035, pz), new pc.Vec3(0.008, h * 0.5, 0.14), labelMat);
           } else {
-            addBox(app, `A${aisleIndex + 1}-Box-${side}-${tier}-${item}`, new pc.Vec3(shelfX - side * 0.06, y + h / 2 + 0.035, pz), new pc.Vec3(0.28, h, 0.20), pm);
+            addBox(app, `A${aisleIndex + 1}-Bag-${side}-${tier}-${item}`, new pc.Vec3(px, y + h * 0.42 + 0.035, pz), new pc.Vec3(0.34, h * 0.82, 0.24), pm);
           }
         }
       }
@@ -193,7 +204,9 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI): B
       addBox(app, `CoolerShelf-${door}-${tier}`, new pc.Vec3(x, y, -10.47), new pc.Vec3(1.45, 0.045, 0.62), steel);
       for (let item = 0; item < 5; item++) {
         const px = x - 0.54 + item * 0.27;
-        addCylinder(app, `CoolerDrink-${door}-${tier}-${item}`, new pc.Vec3(px, y + 0.18, -10.30), new pc.Vec3(0.15, 0.31, 0.15), productMats[(door + tier + item) % productMats.length]);
+        const dh = 0.27 + ((door + tier + item) % 3) * 0.055;
+        addCylinder(app, `CoolerDrink-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh / 2 + 0.025, -10.30), new pc.Vec3(0.15, dh, 0.15), productMats[(door + tier + item) % productMats.length]);
+        addCylinder(app, `CoolerDrinkCap-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh + 0.06, -10.30), new pc.Vec3(0.075, 0.05, 0.075), capMat);
       }
     }
   }
