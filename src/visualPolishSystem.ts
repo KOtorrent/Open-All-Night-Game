@@ -93,6 +93,20 @@ export class VisualPolishSystem {
     for (const x of [-6.75, -3.4, 0, 3.4, 6.75]) {
       box(this.app, `AisleWalkLane-${x}`, new pc.Vec3(x, 0.010, 0.35), new pc.Vec3(0.035, 0.008, 8.6), lane);
     }
+
+    // Subtle worn-floor grime at the highest-traffic spots (entrance, checkout, coffee, staff
+    // doorway). The store is open and operating, not abandoned, so this stays faint and small -
+    // a believable years-of-foot-traffic patina rather than dirt or damage.
+    const grime = material(new pc.Color(0.045, 0.048, 0.045), 0, 0.06);
+    const grimeSpots: Array<[number, number, number, number]> = [
+      [0, 10.9, 2.6, 1.1],
+      [-5.0, 7.6, 1.9, 1.4],
+      [6.2, 7.9, 1.7, 1.2],
+      [-3.9, -6.9, 1.6, 0.9]
+    ];
+    for (const [x, z, sx, sz] of grimeSpots) {
+      box(this.app, `FloorGrime-${x}-${z}`, new pc.Vec3(x, 0.008, z), new pc.Vec3(sx, 0.004, sz), grime);
+    }
   }
 
   private polishWallsAndCeiling(): void {
