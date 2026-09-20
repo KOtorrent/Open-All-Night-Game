@@ -271,5 +271,11 @@ app.on('update', (dt: number) => {
   }
 });
 
-window.addEventListener('error', (event) => ui.showMessage(`Runtime error: ${event.message}`, 8000));
+// Raw JS error text in the in-game message box is a QA convenience (seeing a crash immediately
+// without opening devtools on a test device); it was previously unconditional, so any real runtime
+// error would surface an implementation-detail string like "Runtime error: Cannot read properties
+// of undefined..." directly to a released player. Keep it for ?dev=1 test sessions only.
+if (new URLSearchParams(window.location.search).get('dev') === '1') {
+  window.addEventListener('error', (event) => ui.showMessage(`Runtime error: ${event.message}`, 8000));
+}
 console.info(`OPEN ALL NIGHT booted: ${session.config.mode} / night ${session.config.night} / seed ${session.config.seed}`);

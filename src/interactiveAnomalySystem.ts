@@ -19,6 +19,7 @@ export class InteractiveAnomalySystem {
   private active?: Challenge;
   private timer = 0;
   private missSerial = 0;
+  private readonly queue: Array<{ challenge: Challenge; title: string }> = [];
   private readonly action: Interactable;
 
   constructor(
@@ -130,19 +131,42 @@ export class InteractiveAnomalySystem {
 
   private arm(definition: AnomalyDefinition, challenge: Challenge): void {
     this.session.progression.recordAnomaly(definition.id, definition.tier === 'mythic');
+    this.state.complete(`anomaly:${definition.id}`);
     if (this.active) {
-      this.state.complete(`anomaly:${definition.id}`);
+      // Confirmed in-engine: a large single time-jump (e.g. GameState.advanceMinutes covering
+      // several beats at once, or - in real play - a backgrounded tab resuming with a big elapsed
+      // delta, since GameState.update() deliberately does not clamp dt the way movement/response
+      // timers do) can make two of this system's own anomalies come due in the same frame. The old
+      // behavior just dropped every anomaly after the first: no response window, no rule-break, no
+      // "you ignored it" message - resolved:<id> then never becomes true, which can silently and
+      // permanently block anything gated on it (e.g. Night 5's hidden BREAK THE RULES ending checks
+      // resolved:wrong-door and resolved:frozen-clock). Queue it instead so every armed anomaly
+      // still gets its own response window, just one after another.
+      if (challenge.id !== this.active.id && !this.queue.some((q) => q.challenge.id === challenge.id)) {
+        this.queue.push({ challenge, title: definition.title });
+      }
       this.ui.showMessage(`${definition.title}: ${challenge.text}`, 3600);
       return;
     }
-    this.state.complete(`anomaly:${definition.id}`);
+    this.activate(challenge, definition.title);
+  }
+
+  private activate(challenge: Challenge, title: string): void {
     this.active = challenge;
     this.timer = challenge.timeout;
     this.action.label = challenge.label;
     this.action.position.copy(challenge.position);
     this.state.addTask(`response:${challenge.id}`, challenge.label.charAt(0).toUpperCase() + challenge.label.slice(1));
-    this.ui.flashWarning(definition.title.toUpperCase(), 1100);
+    this.ui.flashWarning(title.toUpperCase(), 1100);
     this.ui.showMessage(challenge.text, 4300);
+  }
+
+  private advanceQueue(): void {
+    this.active = undefined;
+    this.action.label = 'verify anomaly';
+    this.action.position.set(999, 999, 999);
+    const next = this.queue.shift();
+    if (next) this.activate(next.challenge, next.title);
   }
 
   private respond(): string {
@@ -151,9 +175,7 @@ export class InteractiveAnomalySystem {
     this.state.complete(`response:${challenge.id}`);
     this.state.complete(`resolved:${challenge.id}`);
     this.ui.flashWarning('VERIFIED', 1000);
-    this.active = undefined;
-    this.action.label = 'verify anomaly';
-    this.action.position.set(999, 999, 999);
+    this.advanceQueue();
     return challenge.safeText;
   }
 
@@ -172,8 +194,6 @@ export class InteractiveAnomalySystem {
       this.ui.flashWarning('RULE BROKEN', 1500);
       this.ui.showMessage('You let the anomaly resolve on its own. That was the wrong choice.', 4000);
     }
-    this.active = undefined;
-    this.action.label = 'verify anomaly';
-    this.action.position.set(999, 999, 999);
+    this.advanceQueue();
   }
 }
