@@ -57,6 +57,12 @@ export class NightFiveRuntime {
     if (this.ritualArmed && minute >= 30 * 60 && !this.ritualAnnounced) {
       this.ritualAnnounced = true;
       this.state.complete('five-sixty');
+      // The always-visible clock used to keep ticking normally up to a clean "6:00 AM" right next
+      // to a message claiming the time is "5:60" - two contradicting clocks on screen at once reads
+      // as a UI bug, not a horror beat. Freezing the real clock display on the impossible time
+      // (until the ritual is actually finished) makes the wrongness something the player can see
+      // continuously instead of being told about it once while the HUD disagrees.
+      this.state.setClockOverride('5:60 AM');
       this.ui.flashWarning('5:60 AM', 2600);
       this.ui.showMessage('The clock rolls past 5:59 without reaching six. Finish the routine.', 5200);
     }
@@ -64,6 +70,7 @@ export class NightFiveRuntime {
     const ritualDone = ['n5-ritual-coffee','n5-ritual-rear','n5-ritual-register'].every((id) => this.state.isComplete(id));
     if (ritualDone && this.state.isComplete('larry-conversation') && !this.state.isComplete('n5-ritual-complete')) {
       this.state.complete('n5-ritual-complete');
+      this.state.setClockOverride(null);
       this.ui.flashWarning('SHIFT CHANGE', 1800);
       this.ui.showMessage('Coffee. Door. Counter. Someone is ready to take the shift.', 4200);
       if (this.canUnlockSabotage()) this.state.complete('ending-break-available');

@@ -19,6 +19,7 @@ export class GameState {
   private completed = new Set<string>();
   private dynamicTasks: Array<{ id: string; text: string }> = [];
   private autosaveTimer = 0;
+  private clockOverride: string | null = null;
   private readonly startMinutes: number;
   private readonly endMinutes: number;
   private readonly saveKey: string;
@@ -47,7 +48,16 @@ export class GameState {
       this.autosaveTimer = 0;
       this.save();
     }
-    this.ui.setClock(this.formatClock(this.gameMinutes));
+    this.ui.setClock(this.clockOverride ?? this.formatClock(this.gameMinutes));
+  }
+
+  // Night 5's "5:60" beat only ever showed up as one-off flash/message text while the always-visible
+  // clock kept ticking normally up to a clean "6:00 AM" - the two contradicted each other, which
+  // reads as a UI bug rather than "the clock is broken". Overriding the actual clock display makes
+  // the wrongness something the player can see continuously, not just be told about once.
+  setClockOverride(text: string | null): void {
+    this.clockOverride = text;
+    this.ui.setClock(this.clockOverride ?? this.formatClock(this.gameMinutes));
   }
 
   getGameMinutes(): number { return this.gameMinutes; }
@@ -93,7 +103,7 @@ export class GameState {
   private refreshUI(): void {
     const tasks = [...this.baseTasks, ...this.dynamicTasks];
     this.ui.setTasks(tasks.map((task) => ({ text: task.text, done: this.completed.has(task.id) })));
-    this.ui.setClock(this.formatClock(this.gameMinutes));
+    this.ui.setClock(this.clockOverride ?? this.formatClock(this.gameMinutes));
   }
 
   private formatClock(minutes: number): string {
