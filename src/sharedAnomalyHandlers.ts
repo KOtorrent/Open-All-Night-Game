@@ -98,17 +98,47 @@ export class SharedAnomalyHandlers {
   private spawnPresence(id: string, position: pc.Vec3, color: pc.Color, text: string, seconds = 14): void {
     this.transient?.destroy();
 
-    const material = new pc.StandardMaterial();
-    material.diffuse = color;
-    material.gloss = 0.08;
-    material.update();
+    // Used to be a single bare capsule with no head or limbs - functionally fine (it appears,
+    // times out, sets its flags) but visually undercut every one of these anomalies: "the woman in
+    // the yellow coat keeps smiling" pointed at a faceless blob that cannot smile. Built out with
+    // the same torso/head/hair/legs/arms construction the named characters use so each presence
+    // reads as an actual figure. tall-man keeps an exaggerated, elongated build - a stretched
+    // person is more unsettling than a scaled-up blob, and still reads as "impossibly tall" rather
+    // than just a bigger shapeless mass.
+    const mat = (c: pc.Color, gloss = 0.1): pc.StandardMaterial => {
+      const m = new pc.StandardMaterial();
+      m.diffuse = c;
+      m.gloss = gloss;
+      m.update();
+      return m;
+    };
+    const part = (parent: pc.Entity, name: string, type: 'sphere' | 'capsule', pos: pc.Vec3, scale: pc.Vec3, material: pc.StandardMaterial): pc.Entity => {
+      const e = new pc.Entity(name);
+      e.addComponent('render', { type });
+      e.setLocalPosition(pos);
+      e.setLocalScale(scale);
+      if (e.render) e.render.material = material;
+      parent.addChild(e);
+      return e;
+    };
+
+    const isTall = id === 'tall-man';
+    const skin = mat(new pc.Color(0.42, 0.36, 0.32));
+    const cloth = mat(color, 0.10);
+    const dark = mat(new pc.Color(0.035, 0.04, 0.045));
 
     const root = new pc.Entity(`AnomalyPresence-${id}`);
     const body = new pc.Entity('body');
-    body.addComponent('render', { type: 'capsule' });
-    body.setLocalScale(id === 'tall-man' ? 0.65 : 0.52, id === 'tall-man' ? 2.4 : 1.45, id === 'tall-man' ? 0.65 : 0.52);
-    body.setLocalPosition(0, id === 'tall-man' ? 1.15 : 0.75, 0);
-    if (body.render) body.render.material = material;
+    part(body, 'Torso', 'capsule', new pc.Vec3(0, 1.12, 0), new pc.Vec3(0.66, 0.80, 0.44), cloth);
+    part(body, 'Head', 'sphere', new pc.Vec3(0, 1.84, 0), new pc.Vec3(0.40, 0.46, 0.40), skin);
+    part(body, 'Hair', 'sphere', new pc.Vec3(0, 2.00, -0.01), new pc.Vec3(0.41, 0.20, 0.41), dark);
+    part(body, 'LegL', 'capsule', new pc.Vec3(-0.18, 0.47, 0), new pc.Vec3(0.22, 0.60, 0.22), dark);
+    part(body, 'LegR', 'capsule', new pc.Vec3(0.18, 0.47, 0), new pc.Vec3(0.22, 0.60, 0.22), dark);
+    part(body, 'ArmL', 'capsule', new pc.Vec3(-0.41, 1.16, 0), new pc.Vec3(0.17, 0.60, 0.17), cloth);
+    part(body, 'ArmR', 'capsule', new pc.Vec3(0.41, 1.16, 0), new pc.Vec3(0.17, 0.60, 0.17), cloth);
+    // A uniform build stretched taller (not wider) keeps every limb anatomically connected while
+    // still reading as "impossible height", rather than independently resizing individual parts.
+    body.setLocalScale(isTall ? 0.72 : 0.87, isTall ? 1.55 : 0.87, isTall ? 0.72 : 0.87);
     root.addChild(body);
     root.setPosition(position);
     this.ctx.app.root.addChild(root);
