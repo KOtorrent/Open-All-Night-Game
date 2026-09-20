@@ -8,6 +8,7 @@ export class NightThreeRuntime {
   private stormPulse = 0;
   private blackoutArmed = false;
   private blackoutTimer = 0;
+  private blackoutGrace = 0;
   private blackoutActive = false;
   private emergencyLights: pc.Entity[] = [];
   private pump7Armed = false;
@@ -99,11 +100,24 @@ export class NightThreeRuntime {
     if (!this.blackoutArmed && this.state.isComplete('anomaly:storm-blackout')) {
       this.blackoutArmed = true;
       this.blackoutTimer = 14;
+      // Whatever the player was doing when the anomaly fires (checking a camera, restocking,
+      // reading the notebook) is very rarely "already standing behind the counter" - confirmed
+      // in-engine that with no grace period, the position check below ran on the same frame as
+      // arming and broke the rule (and immediately reverted the emergency lighting it had just
+      // switched on) before the player could ever react. A few seconds to actually get there keeps
+      // the rule "avoidable" the way its own task text ("stay behind the counter") implies, instead
+      // of an instant, unwinnable fail unless the player happened to already be at the counter.
+      this.blackoutGrace = 6;
       this.state.addTask('n3-blackout-hold', 'Stay behind the counter until emergency lights stabilize');
       this.ui.flashWarning('POWER OUT', 1200);
       this.setBlackoutLighting(true);
     }
     if (!this.blackoutArmed || this.state.isComplete('n3-blackout-held') || this.state.isComplete('rule-broken:n3-blackout')) return;
+
+    if (this.blackoutGrace > 0) {
+      this.blackoutGrace -= dt;
+      return;
+    }
 
     const pos = this.camera.getPosition();
     const behindCounter = pos.z > 6.4 && pos.x < -2.7;
