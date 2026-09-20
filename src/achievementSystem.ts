@@ -63,8 +63,12 @@ export class AchievementSystem {
       case 'THREE_THIRTY_THREE': return p.anomaliesSeen.includes('frozen-clock');
       case 'NO_SERVICE': return this.state.isComplete('pump7-denied') || this.state.isComplete('n3-pump7-denied');
       case 'NOBODY_HOME': return this.state.isComplete('rear-door-checked') || this.state.isComplete('n3-rear-door-safe');
-      case 'WRONG_NUMBER': return this.state.isComplete('phone-answered');
-      case 'PAPER_TRAIL': return this.state.isComplete('impossible-receipt-read');
+      // Confirmed in-engine (final achievement audit): both flag names were transposed from what
+      // storePhoneSystem.ts/impossibleReceiptSystem.ts actually set ('phone-answered' vs the real
+      // 'answered-store-phone', 'impossible-receipt-read' vs the real 'read-impossible-receipt'),
+      // making these two achievements structurally unreachable no matter what a player did.
+      case 'WRONG_NUMBER': return this.state.isComplete('answered-store-phone');
+      case 'PAPER_TRAIL': return this.state.isComplete('read-impossible-receipt');
       // IDs must match what officeLoreSystem.ts actually records via state.complete() (also used by
       // shiftEndSystem.ts's lore-read count) — this previously checked 'office-roster'/'office-
       // incidents'/'office-terminal', none of which any system ever sets, making the achievement
