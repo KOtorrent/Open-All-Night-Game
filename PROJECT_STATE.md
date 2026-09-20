@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Gameplay/framework content freeze. The campaign, Endless Mode, progression, endings, achievements and reusable anomaly-response architecture are now considered content-complete enough for systematic QA. New feature expansion is frozen unless testing proves an existing gameplay contract cannot function.
+Full-game regression and release-prep pass complete. Campaign (Nights 1-5), Endless Mode, all three endings, all 30 achievements, save/reload/progression, and menu navigation have all been driven through their real production code paths end to end and verified working, with three real defects found and fixed along the way (see `docs/RELEASE_READINESS.md` for the full report). No known P0 blockers remain. The one tracked P1 (vendoring the authored GLB assets before Steam packaging) and the P2 polish items are documented there. New feature expansion remains frozen; further work should be regression fixes, the outstanding Steam-packaging prep, or explicitly-requested polish.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -52,15 +52,19 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - Chores, delivery, fuel authorization, Pump 7 foreshadow, phone event, CAM 4 figure, rear-door rattle, Window Watcher, impossible receipt and atmosphere beats.
 - CCTV, power event, office lore, Night 1 shift ending and local audio ambience.
 
-## Known visual/bug debt intentionally deferred to the dedicated bug pass
-- Duplicate/overlapping NPC presentation can still occur.
-- Office/restroom/staff geometry still needs a clean dedicated rebuild/verification pass.
-- Cooler/freezer stock presentation is incomplete.
-- Some hero props remain procedural/placeholder.
-- Character art is not final; rejected chibi GLBs remain disabled by default.
-- Customer collision/pathing and prompt alignment require systematic regression testing.
+## Known remaining debt (see docs/RELEASE_READINESS.md for the full report)
+- P1: the authored register/rug GLB models still load from a third-party GitHub mirror
+  (`raw.githubusercontent.com/intellicia-public/parastore`) at runtime; vendor them into this
+  repo (or a controlled asset store) before Steam packaging, per `docs/ASSET_SOURCES.md`.
+- P2: single 2.17 MB JS bundle (no code-splitting yet).
+- P2: `NOBODY_HOME` only recognizes Night 3's rear-door-check flag, not Night 1's equivalent
+  (the achievement is still reachable via Night 3).
+- Character art is not final; rejected chibi GLBs remain disabled by default (intentional).
+- No Steamworks integration exists; local achievements are not yet mirrored to Steam IDs.
 
-These issues are no longer allowed to block framework development. They are separable from campaign architecture and are explicitly documented for the later bug-testing pass.
+The office/restroom/staff geometry rebuild, NPC spawn-reservation/duplication fixes, cooler/freezer
+presentation, and the full visual/lighting/material polish pass that were previously tracked here as
+deferred debt have all since been completed in earlier sessions on this branch.
 
 ## Runtime/query framework
 - `?mode=campaign&night=1`
@@ -102,15 +106,16 @@ Mythics:
 9. Missing future anomaly handlers fail safely rather than crashing the game.
 10. Framework documentation is complete enough for a second agent to implement/test individual runtime handlers.
 
-## Next milestone — QA / repair / graphics
-1. Hand the current `main` branch to Claude for systematic smoke testing using `docs/SMOKE_TEST_ROUTES.md`.
-2. Fix P0 environment bugs first: rebuild office/restroom/staff geometry cleanly, eliminate duplicate openings/see-through walls and resolve collider overlap.
-3. Fix NPC spawn reservation, duplicate actors, route collision and shelf traversal.
-4. Fix cooler/freezer presentation and remove all default mystery/experimental props.
-5. Regression-test every prompt, register/CCTV interaction, ending gate, progression transition and Endless failure/restart path.
-6. Validate all 30 achievements using `docs/ACHIEVEMENT_MATRIX.md`.
-7. Then execute the final art pass: approved human assets, hero props, stocked coolers/shelves, exterior signage/pumps, lighting/material/post-processing polish.
-8. After the above passes, run a full Night 1-5 campaign without dev controls plus a sustained Endless session before release packaging.
+## Next milestone — Steam packaging prep
+1. Vendor the authored GLB assets locally and drop the runtime dependency on the third-party
+   GitHub mirror (see Known remaining debt above and `docs/ASSET_SOURCES.md`).
+2. Decide on and implement a packaging strategy for a Steam depot (this repo currently only
+   produces a static web `dist/` via `npm run build`).
+3. Integrate the Steamworks SDK and mirror the existing 30 local achievement IDs to it.
+4. Run the final manual playtest checklist in `docs/RELEASE_READINESS.md` on a real player
+   machine (real-time full campaign run, audio, pointer lock across browsers, FPS spot-check).
+5. Optional polish: code-split the JS bundle; fold Night 1's `checked-rear-rattle` flag into
+   `NOBODY_HOME`'s check for consistency with Night 3.
 
 ## Standing rules
 - GitHub is always the source of truth.
