@@ -12,6 +12,7 @@ export class GameUI {
   readonly cctvLabel: HTMLDivElement;
   readonly cctvHelp: HTMLDivElement;
   readonly newShiftButton: HTMLButtonElement;
+  readonly title: HTMLDivElement;
 
   constructor() {
     this.root = document.createElement('div');
@@ -21,9 +22,9 @@ export class GameUI {
     this.clock = document.createElement('div');
     this.clock.style.cssText = 'position:absolute;right:24px;top:18px;font-size:21px;letter-spacing:2px;color:#f2e8b0';
 
-    const title = document.createElement('div');
-    title.textContent = 'CASE’S COUNTRY GAS STOP';
-    title.style.cssText = 'position:absolute;left:18px;top:14px;font-size:12px;letter-spacing:1.5px;color:#d8cf9b;opacity:.9';
+    this.title = document.createElement('div');
+    this.title.textContent = 'CASE’S COUNTRY GAS STOP';
+    this.title.style.cssText = 'position:absolute;left:18px;top:14px;font-size:12px;letter-spacing:1.5px;color:#d8cf9b;opacity:.9';
 
     this.newShiftButton = document.createElement('button');
     this.newShiftButton.textContent = 'NEW SHIFT';
@@ -66,7 +67,7 @@ export class GameUI {
     this.cctvHelp.style.cssText = 'position:absolute;left:50%;bottom:22px;transform:translateX(-50%);padding:7px 11px;background:rgba(0,0,0,.68);font-size:12px;letter-spacing:.7px;color:#bdc9bf';
     this.cctv.append(this.cctvLabel, this.cctvHelp);
 
-    this.root.append(this.vignette, title, this.newShiftButton, this.clock, this.crosshair, this.prompt, this.message, this.tasks, this.help, this.warning, this.cctv);
+    this.root.append(this.vignette, this.title, this.newShiftButton, this.clock, this.crosshair, this.prompt, this.message, this.tasks, this.help, this.warning, this.cctv);
     document.body.appendChild(this.root);
   }
 
@@ -106,6 +107,11 @@ export class GameUI {
     this.tasks.style.opacity = active ? '0' : '1';
     this.newShiftButton.style.display = active ? 'none' : 'block';
     this.help.style.opacity = active ? '0' : this.help.style.opacity;
+    // title/clock were never hidden here, so the normal "CASE'S COUNTRY GAS STOP" / wall-clock HUD
+    // text sat directly underneath (and faintly showed through) the CCTV label and security
+    // timecode occupying the same top-left/top-right corners - confirmed via runtime screenshot.
+    this.title.style.opacity = active ? '0' : '.9';
+    this.clock.style.opacity = active ? '0' : '1';
   }
 
   setCctvLabel(label: string): void {
