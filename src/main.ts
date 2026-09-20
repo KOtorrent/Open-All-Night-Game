@@ -128,6 +128,18 @@ vignette.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2;'
   'background:radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.38) 100%)';
 document.body.appendChild(vignette);
 
+// Night 3's own ambient light is already darker than the other nights (see nightThreeRuntime.ts),
+// but the storm otherwise only reads through occasional message text - the exterior looked
+// identical to a clear night. A very faint cool-blue static tint over the whole view is a cheap,
+// zero-engine-risk way to make the storm night read as visually distinct without diverging into a
+// different game: same layering approach and z-index as the vignette above, just one more night-3-
+// only wash underneath it.
+if (session.config.night === 3 && !session.isEndless()) {
+  const stormTint = document.createElement('div');
+  stormTint.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:1;background:rgba(30,42,58,0.10)';
+  document.body.appendChild(stormTint);
+}
+
 if (new URLSearchParams(window.location.search).get('dev') === '1') {
   // QA-only hook: lets an automated screenshot/inspection pass reposition the camera
   // without wiring up pointer-lock mouse look. Never active outside ?dev=1.

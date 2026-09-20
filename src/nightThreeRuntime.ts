@@ -8,6 +8,8 @@ export class NightThreeRuntime {
   private stormPulse = 0;
   private blackoutArmed = false;
   private blackoutTimer = 0;
+  private blackoutActive = false;
+  private emergencyLights: pc.Entity[] = [];
   private pump7Armed = false;
   private pump7Timer = 0;
   private rearDoorArmed = false;
@@ -99,12 +101,14 @@ export class NightThreeRuntime {
       this.blackoutTimer = 14;
       this.state.addTask('n3-blackout-hold', 'Stay behind the counter until emergency lights stabilize');
       this.ui.flashWarning('POWER OUT', 1200);
+      this.setBlackoutLighting(true);
     }
     if (!this.blackoutArmed || this.state.isComplete('n3-blackout-held') || this.state.isComplete('rule-broken:n3-blackout')) return;
 
     const pos = this.camera.getPosition();
     const behindCounter = pos.z > 6.4 && pos.x < -2.7;
     if (!behindCounter) {
+      this.setBlackoutLighting(false);
       this.breakRule('n3-blackout', 'You leave the counter before the emergency lights stabilize.');
       return;
     }
@@ -112,8 +116,36 @@ export class NightThreeRuntime {
     this.blackoutTimer -= dt;
     if (this.blackoutTimer <= 0) {
       this.state.complete('n3-blackout-held');
+      this.setBlackoutLighting(false);
       this.ui.showMessage('Emergency lights settle into a weak red glow. You can move again.', 3200);
     }
+  }
+
+  // The blackout anomaly's own text ("The fluorescents die. Emergency light begins to hum.") had
+  // nothing behind it - the store's fluorescent fixtures stayed fully lit the whole time, directly
+  // contradicting the narration. Cuts the main ceiling fixtures and swaps in a few dim red emergency
+  // pools instead, matching "blackout scary but playable / emergency-lit store readable": the
+  // counter the player is required to stay at keeps a lit pool, the rest of the floor goes dim red.
+  private setBlackoutLighting(active: boolean): void {
+    if (this.blackoutActive === active) return;
+    this.blackoutActive = active;
+
+    for (const component of this.app.root.findComponents('light')) {
+      const light = component as unknown as pc.LightComponent;
+      if (light.entity.name.startsWith('FixtureLight-')) light.intensity = active ? 0.02 : 0.78;
+    }
+
+    if (active && this.emergencyLights.length === 0) {
+      const positions: pc.Vec3[] = [new pc.Vec3(-5.6, 2.5, 7.4), new pc.Vec3(0, 2.5, -1), new pc.Vec3(4.8, 2.5, -8.0)];
+      for (const [i, position] of positions.entries()) {
+        const light = new pc.Entity(`EmergencyLight-${i}`);
+        light.addComponent('light', { type: 'omni', color: new pc.Color(0.85, 0.10, 0.06), intensity: 1.3, range: 6.8, castShadows: false });
+        light.setPosition(position);
+        this.app.root.addChild(light);
+        this.emergencyLights.push(light);
+      }
+    }
+    for (const light of this.emergencyLights) light.enabled = active;
   }
 
   private updatePumpSeven(dt: number): void {
