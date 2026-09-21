@@ -58,6 +58,7 @@ import { DeliverySystem } from './deliverySystem';
 import { ShiftEndSystem } from './shiftEndSystem';
 import { DevTools } from './devTools';
 import { applyPerformanceProfile } from './performanceProfile';
+import { MaterialLibrary } from './materialLibrary';
 
 const canvas = document.getElementById('application') as HTMLCanvasElement | null;
 if (!canvas) throw new Error('Missing application canvas');
@@ -93,8 +94,11 @@ new DevTools(state, ui);
 const anomalyRuntime = new AnomalyRuntime(session, ui);
 const frameworkNight = new FrameworkNightDirector(session, state, ui, anomalyRuntime);
 
-const world = buildStore(app, state, ui);
-buildExterior(app, world.colliders);
+const materialLibrary = new MaterialLibrary(app);
+await materialLibrary.ready();
+
+const world = buildStore(app, state, ui, materialLibrary);
+buildExterior(app, world.colliders, materialLibrary);
 buildStaffArea(app, world);
 new StoreSignageSystem(app);
 new StaffDetailSystem(app);
@@ -107,7 +111,9 @@ void authoredAssets.start();
 const authoredCharacters = new AuthoredCharacterSystem(app);
 
 const camera = new pc.Entity('PlayerCamera');
-camera.addComponent('camera', { clearColor: new pc.Color(0.006, 0.009, 0.012), nearClip: 0.05, farClip: 180, fov: 70 });
+// farClip raised from 180 to 220 to comfortably contain the exterior sky dome (exteriorBuilder.ts),
+// a large emissive backdrop box that would otherwise be clipped before it's ever visible.
+camera.addComponent('camera', { clearColor: new pc.Color(0.010, 0.014, 0.020), nearClip: 0.05, farClip: 220, fov: 70 });
 // The engine defaults to TONEMAP_LINEAR, which hard-clips: fixture lights placed close enough to
 // read as "lit room" were blowing straight to solid white a couple meters out while everywhere
 // else fell off a cliff to pure black a few meters further, confirmed via runtime screenshots of

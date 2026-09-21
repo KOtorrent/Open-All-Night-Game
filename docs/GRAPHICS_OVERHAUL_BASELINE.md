@@ -80,18 +80,19 @@ Function is solid (legible, no bleed-through issues found in the prior audit) bu
 black-panel/monospace treatment as the menu. Lower priority than menu/characters/exterior for this
 pass; the visual style bible's UI section should guide a later pass here.
 
-## Summary of this pass's targets
+## Summary of this pass's targets — final status
 
-| Area | Classification | This pass? |
+| Area | Classification | Status |
 |---|---|---|
-| Characters | REBUILD | Yes — builder done, 4/10+ characters converted |
-| Main menu | REBUILD | Yes |
-| Gas pumps / canopy | REBUILD | Yes |
-| World depth / sky | REBUILD | Yes |
-| Storefront facade | RESKIN | Yes (materials pass) |
-| Parking lot surface | RESKIN | Yes (materials pass) |
-| Forecourt layout | KEEP | N/A |
-| Register / rug | KEEP | N/A |
-| Interior hero props | RESKIN | **Deferred to Pass 2** |
+| Characters | REBUILD | Done — shared builder built and applied to Earl, Silent Customer, Traveler, player avatar (4/10+) |
+| Main menu | REBUILD | Done — shows on bare landing, full visual rebuild, navigation logic unchanged |
+| Gas pumps | REBUILD | Done — base plinth, nozzle cradle, numbered placard, painted-metal/brushed-steel materials |
+| Canopy | RESKIN | Done — brand-panel fascia texture, brushed-steel columns, concrete roof underside, column base plinths |
+| World depth / sky | REBUILD | Done — emissive sky dome (gradient + stars), two-layer treeline, moonlight, roadside utility poles |
+| Storefront facade / interior walls | RESKIN | Done — per-surface-sized tiled materials (off_white_wall/vinyl_floor/ceiling_tile) |
+| Parking lot / forecourt surface | RESKIN | Done — tiled asphalt/concrete materials |
+| Forecourt layout | KEEP | Unchanged (as intended) |
+| Register / rug | KEEP | Unchanged (as intended) |
+| Interior hero props (shelving, coolers, counter detail) | RESKIN | **Deferred to Pass 2** |
 | Anomaly visual redesign | — | **Deferred to Pass 2** |
-| Remaining characters (Jenna/Marcus/Dale/Larry/anomaly presences) | REBUILD | **Deferred to Pass 2** (builder ready) |
+| Remaining characters (Jenna/Marcus/Dale/Larry/anomaly presences) | REBUILD | **Deferred to Pass 2** (shared builder ready to apply) |

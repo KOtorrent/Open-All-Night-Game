@@ -2,6 +2,7 @@ import * as pc from 'playcanvas';
 import type { BuiltWorld, Collider2D, Interactable } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
+import type { MaterialLibrary } from './materialLibrary';
 
 function mat(color: pc.Color, metalness = 0, gloss = 0.25, emissive?: pc.Color, opacity = 1): pc.StandardMaterial {
   const m = new pc.StandardMaterial();
@@ -61,13 +62,24 @@ function colliderFromBox(colliders: Collider2D[], x: number, z: number, sx: numb
   colliders.push({ minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2, name });
 }
 
-export function buildStore(app: pc.Application, state: GameState, ui: GameUI): BuiltWorld {
+export function buildStore(app: pc.Application, state: GameState, ui: GameUI, materials: MaterialLibrary): BuiltWorld {
   const colliders: Collider2D[] = [];
   const interactables: Interactable[] = [];
 
-  const wall = mat(new pc.Color(0.33, 0.35, 0.34), 0, 0.16);
-  const floor = mat(new pc.Color(0.075, 0.078, 0.08), 0, 0.24);
-  const ceiling = mat(new pc.Color(0.10, 0.11, 0.105), 0, 0.12);
+  // Wall/floor/ceiling now use the shared tiled texture set (docs/VISUAL_STYLE_BIBLE.md) instead of
+  // flat single colors - this also covers the storefront facade (FrontWallL/R below), since PlayCanvas
+  // primitive UVs are fixed per-face at 0..1 and don't auto-scale with an entity's localScale, each
+  // wall/floor/ceiling segment gets its own getTiled() variant sized to its own visible-face
+  // dimensions rather than one shared material with one fixed tiling (which would either smear
+  // across the big surfaces or over-repeat on the small ones). Interior hero props (shelving,
+  // coolers, counter) keep their existing flat materials for now; that pass is scoped for later per
+  // docs/GRAPHICS_OVERHAUL_BASELINE.md.
+  const floor = materials.getTiled('vinyl_floor', 20, 24);
+  const ceiling = materials.getTiled('ceiling_tile', 20, 24);
+  const wallLR = materials.getTiled('off_white_wall', 24, 4.1);
+  const wallBack = materials.getTiled('off_white_wall', 20, 4.1);
+  const wallFront = materials.getTiled('off_white_wall', 5.6, 4.1);
+  const wall = wallFront;
   const steel = mat(new pc.Color(0.27, 0.29, 0.30), 0.65, 0.42);
   const darkSteel = mat(new pc.Color(0.055, 0.06, 0.06), 0.7, 0.30);
   const counter = mat(new pc.Color(0.25, 0.105, 0.06), 0, 0.28);
@@ -83,9 +95,9 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI): B
   // Main shell: 20m x 24m, player-height authored around real-world scale.
   addBox(app, 'Floor', new pc.Vec3(0, -0.08, 0), new pc.Vec3(20, 0.16, 24), floor);
   addBox(app, 'Ceiling', new pc.Vec3(0, 4.15, 0), new pc.Vec3(20, 0.10, 24), ceiling);
-  addBox(app, 'LeftWall', new pc.Vec3(-10, 2.05, 0), new pc.Vec3(0.18, 4.1, 24), wall);
-  addBox(app, 'RightWall', new pc.Vec3(10, 2.05, 0), new pc.Vec3(0.18, 4.1, 24), wall);
-  addBox(app, 'BackWall', new pc.Vec3(0, 2.05, -12), new pc.Vec3(20, 4.1, 0.18), wall);
+  addBox(app, 'LeftWall', new pc.Vec3(-10, 2.05, 0), new pc.Vec3(0.18, 4.1, 24), wallLR);
+  addBox(app, 'RightWall', new pc.Vec3(10, 2.05, 0), new pc.Vec3(0.18, 4.1, 24), wallLR);
+  addBox(app, 'BackWall', new pc.Vec3(0, 2.05, -12), new pc.Vec3(20, 4.1, 0.18), wallBack);
   // Front wall split around entrance and windows.
   addBox(app, 'FrontWallL', new pc.Vec3(-7.2, 2.05, 12), new pc.Vec3(5.6, 4.1, 0.18), wall);
   addBox(app, 'FrontWallR', new pc.Vec3(7.2, 2.05, 12), new pc.Vec3(5.6, 4.1, 0.18), wall);
