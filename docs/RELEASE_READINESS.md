@@ -1,14 +1,23 @@
 # Release Readiness — Open All Night
 
-Snapshot from the final full-game regression + release-prep pass on branch `qa/claude-repair-pass-1`.
+Snapshot from the final full-game regression + release-prep pass on branch `qa/claude-repair-pass-1`, updated after the final pre-merge cleanup pass.
+
+## Final pre-merge cleanup pass (latest)
+
+Two items remained after the regression pass below, both now fixed, verified, committed and pushed:
+
+1. **Exterior forecourt/canopy/pump lighting** — a real human screenshot showed the pumps, canopy columns and pavement markings crushed to near-black. Root-caused to only 4 sparse, shadow-casting canopy lights (0.95 intensity - about a third of the interior's comparable fixture lights, which rely on an 11-light overlapping grid and enclosing walls the forecourt doesn't have) whose steep top-down angle was also self-shadowing the pumps' own faces. Fixed by boosting canopy light intensity/range, adding two range-bounded non-shadow-casting fill lights, and lifting the pump material's near-black albedo slightly. Verified via before/after screenshots under both `?low=0` and `?low=1`; the distant treeline/road are unchanged.
+2. **Remote GLB production dependency** — the two default-loading authored models (register, entry rug) loaded from `raw.githubusercontent.com/intellicia-public/parastore` at runtime. Verified CC0 1.0 provenance directly against that mirror's own LICENSE/README, vendored both files (plus a texture `cash-register.glb` references by relative URI rather than embedding) into `public/assets/market/`, and repointed the default registry entries at the local path. The remaining unapproved/rejected experimental assets stay on the mirror but are now also gated behind `?dev=1`, so no query-parameter guess by a normal player can trigger a third-party request. Verified with the production build served and **all** non-local network access blocked: both models still load, zero blocked attempts occur, zero page errors.
+
+See the git log for the exact commits (`4df640e` lighting, `d7b27e7` assets).
 
 ## Current state
 
-- **Latest commit:** `b5fda73` (pushed, local matches `origin/qa/claude-repair-pass-1`)
+- **Latest commit:** `d7b27e7` (pushed, local matches `origin/qa/claude-repair-pass-1`)
 - **Working tree:** clean
 - **`npm ci`:** clean install, 0 vulnerabilities
 - **`npm run build`** (`tsc --noEmit && vite build`): clean, no errors
-- **Production build:** `dist/index.html` + `dist/assets/index-*.js` (2.17 MB / 567 KB gzip) verified to boot and render correctly via `vite preview` for menu, Night 1, Night 3, Night 5 and Endless
+- **Production build:** `dist/index.html` + `dist/assets/index-*.js` (2.17 MB / 567 KB gzip) + vendored `dist/assets/market/*` verified to boot and render correctly via `vite preview` for menu, Night 1, Night 3, Night 5 and Endless, including with all non-local network access blocked (register/rug still load, register/CCTV/cooler/office/restroom/Pump 7/Larry all functional, zero page errors, zero external requests)
 
 ## Full campaign regression status
 
@@ -49,12 +58,9 @@ Booting with no query parameters at all confirms: no dev panel, no `__oanDebug` 
 
 ## Asset / network dependency findings
 
-`docs/ASSET_SOURCES.md` already documents this precisely and it still applies: the default boot loads two authored GLB models (register, entry rug) from `raw.githubusercontent.com/intellicia-public/parastore`, described there as *"an integration bridge, not the intended shipping arrangement."* This pass re-confirmed the behavior end to end:
+**Resolved in the final pre-merge pass** — see `docs/ASSET_SOURCES.md` for the full record. The two default-loading authored GLB models (register, entry rug) are now vendored in `public/assets/market/` and load from a same-origin path; the game's default boot makes zero requests to any third-party host (verified with all non-local network access blocked in a production build). The remaining experimental/rejected models (cooler, shelf samples, chibi characters) are still on the temporary `intellicia-public/parastore` mirror, pending individual visual approval, but are now gated behind `?dev=1` in addition to their existing opt-in flags, so a normal player can never reach them by guessing a query parameter.
 
-- If that host is unreachable (confirmed in this sandbox, whose network policy blocks it), the loader retries a few times, then falls back to the primitive geometry gracefully (`console.warn`, no thrown error, no broken interactable) — **the game remains fully playable offline**.
-- No gameplay-critical asset is remote-only; every remote asset has a working primitive fallback already wired.
-- This dependency is a **known, already-documented release blocker specifically for Steam packaging** (a shipped build should not depend on a third-party GitHub mirror at runtime), not a playability blocker. `ASSET_SOURCES.md`'s own import rule already states the required fix: vendor the actually-used models into the repo (or another controlled asset store) before packaging, and remove the runtime dependency on the raw GitHub URLs.
-- No Steamworks integration exists anywhere in this codebase. Local achievements (`ProgressionStore`/`AchievementSystem`) are **not** Steamworks achievements; `docs/FULL_GAME_FRAMEWORK.md` already notes Steamworks should mirror these IDs later rather than invent a second namespace.
+No Steamworks integration exists anywhere in this codebase. Local achievements (`ProgressionStore`/`AchievementSystem`) are **not** Steamworks achievements; `docs/FULL_GAME_FRAMEWORK.md` already notes Steamworks should mirror these IDs later rather than invent a second namespace.
 
 ## Performance findings
 
@@ -64,12 +70,17 @@ Booting with no query parameters at all confirms: no dev panel, no `__oanDebug` 
 
 ## Fixes landed this pass
 
-All three are pushed to `qa/claude-repair-pass-1` (commits `6a9d0c1`, `743572d`, `b5fda73`):
+Regression pass, pushed to `qa/claude-repair-pass-1` (commits `6a9d0c1`, `743572d`, `b5fda73`):
 
 1. **Night 3 blackout instant-fail** (`nightThreeRuntime.ts`) — the "stay behind the counter" position check ran on the exact same frame the blackout armed, with zero grace period. A player anywhere else in the store when the anomaly fired broke the rule immediately, and the emergency lighting flashed on and reverted in the same frame. Added a 6-second grace period before the position check starts enforcing.
 2. **Dropped anomaly responses under overlap** (`interactiveAnomalySystem.ts`) — if two shared-response anomalies became due in the same frame (a large `advanceMinutes` jump, or in real play a backgrounded tab resuming with a large elapsed delta, since `GameState.update()` deliberately doesn't clamp `dt` the way movement/response timers do), every anomaly after the first was silently dropped: no response window, no rule-break, no message, and `resolved:<id>` never became true — which could permanently block anything gated on it, including Night 5's hidden BREAK THE RULES ending. Now queues overlapping challenges so each gets its own window in turn.
 3. **Two structurally-unreachable achievements** (`achievementSystem.ts`) — `WRONG_NUMBER` checked `'phone-answered'` but `storePhoneSystem.ts` sets `'answered-store-phone'`; `PAPER_TRAIL` checked `'impossible-receipt-read'` but `impossibleReceiptSystem.ts` sets `'read-impossible-receipt'`. Both flag names were transposed, so neither achievement could ever unlock. Corrected to the actual flag names (also used by `shiftEndSystem.ts`'s own Night 1 summary, confirming they're canonical).
 4. **Dev-only error overlay leak** (`main.ts`) — `window.addEventListener('error', ...)` showed raw JavaScript error text directly in the in-game message box for every player, not just test sessions. Gated behind `?dev=1`.
+
+Final pre-merge cleanup pass, pushed to `qa/claude-repair-pass-1` (commits `4df640e`, `d7b27e7`):
+
+5. **Exterior forecourt/canopy/pump readability** (`exteriorBuilder.ts`) — see the summary at the top of this document.
+6. **Remote GLB production dependency removed** (`authoredRetailAssetSystem.ts`, `authoredCharacterSystem.ts`, `docs/ASSET_SOURCES.md`) — see the summary at the top of this document.
 
 ## Known non-blocking issues
 
@@ -88,8 +99,8 @@ All three are pushed to `qa/claude-repair-pass-1` (commits `6a9d0c1`, `743572d`,
 | `?low=1` / `?low=0` | Force/deny the reduced-performance profile |
 | `?perf=1` / `?perf=0` | Alias for the above |
 | `?assets=0` | Disables the authored-asset layer entirely |
-| `?experimentalAssets=1` | Enables not-yet-approved authored props (cooler visual, shelf samples, accents) |
-| `?characters=1` / `?experimentalCharacters=1` | Enables the (rejected, disabled-by-default) chibi character layer |
+| `?experimentalAssets=1` (also requires `?dev=1`) | Enables not-yet-approved authored props (cooler visual, shelf samples, accents), remote-loaded |
+| `?characters=1` / `?experimentalCharacters=1` (also requires `?dev=1`) | Enables the (rejected, disabled-by-default) chibi character layer, remote-loaded |
 | `?forceMythic=<id>` (requires `?dev=1`) | Forces a specific campaign mythic for testing |
 
 None of these affect a real player's default experience; all were confirmed absent/disabled when booting with no query string at all.
@@ -102,21 +113,20 @@ This pass was run in an automated headless sandbox. Before shipping, a human sho
 - Confirm audio (ambient loop, register beep, chime) plays correctly — `AmbientAudio` was not exercised by this pass beyond construction.
 - Confirm pointer lock / mouse-look behaves correctly across browsers (Safari in particular has historically been stricter about pointer lock).
 - Spot-check frame rate on a real mid-range laptop under `?low=1` vs default, since this pass's sandbox could not produce a meaningful FPS number.
-- Confirm the authored register/rug GLB assets actually load on a normal (non-sandboxed) network connection, since this pass's sandbox network policy blocked `raw.githubusercontent.com` outright and could only verify the offline-fallback path.
+- Confirm the exterior lighting reads correctly on a real monitor/panel (this pass's before/after comparison was done via screenshots in a headless sandbox, not a calibrated display).
 
 ## Steam packaging tasks still outstanding
 
-- Vendor the actually-used authored GLB assets (currently loaded from `raw.githubusercontent.com/intellicia-public/parastore`) into this repository or another controlled asset store, and remove the runtime dependency on that URL, per `docs/ASSET_SOURCES.md`'s own import rule.
 - No Steamworks SDK integration exists yet. Local achievements would need to be mirrored to Steamworks achievement IDs (`docs/FULL_GAME_FRAMEWORK.md` already flags this as future work) — this is a from-scratch integration, not a fix.
 - No packaging/build pipeline for a Steam depot (e.g. Electron/NW.js wrapper or a chosen browser-shell strategy) exists in this repository; `npm run build` only produces a static web `dist/`.
 - Bundle-size code-splitting (see Performance findings) would reduce initial load time in a packaged build.
+- Before shipping any of the remaining experimental/rejected assets (cooler visual, shelf samples, chibi characters), follow the same vendoring process used for the register/rug: verify license against the mirror, copy the file into `public/assets/...`, repoint the registry entry locally (see `docs/ASSET_SOURCES.md`).
 
 ## Blocker classification
 
-**P0 (cannot release):** none remaining. The three defects found in this pass (Night 3 blackout instant-fail, dropped overlapping anomaly responses, two unreachable achievements) were all real P0/P1-grade regressions and have been fixed, verified, and pushed.
+**P0 (cannot release):** none remaining. All defects found across the regression pass and the final pre-merge cleanup pass (Night 3 blackout instant-fail, dropped overlapping anomaly responses, two unreachable achievements, exterior lighting crush, remote GLB production dependency) have been fixed, verified, and pushed.
 
-**P1 (should fix before release):**
-- Vendor the authored GLB assets locally and drop the `raw.githubusercontent.com` runtime dependency before Steam packaging (already tracked in `ASSET_SOURCES.md`).
+**P1 (should fix before release):** none remaining.
 
 **P2 (can ship, polish later):**
 - Single 2.17 MB JS bundle; consider code-splitting.

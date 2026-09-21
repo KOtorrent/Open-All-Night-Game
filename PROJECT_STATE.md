@@ -1,7 +1,7 @@
 # Open All Night — Project State
 
 ## Current phase
-Full-game regression and release-prep pass complete. Campaign (Nights 1-5), Endless Mode, all three endings, all 30 achievements, save/reload/progression, and menu navigation have all been driven through their real production code paths end to end and verified working, with three real defects found and fixed along the way (see `docs/RELEASE_READINESS.md` for the full report). No known P0 blockers remain. The one tracked P1 (vendoring the authored GLB assets before Steam packaging) and the P2 polish items are documented there. New feature expansion remains frozen; further work should be regression fixes, the outstanding Steam-packaging prep, or explicitly-requested polish.
+Full-game regression and final pre-merge cleanup pass complete. Campaign (Nights 1-5), Endless Mode, all three endings, all 30 achievements, save/reload/progression, and menu navigation have all been driven through their real production code paths end to end and verified working. The final pre-merge pass additionally fixed the exterior forecourt/canopy/pump lighting (was crushed to near-black in a real screenshot) and removed the production runtime's dependency on a third-party GitHub mirror (the two default-loading GLBs are now vendored locally; remaining experimental/rejected assets are dev-gated). No known P0 or P1 blockers remain - see `docs/RELEASE_READINESS.md` for the full report. New feature expansion remains frozen; further work should be regression fixes, Steam-packaging prep (Steamworks SDK integration, a packaging pipeline, vendoring any experimental assets before they ship), or explicitly-requested polish.
 
 ## Source of truth
 This GitHub repository is authoritative. No AI sandbox is allowed to be the only copy of project work.
@@ -53,9 +53,6 @@ PlayCanvas Engine, standalone code-first workflow using TypeScript + Vite.
 - CCTV, power event, office lore, Night 1 shift ending and local audio ambience.
 
 ## Known remaining debt (see docs/RELEASE_READINESS.md for the full report)
-- P1: the authored register/rug GLB models still load from a third-party GitHub mirror
-  (`raw.githubusercontent.com/intellicia-public/parastore`) at runtime; vendor them into this
-  repo (or a controlled asset store) before Steam packaging, per `docs/ASSET_SOURCES.md`.
 - P2: single 2.17 MB JS bundle (no code-splitting yet).
 - P2: `NOBODY_HOME` only recognizes Night 3's rear-door-check flag, not Night 1's equivalent
   (the achievement is still reachable via Night 3).
@@ -73,7 +70,7 @@ deferred debt have all since been completed in earlier sessions on this branch.
 - `?menu=1` opens the framework front end on boot.
 - `?dev=1` keeps developer time controls and missing-handler diagnostics.
 - `?low=1` / `?low=0` control the Codespaces performance profile.
-- `?experimentalAssets=1` and `?experimentalCharacters=1` remain isolated experiments only.
+- `?experimentalAssets=1` and `?experimentalCharacters=1` remain isolated experiments only, and now also require `?dev=1`.
 
 ## Campaign canon
 1. Night 1 — FIRST SHIFT
@@ -107,13 +104,13 @@ Mythics:
 10. Framework documentation is complete enough for a second agent to implement/test individual runtime handlers.
 
 ## Next milestone — Steam packaging prep
-1. Vendor the authored GLB assets locally and drop the runtime dependency on the third-party
-   GitHub mirror (see Known remaining debt above and `docs/ASSET_SOURCES.md`).
-2. Decide on and implement a packaging strategy for a Steam depot (this repo currently only
+1. Decide on and implement a packaging strategy for a Steam depot (this repo currently only
    produces a static web `dist/` via `npm run build`).
-3. Integrate the Steamworks SDK and mirror the existing 30 local achievement IDs to it.
-4. Run the final manual playtest checklist in `docs/RELEASE_READINESS.md` on a real player
+2. Integrate the Steamworks SDK and mirror the existing 30 local achievement IDs to it.
+3. Run the final manual playtest checklist in `docs/RELEASE_READINESS.md` on a real player
    machine (real-time full campaign run, audio, pointer lock across browsers, FPS spot-check).
+4. Before shipping any remaining experimental/rejected asset (cooler visual, shelf samples,
+   chibi characters), vendor it the same way the register/rug were - see `docs/ASSET_SOURCES.md`.
 5. Optional polish: code-split the JS bundle; fold Night 1's `checked-rear-rattle` flag into
    `NOBODY_HOME`'s check for consistency with Night 3.
 
