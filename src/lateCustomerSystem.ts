@@ -2,6 +2,7 @@ import * as pc from 'playcanvas';
 import type { BuiltWorld } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
+import { buildLowPolyHuman } from './characterBuilder';
 
 type Phase = 'entering' | 'shopping' | 'waiting' | 'leaving' | 'done';
 
@@ -89,22 +90,20 @@ export class LateCustomerSystem {
     this.state.addTask('late-sale', 'Serve the late-night traveler');
 
     const root = new pc.Entity('LateNightTraveler');
-    const skin = mat(new pc.Color(0.44, 0.33, 0.25), 0.14);
-    const jacket = mat(new pc.Color(0.18, 0.12, 0.075), 0.12);
-    const jeans = mat(new pc.Color(0.07, 0.11, 0.16), 0.10);
-    const dark = mat(new pc.Color(0.025, 0.028, 0.03), 0.10);
-
-    part(root, 'Torso', 'capsule', new pc.Vec3(0, 1.12, 0), new pc.Vec3(0.70, 0.84, 0.48), jacket);
-    part(root, 'Head', 'sphere', new pc.Vec3(0, 1.88, 0), new pc.Vec3(0.42, 0.48, 0.42), skin);
-    part(root, 'Cap', 'cylinder', new pc.Vec3(0, 2.08, 0), new pc.Vec3(0.44, 0.12, 0.44), dark);
-    part(root, 'LegL', 'capsule', new pc.Vec3(-0.19, 0.48, 0), new pc.Vec3(0.23, 0.62, 0.23), jeans);
-    part(root, 'LegR', 'capsule', new pc.Vec3(0.19, 0.48, 0), new pc.Vec3(0.23, 0.62, 0.23), jeans);
-    part(root, 'ArmL', 'capsule', new pc.Vec3(-0.43, 1.17, 0), new pc.Vec3(0.18, 0.62, 0.18), jacket);
-    part(root, 'ArmR', 'capsule', new pc.Vec3(0.43, 1.17, 0), new pc.Vec3(0.18, 0.62, 0.18), jacket);
-    root.setLocalScale(0.86, 0.86, 0.86);
+    this.app.root.addChild(root);
+    buildLowPolyHuman(root, {
+      build: 'lanky',
+      posture: 'stooped',
+      skinTone: new pc.Color(0.44, 0.33, 0.25),
+      hairColor: new pc.Color(0.025, 0.028, 0.03),
+      hairStyle: 'cap',
+      shirtColor: new pc.Color(0.28, 0.26, 0.24),
+      pantsColor: new pc.Color(0.07, 0.11, 0.16),
+      jacketColor: new pc.Color(0.18, 0.12, 0.075),
+      gloss: 0.13
+    });
     root.setPosition(0, 0, 14.0);
     root.setEulerAngles(0, 180, 0);
-    this.app.root.addChild(root);
 
     this.actor = {
       root,

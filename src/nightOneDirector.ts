@@ -2,6 +2,7 @@ import * as pc from 'playcanvas';
 import type { BuiltWorld, Interactable } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
+import { buildLowPolyHuman } from './characterBuilder';
 
 type CustomerPhase = 'entering' | 'shopping' | 'waiting' | 'leaving' | 'done';
 
@@ -34,19 +35,20 @@ function addPrimitive(parent: pc.Entity, name: string, type: 'box' | 'sphere' | 
 
 function createCustomer(app: pc.Application, name: string, coat: pc.Color, pale = false): pc.Entity {
   const root = new pc.Entity(name);
-  const skin = makeMat(pale ? new pc.Color(0.70, 0.68, 0.61) : new pc.Color(0.48, 0.38, 0.30), 0.16);
-  const cloth = makeMat(coat, 0.12);
-  const dark = makeMat(new pc.Color(0.035, 0.04, 0.045), 0.10);
-
-  addPrimitive(root, 'Torso', 'capsule', new pc.Vec3(0, 1.12, 0), new pc.Vec3(0.68, 0.82, 0.46), cloth);
-  addPrimitive(root, 'Head', 'sphere', new pc.Vec3(0, 1.86, 0), new pc.Vec3(0.42, 0.48, 0.42), skin);
-  addPrimitive(root, 'Hair', 'sphere', new pc.Vec3(0, 2.02, 0.01), new pc.Vec3(0.43, 0.22, 0.43), dark);
-  addPrimitive(root, 'LegL', 'capsule', new pc.Vec3(-0.19, 0.48, 0), new pc.Vec3(0.23, 0.62, 0.23), dark);
-  addPrimitive(root, 'LegR', 'capsule', new pc.Vec3(0.19, 0.48, 0), new pc.Vec3(0.23, 0.62, 0.23), dark);
-  addPrimitive(root, 'ArmL', 'capsule', new pc.Vec3(-0.43, 1.17, 0), new pc.Vec3(0.18, 0.62, 0.18), cloth).setLocalEulerAngles(0, 0, 7);
-  addPrimitive(root, 'ArmR', 'capsule', new pc.Vec3(0.43, 1.17, 0), new pc.Vec3(0.18, 0.62, 0.18), cloth).setLocalEulerAngles(0, 0, -7);
-  root.setLocalScale(0.86, 0.86, 0.86);
   app.root.addChild(root);
+  const isEarl = name === 'Earl-Regular-Customer';
+  buildLowPolyHuman(root, {
+    heightScale: isEarl ? 0.98 : 1.0,
+    build: isEarl ? 'heavy' : 'average',
+    skinTone: pale ? new pc.Color(0.72, 0.70, 0.64) : new pc.Color(0.50, 0.39, 0.30),
+    hairColor: pale ? new pc.Color(0.62, 0.60, 0.56) : new pc.Color(0.14, 0.10, 0.08),
+    hairStyle: isEarl ? 'cap' : 'short',
+    shirtColor: new pc.Color(0.30, 0.31, 0.33),
+    pantsColor: new pc.Color(0.10, 0.11, 0.13),
+    jacketColor: coat,
+    gloss: 0.14,
+    posture: isEarl ? 'stooped' : 'upright'
+  });
   return root;
 }
 

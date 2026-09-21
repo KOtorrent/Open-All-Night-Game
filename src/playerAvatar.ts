@@ -1,23 +1,6 @@
 import * as pc from 'playcanvas';
 import type { PlayerController } from './playerController';
-
-function mat(color: pc.Color, gloss = 0.16): pc.StandardMaterial {
-  const m = new pc.StandardMaterial();
-  m.diffuse = color;
-  m.gloss = gloss;
-  m.update();
-  return m;
-}
-
-function primitive(parent: pc.Entity, name: string, type: 'box' | 'sphere' | 'cylinder' | 'capsule', pos: pc.Vec3, scale: pc.Vec3, material: pc.StandardMaterial): pc.Entity {
-  const e = new pc.Entity(name);
-  e.addComponent('render', { type });
-  e.setLocalPosition(pos);
-  e.setLocalScale(scale);
-  if (e.render) e.render.material = material;
-  parent.addChild(e);
-  return e;
-}
+import { buildLowPolyHuman } from './characterBuilder';
 
 /**
  * A simple third-person body proxy that follows the FPS camera so security cameras,
@@ -32,22 +15,28 @@ export class PlayerAvatar {
   constructor(app: pc.Application, player: PlayerController) {
     this.player = player;
     this.root = new pc.Entity('Player-World-Avatar');
-
-    const shirt = mat(new pc.Color(0.075, 0.12, 0.14));
-    const pants = mat(new pc.Color(0.035, 0.04, 0.045));
-    const skin = mat(new pc.Color(0.52, 0.40, 0.31), 0.12);
-    const shoes = mat(new pc.Color(0.018, 0.02, 0.02), 0.10);
-
-    primitive(this.root, 'PlayerTorso', 'capsule', new pc.Vec3(0, 1.03, 0), new pc.Vec3(0.58, 0.72, 0.40), shirt);
-    primitive(this.root, 'PlayerHead', 'sphere', new pc.Vec3(0, 1.56, 0.08), new pc.Vec3(0.34, 0.38, 0.34), skin);
-    primitive(this.root, 'PlayerLegL', 'capsule', new pc.Vec3(-0.16, 0.43, 0), new pc.Vec3(0.19, 0.55, 0.19), pants);
-    primitive(this.root, 'PlayerLegR', 'capsule', new pc.Vec3(0.16, 0.43, 0), new pc.Vec3(0.19, 0.55, 0.19), pants);
-    primitive(this.root, 'PlayerArmL', 'capsule', new pc.Vec3(-0.36, 1.03, 0), new pc.Vec3(0.14, 0.54, 0.14), shirt).setLocalEulerAngles(0, 0, 5);
-    primitive(this.root, 'PlayerArmR', 'capsule', new pc.Vec3(0.36, 1.03, 0), new pc.Vec3(0.14, 0.54, 0.14), shirt).setLocalEulerAngles(0, 0, -5);
-    primitive(this.root, 'PlayerShoeL', 'box', new pc.Vec3(-0.16, 0.10, -0.08), new pc.Vec3(0.20, 0.13, 0.34), shoes);
-    primitive(this.root, 'PlayerShoeR', 'box', new pc.Vec3(0.16, 0.10, -0.08), new pc.Vec3(0.20, 0.13, 0.34), shoes);
-
     app.root.addChild(this.root);
+
+    buildLowPolyHuman(this.root, {
+      build: 'average',
+      skinTone: new pc.Color(0.52, 0.40, 0.31),
+      hairColor: new pc.Color(0.12, 0.09, 0.07),
+      hairStyle: 'short',
+      shirtColor: new pc.Color(0.075, 0.12, 0.14),
+      pantsColor: new pc.Color(0.035, 0.04, 0.045),
+      shoeColor: new pc.Color(0.018, 0.02, 0.02),
+      gloss: 0.14
+    });
+
+    // Local +Z is "behind" the FPS camera's look direction (local -Z is forward, per
+    // playerController's own forward-vector convention). Nudge the head assembly backward so it
+    // sits clear of the camera's near clip plane instead of surrounding the lens - the capsule-era
+    // avatar relied on the same trick (a +0.08 head offset) for the same reason.
+    for (const partName of ['Head', 'Jaw', 'Neck', 'Hair']) {
+      const node = this.root.findByName(partName) as pc.Entity | null;
+      if (node) node.setLocalPosition(node.getLocalPosition().x, node.getLocalPosition().y, node.getLocalPosition().z + 0.12);
+    }
+
     this.update();
   }
 
