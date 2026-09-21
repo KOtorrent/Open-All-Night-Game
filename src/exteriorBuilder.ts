@@ -41,8 +41,12 @@ function collider(colliders: Collider2D[], x: number, z: number, sx: number, sz:
 export function buildExterior(app: pc.Application, colliders: Collider2D[]): void {
   const asphalt = material(new pc.Color(0.027, 0.031, 0.034), 0, 0.18);
   const curb = material(new pc.Color(0.29, 0.29, 0.25), 0, 0.16);
-  const red = material(new pc.Color(0.37, 0.025, 0.018), 0.25, 0.28);
-  const dark = material(new pc.Color(0.028, 0.033, 0.035), 0.45, 0.25);
+  // The pump body's original diffuse (0.37,0.025,0.018) was so heavily red-only that with almost no
+  // green/blue channel to catch fill light, it read as a near-black silhouette rather than "red" the
+  // instant it left a direct hotspot - confirmed in a real human screenshot. A modest, still-dark-red
+  // lift keeps the identity color while giving it something to actually reflect.
+  const red = material(new pc.Color(0.46, 0.065, 0.045), 0.25, 0.28);
+  const dark = material(new pc.Color(0.06, 0.065, 0.07), 0.45, 0.25);
   const metal = material(new pc.Color(0.34, 0.36, 0.34), 0.7, 0.42);
   const glass = material(new pc.Color(0.08, 0.18, 0.16), 0.05, 0.65, new pc.Color(0.01, 0.035, 0.025));
   const white = material(new pc.Color(0.72, 0.70, 0.61), 0, 0.16);
@@ -99,7 +103,15 @@ export function buildExterior(app: pc.Application, colliders: Collider2D[]): voi
     }
   });
 
-  // Canopy lights with overlapping pools rather than one giant hotspot.
+  // Canopy lights with overlapping pools rather than one giant hotspot. A real human screenshot
+  // showed the pumps reading as near-black silhouettes and the columns/pavement crushed even
+  // directly under these fixtures - at 0.95 intensity they were roughly a third as bright as the
+  // fixture lights the interior uses at similar range (storeBuilder.ts's FixtureLight, 0.78 at
+  // range 5.7, but in a dense overlapping 11-fixture grid with enclosing walls to bounce off of).
+  // The forecourt has neither the fixture density nor the walls, so each canopy light needs to
+  // carry more on its own; also confirmed the shadow-casting top-down angle was self-shadowing the
+  // pumps' own front faces. Boosted intensity/range here, and added non-shadow fill lights below to
+  // specifically counter that self-shadowing without doubling the shadow-casting light count.
   for (const x of [-6.1, -2.0, 2.0, 6.1]) {
     const fixture = box(app, `CanopyFixture-${x}`, new pc.Vec3(x, 4.43, 28.2), new pc.Vec3(1.1, 0.055, 0.62), signGlow);
     fixture.setEulerAngles(0, 0, 0);
@@ -107,14 +119,35 @@ export function buildExterior(app: pc.Application, colliders: Collider2D[]): voi
     light.addComponent('light', {
       type: 'omni',
       color: new pc.Color(0.88, 0.86, 0.69),
-      intensity: 0.95,
-      range: 7.3,
+      intensity: 2.1,
+      range: 8.6,
       castShadows: true,
       shadowResolution: 512
     });
     light.setPosition(x, 4.15, 28.2);
     app.root.addChild(light);
   }
+
+  // Non-shadow fill lights: low, wide, deliberately dimmer than the canopy hotspots above so they
+  // read as ambient fill rather than a second set of pools. Scoped in range/position to stay inside
+  // the property (max reach ~z=39 for the first, ~z=30 for the second) so the distant road/treeline
+  // at z=50 stays exactly as dark as before - only the forecourt/pump/parking-marking area brightens.
+  const forecourtFill = [
+    { z: 27.0, intensity: 0.85, range: 12.5 },
+    { z: 19.0, intensity: 0.6, range: 11.0 }
+  ];
+  forecourtFill.forEach(({ z, intensity, range }, i) => {
+    const fill = new pc.Entity(`ForecourtFillLight-${i}`);
+    fill.addComponent('light', {
+      type: 'omni',
+      color: new pc.Color(0.58, 0.58, 0.52),
+      intensity,
+      range,
+      castShadows: false
+    });
+    fill.setPosition(0, 2.6, z);
+    app.root.addChild(fill);
+  });
 
   // Ice chest by the storefront.
   box(app, 'IceChestBody', new pc.Vec3(8.6, 0.72, 14.5), new pc.Vec3(1.75, 1.42, 1.0), iceBlue);
