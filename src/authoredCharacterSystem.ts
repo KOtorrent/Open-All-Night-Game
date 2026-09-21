@@ -36,7 +36,11 @@ export class AuthoredCharacterSystem {
   constructor(private readonly app: pc.Application) {
     this.registry = new AssetRegistry(app);
     const params = new URLSearchParams(window.location.search);
-    const explicitlyEnabled = params.get('characters') === '1' || params.get('experimentalCharacters') === '1';
+    // Rejected content (see class comment) that still lives on the temporary remote mirror - also
+    // require ?dev=1 so a normal player can never trigger a request to that third-party host just
+    // by guessing a query param, the way ?characters=1 alone used to allow.
+    const explicitlyEnabled = params.get('dev') === '1' &&
+      (params.get('characters') === '1' || params.get('experimentalCharacters') === '1');
     this.disabled = params.get('assets') === '0' || !explicitlyEnabled;
 
     for (const binding of this.bindings) {

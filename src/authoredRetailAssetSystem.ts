@@ -1,12 +1,20 @@
 import * as pc from 'playcanvas';
 import { AssetRegistry } from './assetRegistry';
 
-const MARKET_BASE = 'https://raw.githubusercontent.com/intellicia-public/parastore/main/frontend/public/assets/market';
+// The two models actually used by default (register, entry rug) are vendored locally - see
+// docs/ASSET_SOURCES.md for full provenance/license record. A release build must not depend on a
+// third-party GitHub mirror at runtime for anything a normal player can reach without ?dev=1.
+const LOCAL_MARKET_BASE = '/assets/market';
+// Everything below this line is still experimental/unapproved content (the cooler import is
+// explicitly rejected; the rest is pending an in-game visual check) and is not part of the shipped
+// game - it stays on the temporary mirror and is gated behind ?dev=1 below so a normal player can
+// never trigger a request to it.
+const REMOTE_MARKET_BASE = 'https://raw.githubusercontent.com/intellicia-public/parastore/main/frontend/public/assets/market';
 
 /**
  * Runtime bridge for real authored retail models. Primitive gameplay geometry remains collision /
  * fallback. Only visually approved replacements are enabled by default; everything else is opt-in
- * behind ?experimentalAssets=1 until scale, silhouette and placement have been checked in-game.
+ * behind ?dev=1&experimentalAssets=1 until scale, silhouette and placement have been checked in-game.
  */
 export class AuthoredRetailAssetSystem {
   private readonly registry: AssetRegistry;
@@ -14,16 +22,16 @@ export class AuthoredRetailAssetSystem {
   constructor(private readonly app: pc.Application) {
     this.registry = new AssetRegistry(app);
 
-    this.registry.register({ id: 'authored-register', url: `${MARKET_BASE}/cash-register.glb`, scale: 0.95 });
-    this.registry.register({ id: 'authored-coolers', url: `${MARKET_BASE}/freezers-standing.glb`, scale: 1.10 });
-    this.registry.register({ id: 'authored-shelf-boxes', url: `${MARKET_BASE}/shelf-boxes.glb`, scale: 1.0 });
-    this.registry.register({ id: 'authored-shelf-bags', url: `${MARKET_BASE}/shelf-bags.glb`, scale: 1.0 });
-    this.registry.register({ id: 'authored-display-bread', url: `${MARKET_BASE}/display-bread.glb`, scale: 1.0 });
-    this.registry.register({ id: 'authored-display-fruit', url: `${MARKET_BASE}/display-fruit.glb`, scale: 1.0 });
-    this.registry.register({ id: 'authored-bottle-return', url: `${MARKET_BASE}/bottle-return.glb`, scale: 1.0 });
-    this.registry.register({ id: 'authored-shelf-end', url: `${MARKET_BASE}/shelf-end.glb`, scale: 1.0 });
-    this.registry.register({ id: 'authored-chest-freezer', url: `${MARKET_BASE}/freezer.glb`, scale: 1.0 });
-    this.registry.register({ id: 'authored-entry-rug', url: `${MARKET_BASE}/rugRectangle.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-register', url: `${LOCAL_MARKET_BASE}/cash-register.glb`, scale: 0.95 });
+    this.registry.register({ id: 'authored-entry-rug', url: `${LOCAL_MARKET_BASE}/rugRectangle.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-coolers', url: `${REMOTE_MARKET_BASE}/freezers-standing.glb`, scale: 1.10 });
+    this.registry.register({ id: 'authored-shelf-boxes', url: `${REMOTE_MARKET_BASE}/shelf-boxes.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-shelf-bags', url: `${REMOTE_MARKET_BASE}/shelf-bags.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-display-bread', url: `${REMOTE_MARKET_BASE}/display-bread.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-display-fruit', url: `${REMOTE_MARKET_BASE}/display-fruit.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-bottle-return', url: `${REMOTE_MARKET_BASE}/bottle-return.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-shelf-end', url: `${REMOTE_MARKET_BASE}/shelf-end.glb`, scale: 1.0 });
+    this.registry.register({ id: 'authored-chest-freezer', url: `${REMOTE_MARKET_BASE}/freezer.glb`, scale: 1.0 });
   }
 
   async start(): Promise<void> {
@@ -37,7 +45,7 @@ export class AuthoredRetailAssetSystem {
     // unexplained gray object sitting in front of the freezer wall. Keep the normal build clean.
     const jobs: Promise<void>[] = [this.replaceRegister(), this.addEntryRug()];
 
-    if (params.get('experimentalAssets') === '1') {
+    if (params.get('dev') === '1' && params.get('experimentalAssets') === '1') {
       jobs.push(this.replaceCoolerVisual(), this.addShelfHeroSamples(), this.addRetailAccents());
     }
 
