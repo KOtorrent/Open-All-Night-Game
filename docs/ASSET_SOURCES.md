@@ -54,3 +54,35 @@ Both systems now also require `?dev=1` (previously `?characters=1`/`?experimenta
 
 ## Import rule
 Before committing a binary model, verify its original source and license, keep only the models actually used by the game, and register them through `AssetRegistry`. Do not pull giant asset packs wholesale into the game repository.
+
+## Generated textures (graphics overhaul Pass 1)
+
+`public/textures/generated/*.png` (19 files, 128px or 256px, ~5-40KB each) are 100% procedurally
+authored for this repository by a local Python/Pillow script
+(`gen_textures.py`, kept outside the repo in the session scratchpad, not committed - it's a
+one-off generator, not a build dependency) — no external source images, no license concerns, no
+network dependency at build or runtime. They are tileable surface textures for the material
+language defined in `docs/VISUAL_STYLE_BIBLE.md`, loaded and applied via `src/materialLibrary.ts`:
+
+| File | Surface |
+|---|---|
+| `asphalt.png` | Forecourt / parking lot / road |
+| `concrete.png` | Pump islands, curbs |
+| `painted_metal_pump_red.png` | Gas pump bodies |
+| `painted_metal_shelving.png` | Retail shelving frames |
+| `brushed_steel.png` | Register, fixtures, canopy structure |
+| `cooler_metal.png` | Cooler bank frame |
+| `vinyl_floor.png` | Interior flooring |
+| `off_white_wall.png` | Interior sales-floor walls |
+| `drywall_office.png` | Staff area / office walls |
+| `ceiling_tile.png` | Interior drop ceiling |
+| `cases_brand_panel.png` | Case's-branded green/cream surfaces (signage, canopy fascia) |
+| `laminate_counter.png` | Checkout counter, coffee station |
+| `restroom_tile.png` | Restroom walls/floor |
+| `cardboard.png` | Stockroom boxes, delivery props |
+| `paper.png` | Receipts, notices, roster sheets |
+| `generic_label_red/green/blue/gold.png` | Generic fictional product-packaging label swatches (no real brands) |
+
+All are kept intentionally small (128-256px) since they're tiled at a modest repeat rate rather than
+viewed at full-screen close-up — see the "avoid massive 4K textures" performance guidance in the
+graphics overhaul brief.
