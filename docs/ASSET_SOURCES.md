@@ -82,6 +82,8 @@ language defined in `docs/VISUAL_STYLE_BIBLE.md`, loaded and applied via `src/ma
 | `cardboard.png` | Stockroom boxes, delivery props |
 | `paper.png` | Receipts, notices, roster sheets |
 | `generic_label_red/green/blue/gold.png` | Generic fictional product-packaging label swatches (no real brands) |
+| `sky_gradient.png` | Exterior sky dome (vertical night gradient + sparse stars), rendered emissive so it stays visible regardless of local lighting |
+| `pump_number_1.png` … `pump_number_8.png` | Numbered placard decals for the 8 forecourt pumps (simple block-digit graphics, no font file needed) |
 
 All are kept intentionally small (128-256px) since they're tiled at a modest repeat rate rather than
 viewed at full-screen close-up — see the "avoid massive 4K textures" performance guidance in the
