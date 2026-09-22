@@ -194,6 +194,7 @@ export class AuthoredCharacterSystem {
       model.name = modelName;
 
       this.retintByMaterialName(model, binding.overrides);
+      this.hideWeaponProps(model);
 
       const asset = this.registry.getAsset(binding.assetId);
       const container = asset?.resource as pc.ContainerResource | undefined;
@@ -205,6 +206,27 @@ export class AuthoredCharacterSystem {
       console.warn(`Authored character unavailable for ${binding.rootName}; keeping primitive fallback.`, error);
     } finally {
       this.loadingGuids.delete(guid);
+    }
+  }
+
+  /**
+   * The Suit and Swat source outfits (Silent Customer, Tall Man) each bundle a holstered "Pistol"
+   * node baked into the rig. Open All Night is a horror-of-the-uncanny game, not an armed-threat
+   * game, and no named character is meant to read as visibly armed - so any node literally named
+   * "Pistol" (or similar) is disabled on attach, for every character, as a blanket safety net
+   * rather than a per-binding special case.
+   */
+  private hideWeaponProps(model: pc.Entity): void {
+    const banned = /pistol|weapon|gun|knife|rifle/i;
+    const stack: pc.GraphNode[] = [model];
+    while (stack.length) {
+      const node = stack.pop();
+      if (!node) continue;
+      stack.push(...node.children);
+      if (banned.test(node.name)) {
+        const entity = node as pc.Entity;
+        if (entity.render) entity.render.enabled = false;
+      }
     }
   }
 
