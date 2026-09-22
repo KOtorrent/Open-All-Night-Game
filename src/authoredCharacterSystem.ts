@@ -5,6 +5,28 @@ const BASE = '/assets/characters/quaternius';
 const IDLE_CLIP = 'Idle';
 const WALK_CLIP = 'Walk';
 const WALK_SPEED_THRESHOLD = 0.08; // m/s - below this, treat the actor as stationary (idle)
+// The pack's own Walk clip is a 1.333s in-place stride cycle with no baked root motion (the game
+// always drives the NPC root's actual position/rotation itself, exactly as before - this constant
+// only affects how fast the LEGS cycle, never how fast the character actually moves). Customer
+// systems use per-character speeds from 1.35 to 1.72 m/s; 1.4 m/s is a reasonable "the clip's
+// authored pace" reference, so anim.speed is scaled proportionally to each character's own actual
+// measured movement speed at the moment they start walking - this is the general fix, not a
+// per-character guess, and applies identically to every current and future bound character.
+const REFERENCE_WALK_SPEED = 1.4; // m/s
+const MIN_WALK_ANIM_SPEED = 0.6;
+const MAX_WALK_ANIM_SPEED = 2.2;
+
+// World-proportion calibration (human review pass): the original per-character scales landed every
+// character inside the brief's own stated meter ranges, but the checkout counter top (1.365m -
+// see storeBuilder.ts CounterTop) still read at ~77% up an adult's body - upper chest/collar, not
+// waist. Direct in-engine measurement confirmed the whole store (ceiling 4.1m, doors ~2.85-3.1m,
+// aisle shelving ~2.85m tall) is built roughly 1.4-1.5x taller than strict real-world proportions,
+// so a literal waist-height counter read is architecturally out of reach without pushing character
+// heights well past 2.3m and erasing Tall Man's relative distinctiveness. This +10% multiplier is
+// the deliberately modest correction: verified in-engine to move the counter from upper-chest
+// toward lower-ribcage/stomach (counterFraction 0.77 -> 0.70, a real, visible improvement) while
+// keeping every character close to (not wildly past) their stated target range.
+const SCALE_CORRECTION = 1.10;
 
 interface CharacterBinding {
   /** Name of the existing procedural NPC/player root entity to attach to. */
@@ -45,7 +67,7 @@ export class AuthoredCharacterSystem {
   private readonly bindings: CharacterBinding[] = [
     // Earl: older regular, plain casual clothes, muted browns/grays.
     {
-      rootName: 'Earl-Regular-Customer', assetId: 'q-earl', file: 'male/Casual_2.gltf', scale: 0.955, yaw: 180,
+      rootName: 'Earl-Regular-Customer', assetId: 'q-earl', file: 'male/Casual_2.gltf', scale: (0.955) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         LightBrown: new pc.Color(0.22, 0.20, 0.17),
         Red_Dark: new pc.Color(0.16, 0.15, 0.14),
@@ -55,7 +77,7 @@ export class AuthoredCharacterSystem {
     },
     // Jenna: casual adult woman, restrained navy/gray.
     {
-      rootName: 'Jenna', assetId: 'q-jenna', file: 'female/Casual.gltf', scale: 0.93, yaw: 180,
+      rootName: 'Jenna', assetId: 'q-jenna', file: 'female/Casual.gltf', scale: (0.93) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         White: new pc.Color(0.20, 0.22, 0.26),
         Grey: new pc.Color(0.10, 0.10, 0.11),
@@ -64,7 +86,7 @@ export class AuthoredCharacterSystem {
     },
     // Marcus: distinct from Earl - hoodie/jacket silhouette, charcoal not purple.
     {
-      rootName: 'Marcus-Regular', assetId: 'q-marcus', file: 'male/Casual_Hoodie.gltf', scale: 0.965, yaw: 180,
+      rootName: 'Marcus-Regular', assetId: 'q-marcus', file: 'male/Casual_Hoodie.gltf', scale: (0.965) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         Purple: new pc.Color(0.09, 0.10, 0.12),
         White: new pc.Color(0.26, 0.25, 0.23),
@@ -73,7 +95,7 @@ export class AuthoredCharacterSystem {
     },
     // Dale: suspicious-looking but harmless - heavier darker workwear, not construction-bright.
     {
-      rootName: 'Dale', assetId: 'q-dale', file: 'male/Worker.gltf', scale: 0.965, yaw: 180,
+      rootName: 'Dale', assetId: 'q-dale', file: 'male/Worker.gltf', scale: (0.965) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         Worker_Yellow: new pc.Color(0.14, 0.13, 0.11),
         Worker_Vest: new pc.Color(0.20, 0.09, 0.08),
@@ -82,7 +104,7 @@ export class AuthoredCharacterSystem {
     },
     // Traveler: road-weary, dark olive/charcoal travel jacket, no adventurer gold accents.
     {
-      rootName: 'LateNightTraveler', assetId: 'q-traveler', file: 'male/Adventurer.gltf', scale: 0.955, yaw: 180,
+      rootName: 'LateNightTraveler', assetId: 'q-traveler', file: 'male/Adventurer.gltf', scale: (0.955) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         Green: new pc.Color(0.10, 0.11, 0.09),
         LightGreen: new pc.Color(0.14, 0.15, 0.12),
@@ -93,7 +115,7 @@ export class AuthoredCharacterSystem {
     },
     // Silent Customer: plain, nondescript suit - ordinary base, no red tie.
     {
-      rootName: 'Silent-Customer', assetId: 'q-silent', file: 'male/Suit.gltf', scale: 0.955, yaw: 180,
+      rootName: 'Silent-Customer', assetId: 'q-silent', file: 'male/Suit.gltf', scale: (0.955) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         Suit: new pc.Color(0.05, 0.05, 0.055),
         Tie: new pc.Color(0.05, 0.05, 0.055),
@@ -103,7 +125,7 @@ export class AuthoredCharacterSystem {
     },
     // Larry: older, tired, subdued cardigan-over-workshirt in brown/gray/green.
     {
-      rootName: 'LarryCase', assetId: 'q-larry', file: 'male/Farmer.gltf', scale: 0.935, yaw: 180,
+      rootName: 'LarryCase', assetId: 'q-larry', file: 'male/Farmer.gltf', scale: (0.935) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         LightBlue: new pc.Color(0.16, 0.17, 0.15),
         Brown: new pc.Color(0.18, 0.17, 0.13),
@@ -114,7 +136,7 @@ export class AuthoredCharacterSystem {
     },
     // Smiling Woman: mandatory yellow coat via the Suit blazer material.
     {
-      rootName: 'AnomalyPresence-smiling-woman', assetId: 'q-smiling-woman', file: 'female/Suit.gltf', scale: 0.935, yaw: 180,
+      rootName: 'AnomalyPresence-smiling-woman', assetId: 'q-smiling-woman', file: 'female/Suit.gltf', scale: (0.935) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         Black: new pc.Color(0.63, 0.48, 0.10),
         White: new pc.Color(0.30, 0.28, 0.20),
@@ -124,7 +146,7 @@ export class AuthoredCharacterSystem {
     },
     // Tall Man: narrow dark clothing; scaled ~12% taller at spawn time (see spawnPresence caller).
     {
-      rootName: 'AnomalyPresence-tall-man', assetId: 'q-tall-man', file: 'male/Swat.gltf', scale: 0.955 * 1.12, yaw: 180,
+      rootName: 'AnomalyPresence-tall-man', assetId: 'q-tall-man', file: 'male/Swat.gltf', scale: (0.955 * 1.12) * SCALE_CORRECTION, yaw: 180,
       overrides: {
         Swat: new pc.Color(0.045, 0.05, 0.055),
         Swat_Black: new pc.Color(0.02, 0.02, 0.022),
@@ -136,7 +158,7 @@ export class AuthoredCharacterSystem {
     // Player avatar / Duplicate Player: neutral employee look, same model+overrides for both so the
     // duplicate genuinely resembles the player.
     {
-      rootName: 'Player-World-Avatar', assetId: 'q-player', file: 'male/Beach.gltf', scale: 0.945, yaw: 180, offsetZ: 0.18,
+      rootName: 'Player-World-Avatar', assetId: 'q-player', file: 'male/Beach.gltf', scale: (0.945) * SCALE_CORRECTION, yaw: 180, offsetZ: 0.18,
       overrides: {
         Red_Dark: new pc.Color(0.09, 0.13, 0.10),
         LightBrown: new pc.Color(0.16, 0.15, 0.14),
@@ -293,7 +315,10 @@ export class AuthoredCharacterSystem {
     const nextState = shouldWalk ? 'walk' : 'idle';
     if (model.__animState === nextState) return;
     model.__animState = nextState;
-    model.anim.assignAnimation('Base', shouldWalk ? model.__walkTrack : model.__idleTrack, undefined, 1, true);
+    const animSpeed = shouldWalk
+      ? Math.min(MAX_WALK_ANIM_SPEED, Math.max(MIN_WALK_ANIM_SPEED, speed / REFERENCE_WALK_SPEED))
+      : 1;
+    model.anim.assignAnimation('Base', shouldWalk ? model.__walkTrack : model.__idleTrack, undefined, animSpeed, true);
   }
 
   private hidePrimitiveChildren(root: pc.Entity, keep: pc.Entity): void {
@@ -333,8 +358,15 @@ export class AuthoredCharacterSystem {
       root.setPosition(-3.6, 0, 3.3);
       root.setEulerAngles(0, 40, 0);
       this.app.root.addChild(root);
-      const model = await this.registry.instantiate(binding.assetId, root, { scale: binding.scale });
+      const model = await this.registry.instantiate(binding.assetId, root, { scale: binding.scale }) as AnimatedModel;
       this.retintByMaterialName(model, binding.overrides);
+      this.hideWeaponProps(model);
+      // Idle only, by construction - this entity never moves, so driveAnimation() (which is never
+      // even called for it, since it isn't in the per-frame update() poll) would stay Idle anyway;
+      // this call just avoids a frozen bind-T-pose for its 6-second lifetime. "No generic shopper
+      // behavior" per the brief's anomaly-animation rules.
+      const asset = this.registry.getAsset(binding.assetId);
+      this.setupAnimation(model, asset?.resource as pc.ContainerResource | undefined);
       window.setTimeout(() => root.destroy(), seconds * 1000);
     } catch (error) {
       console.warn('Duplicate-player visual unavailable; text-only anomaly still fired.', error);
