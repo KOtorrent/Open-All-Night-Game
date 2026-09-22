@@ -80,10 +80,16 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   const wallBack = materials.getTiled('off_white_wall', 20, 4.1);
   const wallFront = materials.getTiled('off_white_wall', 5.6, 4.1);
   const wall = wallFront;
-  const steel = mat(new pc.Color(0.27, 0.29, 0.30), 0.65, 0.42);
+  // Interior hero props now draw from the same material library instead of flat single colors
+  // (graphics overhaul Pass 2, Phase 2/3): painted-metal shelving/fixtures, a real laminate
+  // countertop, brushed steel for register/ATM/cooler hardware.
+  const steel = materials.get('brushed_steel');
+  const shelfMetal = materials.getTiled('painted_metal_shelving', 2.15, 2.85, 1.2);
   const darkSteel = mat(new pc.Color(0.055, 0.06, 0.06), 0.7, 0.30);
-  const counter = mat(new pc.Color(0.25, 0.105, 0.06), 0, 0.28);
-  const laminate = mat(new pc.Color(0.48, 0.45, 0.36), 0, 0.34);
+  const counter = materials.getTiled('painted_metal_shelving', 6.2, 1.24, 1.0);
+  const laminate = materials.getTiled('laminate_counter', 6.45, 1.48);
+  const coffeeLaminate = materials.getTiled('laminate_counter', 4.7, 1.32);
+  const coolerMetal = materials.getTiled('cooler_metal', 9.5, 3.25, 0.7);
   const green = mat(new pc.Color(0.035, 0.18, 0.095), 0, 0.2);
   const red = mat(new pc.Color(0.48, 0.045, 0.025), 0, 0.23);
   const cream = mat(new pc.Color(0.68, 0.65, 0.48), 0, 0.18);
@@ -91,6 +97,11 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   const white = mat(new pc.Color(0.78, 0.81, 0.78), 0, 0.18);
   const screen = mat(new pc.Color(0.025, 0.08, 0.07), 0, 0.55, new pc.Color(0.015, 0.11, 0.085));
   const coolerGlass = mat(new pc.Color(0.08, 0.14, 0.16), 0.05, 0.72, undefined, 0.32);
+  const paperLabel = materials.get('generic_label_gold');
+  const productLabels = [
+    materials.get('generic_label_red'), materials.get('generic_label_green'),
+    materials.get('generic_label_blue'), materials.get('generic_label_gold')
+  ];
 
   // Main shell: 20m x 24m, player-height authored around real-world scale.
   addBox(app, 'Floor', new pc.Vec3(0, -0.08, 0), new pc.Vec3(20, 0.16, 24), floor);
@@ -127,6 +138,15 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   addBox(app, 'ScannerGlass', new pc.Vec3(-6.15, 1.40, 7.92), new pc.Vec3(0.82, 0.045, 0.58), screen);
   addBox(app, 'ReceiptPrinter', new pc.Vec3(-3.95, 1.49, 8.05), new pc.Vec3(0.52, 0.24, 0.48), darkSteel);
   addBox(app, 'Notebook', new pc.Vec3(-6.78, 1.40, 7.95), new pc.Vec3(0.58, 0.045, 0.76), cream).setEulerAngles(0, 11, 0);
+  // Cash drawer beneath the register face - a real POS's most recognizable missing piece.
+  addBox(app, 'CashDrawer', new pc.Vec3(-5.0, 1.29, 8.10), new pc.Vec3(0.62, 0.14, 0.50), materials.get('brushed_steel'));
+  addBox(app, 'CashDrawerHandle', new pc.Vec3(-5.0, 1.29, 8.36), new pc.Vec3(0.36, 0.03, 0.03), darkSteel);
+  // Bagging area beside the register: a bag stand with a paper bag ready and a small stack of
+  // plastic bags on a hook, so the checkout reads as a real workstation with somewhere for
+  // groceries to go rather than just a screen and a scanner.
+  addBox(app, 'BagStandFrame', new pc.Vec3(-4.15, 1.55, 7.70), new pc.Vec3(0.05, 0.42, 0.05), materials.get('brushed_steel'));
+  addBox(app, 'BagStandRing', new pc.Vec3(-4.15, 1.42, 7.70), new pc.Vec3(0.30, 0.02, 0.24), darkSteel);
+  addBox(app, 'PaperBag', new pc.Vec3(-4.15, 1.60, 7.70), new pc.Vec3(0.26, 0.34, 0.20), materials.get('cardboard'));
 
   interactables.push({
     id: 'register', label: 'clock in', position: new pc.Vec3(-5.0, 1.7, 7.4), radius: 2.7,
@@ -174,7 +194,7 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
 
   // Coffee station, front-right.
   addBox(app, 'CoffeeCounter', new pc.Vec3(6.5, 0.62, 8.8), new pc.Vec3(4.5, 1.24, 1.15), counter);
-  addBox(app, 'CoffeeTop', new pc.Vec3(6.5, 1.30, 8.8), new pc.Vec3(4.7, 0.12, 1.32), laminate);
+  addBox(app, 'CoffeeTop', new pc.Vec3(6.5, 1.30, 8.8), new pc.Vec3(4.7, 0.12, 1.32), coffeeLaminate);
   colliderFromBox(colliders, 6.5, 8.8, 4.5, 1.15, 'Coffee counter');
   addBox(app, 'CoffeeMachine', new pc.Vec3(6.1, 1.78, 8.85), new pc.Vec3(0.9, 0.92, 0.62), darkSteel);
   addBox(app, 'CoffeeFace', new pc.Vec3(6.1, 1.86, 8.52), new pc.Vec3(0.58, 0.42, 0.05), steel);
@@ -207,16 +227,15 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   const aisleXs = [-5.1, -1.7, 1.7, 5.1];
   const productMats = [red, cream, blue, green, mat(new pc.Color(0.42, 0.22, 0.06)), mat(new pc.Color(0.15, 0.35, 0.22))];
   const capMat = mat(new pc.Color(0.62, 0.63, 0.60), 0.3, 0.35);
-  const labelMat = mat(new pc.Color(0.86, 0.83, 0.72), 0, 0.1);
   aisleXs.forEach((x, aisleIndex) => {
     const z = 0.4;
     addBox(app, `Aisle${aisleIndex + 1}-Base`, new pc.Vec3(x, 0.12, z), new pc.Vec3(2.15, 0.24, 8.3), darkSteel);
-    addBox(app, `Aisle${aisleIndex + 1}-Back`, new pc.Vec3(x, 1.55, z), new pc.Vec3(0.08, 2.85, 8.2), steel);
+    addBox(app, `Aisle${aisleIndex + 1}-Back`, new pc.Vec3(x, 1.55, z), new pc.Vec3(0.08, 2.85, 8.2), shelfMetal);
     for (let side of [-1, 1]) {
       for (let tier = 0; tier < 4; tier++) {
         const shelfX = x + side * 0.55;
         const y = 0.43 + tier * 0.66;
-        addBox(app, `A${aisleIndex + 1}-Shelf-${side}-${tier}`, new pc.Vec3(shelfX, y, z), new pc.Vec3(1.0, 0.055, 8.15), steel);
+        addBox(app, `A${aisleIndex + 1}-Shelf-${side}-${tier}`, new pc.Vec3(shelfX, y, z), new pc.Vec3(1.0, 0.055, 8.15), shelfMetal);
         for (let item = 0; item < 9; item++) {
           if ((item + tier + aisleIndex) % 7 === 0) continue;
           const pz = -3.25 + item * 0.80;
@@ -232,7 +251,7 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
             addCylinder(app, `A${aisleIndex + 1}-Cap-${side}-${tier}-${item}`, new pc.Vec3(px, y + h + 0.075, pz), new pc.Vec3(0.10, 0.06, 0.10), capMat);
           } else if (kind === 1) {
             addBox(app, `A${aisleIndex + 1}-Box-${side}-${tier}-${item}`, new pc.Vec3(px, y + h / 2 + 0.035, pz), new pc.Vec3(0.28, h, 0.20), pm);
-            addBox(app, `A${aisleIndex + 1}-Label-${side}-${tier}-${item}`, new pc.Vec3(px - side * 0.145, y + h / 2 + 0.035, pz), new pc.Vec3(0.008, h * 0.5, 0.14), labelMat);
+            addBox(app, `A${aisleIndex + 1}-Label-${side}-${tier}-${item}`, new pc.Vec3(px - side * 0.145, y + h / 2 + 0.035, pz), new pc.Vec3(0.008, h * 0.5, 0.14), productLabels[(item + tier + aisleIndex) % productLabels.length]);
           } else {
             addBox(app, `A${aisleIndex + 1}-Bag-${side}-${tier}-${item}`, new pc.Vec3(px, y + h * 0.42 + 0.035, pz), new pc.Vec3(0.34, h * 0.82, 0.24), pm);
           }
@@ -244,7 +263,10 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
 
   // Aisle 4 / rear cooler wall: dark frames, repeated doors, internal shelves and emissive-ish strips.
   const coolerZ = -10.7;
-  addBox(app, 'CoolerBank', new pc.Vec3(4.8, 1.65, coolerZ), new pc.Vec3(9.5, 3.25, 0.9), darkSteel);
+  addBox(app, 'CoolerBank', new pc.Vec3(4.8, 1.65, coolerZ), new pc.Vec3(9.5, 3.25, 0.9), coolerMetal);
+  // Header trim strip along the top of the cooler bank - a small detail that reads as "commercial
+  // fixture" rather than a bare frame, per the graphics overhaul's cooler-bank brief.
+  addBox(app, 'CoolerHeaderTrim', new pc.Vec3(4.8, 3.24, coolerZ + 0.02), new pc.Vec3(9.6, 0.10, 0.94), materials.get('brushed_steel'));
   colliderFromBox(colliders, 4.8, coolerZ, 9.5, 0.9, 'Cooler bank');
   for (let door = 0; door < 5; door++) {
     const x = 1.1 + door * 1.82;
@@ -274,12 +296,12 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   addBox(app, 'EmployeesOnlyHeader', new pc.Vec3(-3.9, 3.20, -7.1), new pc.Vec3(2.6, 0.40, 0.12), red);
 
   // Back room / office / restroom silhouettes visible through employee corridor.
-  addBox(app, 'StockShelfA', new pc.Vec3(-8.0, 1.35, -9.3), new pc.Vec3(0.7, 2.6, 4.0), steel);
-  addBox(app, 'StockShelfB', new pc.Vec3(-5.6, 1.35, -10.0), new pc.Vec3(0.7, 2.6, 2.6), steel);
+  addBox(app, 'StockShelfA', new pc.Vec3(-8.0, 1.35, -9.3), new pc.Vec3(0.7, 2.6, 4.0), shelfMetal);
+  addBox(app, 'StockShelfB', new pc.Vec3(-5.6, 1.35, -10.0), new pc.Vec3(0.7, 2.6, 2.6), shelfMetal);
   colliderFromBox(colliders, -8.0, -9.3, 0.7, 4.0, 'Stock shelf A');
   colliderFromBox(colliders, -5.6, -10.0, 0.7, 2.6, 'Stock shelf B');
   for (let i = 0; i < 7; i++) {
-    addBox(app, `StockBox-${i}`, new pc.Vec3(-7.9, 0.55 + (i % 3) * 0.65, -10.7 + (i % 2) * 1.2), new pc.Vec3(0.48, 0.48, 0.68), cream);
+    addBox(app, `StockBox-${i}`, new pc.Vec3(-7.9, 0.55 + (i % 3) * 0.65, -10.7 + (i % 2) * 1.2), new pc.Vec3(0.48, 0.48, 0.68), materials.get('cardboard'));
   }
   addBox(app, 'OfficeDesk', new pc.Vec3(-2.1, 0.75, -10.2), new pc.Vec3(2.1, 0.12, 1.0), laminate);
   addBox(app, 'OfficeMonitor', new pc.Vec3(-2.1, 1.25, -10.3), new pc.Vec3(0.75, 0.55, 0.18), darkSteel);

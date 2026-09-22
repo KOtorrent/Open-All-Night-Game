@@ -1,5 +1,6 @@
 import * as pc from 'playcanvas';
 import type { BuiltWorld } from './gameTypes';
+import type { MaterialLibrary } from './materialLibrary';
 
 function mat(color: pc.Color, metalness = 0, gloss = 0.2, emissive?: pc.Color): pc.StandardMaterial {
   const m = new pc.StandardMaterial();
@@ -68,12 +69,15 @@ function addFixtureLight(
   app.root.addChild(light);
 }
 
-export function buildStaffArea(app: pc.Application, world: BuiltWorld): void {
-  const wall = mat(new pc.Color(0.31, 0.33, 0.32), 0, 0.16);
+export function buildStaffArea(app: pc.Application, world: BuiltWorld, materials: MaterialLibrary): void {
+  // Office/stockroom materials now draw from the shared library (graphics overhaul Pass 2) instead
+  // of flat single colors: aged office drywall, a real laminate desktop/floor, brushed steel for the
+  // file cabinet and hardware, and the paper texture for the corkboard notices.
+  const wall = materials.getTiled('drywall_office', 4.05, 3.1);
   const trim = mat(new pc.Color(0.075, 0.08, 0.08), 0.45, 0.28);
-  const laminate = mat(new pc.Color(0.30, 0.20, 0.13), 0, 0.26);
-  const steel = mat(new pc.Color(0.22, 0.24, 0.25), 0.65, 0.38);
-  const paper = mat(new pc.Color(0.72, 0.68, 0.52), 0, 0.12);
+  const laminate = materials.getTiled('laminate_counter', 4.1, 3.8);
+  const steel = materials.get('brushed_steel');
+  const paper = materials.get('paper');
   const cork = mat(new pc.Color(0.30, 0.17, 0.08), 0, 0.12);
   const screen = mat(new pc.Color(0.015, 0.06, 0.055), 0, 0.55, new pc.Color(0.01, 0.08, 0.065));
   const doorMat = mat(new pc.Color(0.13, 0.14, 0.14), 0.55, 0.24);

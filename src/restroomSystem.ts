@@ -2,6 +2,7 @@ import * as pc from 'playcanvas';
 import type { BuiltWorld } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
+import type { MaterialLibrary } from './materialLibrary';
 
 function mat(color: pc.Color, metalness = 0, gloss = 0.2): pc.StandardMaterial {
   const m = new pc.StandardMaterial();
@@ -48,7 +49,8 @@ export class RestroomSystem {
     private readonly app: pc.Application,
     private readonly world: BuiltWorld,
     private readonly state: GameState,
-    private readonly ui: GameUI
+    private readonly ui: GameUI,
+    private readonly materials: MaterialLibrary
   ) {
     this.buildRestroom();
   }
@@ -76,10 +78,14 @@ export class RestroomSystem {
   }
 
   private buildRestroom(): void {
-    const wall = mat(new pc.Color(0.36, 0.39, 0.38), 0, 0.15);
-    const tile = mat(new pc.Color(0.46, 0.49, 0.46), 0, 0.30);
-    const ceramic = mat(new pc.Color(0.84, 0.84, 0.78), 0, 0.52);
-    const steel = mat(new pc.Color(0.38, 0.40, 0.39), 0.7, 0.44);
+    // Painted-wall, ceramic-tile-floor, brushed-steel-hardware readout from the shared material
+    // library (graphics overhaul Pass 2) in place of the old flat single colors. Ceramic fixtures
+    // (toilet/sink/mirror frame) stay a smooth flat material - there's no porcelain texture in the
+    // library and a plain high-gloss surface reads correctly for glazed ceramic at this scale.
+    const wall = this.materials.getTiled('off_white_wall', 2.40, 3.10);
+    const tile = this.materials.getTiled('restroom_tile', 2.40, 3.28);
+    const ceramic = mat(new pc.Color(0.84, 0.84, 0.78), 0, 0.58);
+    const steel = this.materials.get('brushed_steel');
     const doorMat = mat(new pc.Color(0.16, 0.17, 0.17), 0.2, 0.23);
 
     // The restroom is now a fully enclosed room BEHIND the employee divider, with its only door

@@ -99,7 +99,7 @@ await materialLibrary.ready();
 
 const world = buildStore(app, state, ui, materialLibrary);
 buildExterior(app, world.colliders, materialLibrary);
-buildStaffArea(app, world);
+buildStaffArea(app, world, materialLibrary);
 new StoreSignageSystem(app);
 new StaffDetailSystem(app);
 new VisualPolishSystem(app);
@@ -179,7 +179,7 @@ new CctvSystem(app, world, ui, player, camera);
 const cctvPolish = new CctvPolishSystem(ui, state);
 const cctvAnomaly = new CctvAnomalySystem(app, state, ui);
 const officeLore = new OfficeLoreSystem(app, world, state, ui);
-const restroom = new RestroomSystem(app, world, state, ui);
+const restroom = new RestroomSystem(app, world, state, ui, materialLibrary);
 const fuel = new FuelSystem(app, world, state, ui);
 const delivery = new DeliverySystem(app, world, state, ui);
 const pumpSeven = new PumpSevenSystem(app, world, state, ui);
