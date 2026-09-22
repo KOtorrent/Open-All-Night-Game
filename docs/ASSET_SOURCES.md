@@ -2,6 +2,34 @@
 
 Open All Night prefers real authored 3D assets for hero props. This file records provenance before any external asset enters the repository.
 
+## Graphics Overhaul Pass 3 — new source family
+
+### Tiny Treats & KayKit (via series-ai/jam-ready-assets mirror)
+- Mirror repository: https://github.com/series-ai/jam-ready-assets (MIT-compatible curation license per its own README; every individual pack inside carries its own CC0-1.0 `License.txt`, verified pack-by-pack by that repository's own maintainers before it lists the pack)
+- Creators: Isa Lousberg (*Tiny Treats* — "Bubbly Bathroom" and "Bakery Interior" sets) and Kay Lousberg (*KayKit* — "Furniture Bits")
+- License: Creative Commons Zero (CC0) 1.0 Universal for every individual model used. Verified by reading each pack's own `License.txt` inside the mirror (e.g. `tiny-treats/3D/interior-furniture/Bakery Interior/Assets/gltf/../License.txt`), which itself reproduces the creator's original CC0 license text and states "This content is free to use in personal, educational and commercial projects." No attribution is required; this document credits the creators anyway as a courtesy, per the pack's own "not mandatory but appreciated" note.
+- Access note: `kenney.nl`, `quaternius.com`, `itch.io`, `kaylousberg.com`, and `isalousberg.com` (the creators' own primary hosting) are all blocked by this session's network egress policy. Only `github.com` / `raw.githubusercontent.com` / `media.githubusercontent.com` were reachable, so these specific files were fetched from the `series-ai/jam-ready-assets` GitHub mirror via its Git LFS media endpoint (a plain HTTPS GET against `media.githubusercontent.com/media/...`, not the GitHub API), not from the creators' own sites directly. The mirror's own per-pack `License.txt` names its source and verification date, so provenance still traces back to the original creator.
+- Format as vendored: raw `.gltf` + `.bin` + a shared `.png` texture atlas per pack (not repackaged into `.glb`) — PlayCanvas's container asset loader accepts `.gltf` with sibling files natively, so no format conversion was needed.
+- Modifications made: none to the mesh geometry. Materials are overridden at runtime in-engine (the original bright, saturated "cozy" palette does not match Case's worn-commercial visual language) rather than by editing the source texture, so the vendored `.png` atlas is exactly as downloaded.
+
+| Local path | Registry id | Source file (pack / file) | Used for |
+| --- | --- | --- | --- |
+| `public/assets/pass3/checkout/cash_register.gltf` (+ `.bin`, `tiny_treats_texture_1.png`) | `authored-pos-register` | Tiny Treats "Bakery Interior" / `cash_register.gltf` | Checkout POS terminal hero prop |
+| `public/assets/pass3/coffee/coffee_machine.gltf` (+ `.bin`, texture) | `authored-coffee-machine` | Tiny Treats "Bakery Interior" / `coffee_machine.gltf` | Coffee station brewer hero prop |
+| `public/assets/pass3/coffee/coffee_cup_takeaway.gltf` (+ `.bin`, texture) | `authored-coffee-cup` | Tiny Treats "Bakery Interior" / `coffee_cup_takeaway.gltf` | Coffee station cup detail |
+| `public/assets/pass3/restroom/toilet.gltf` (+ `.bin`, texture) | `authored-toilet` | Tiny Treats "Bubbly Bathroom" / `toilet.gltf` | Restroom toilet hero fixture |
+| `public/assets/pass3/restroom/mirror.gltf` (+ `.bin`, texture) | `authored-bathroom-mirror` | Tiny Treats "Bubbly Bathroom" / `mirror.gltf` | Restroom mirror hero fixture |
+| `public/assets/pass3/office/desk.gltf` (+ `.bin`, texture) | `authored-office-desk` | KayKit "Furniture Bits" / `desk.gltf` | Office desk hero prop |
+| `public/assets/pass3/office/chair_desk_A.gltf` (+ `.bin`, texture) | `authored-office-chair` | KayKit "Furniture Bits" / `chair_desk_A.gltf` | Office chair hero prop |
+| `public/assets/pass3/office/monitor.gltf` (+ `.bin`, texture) | `authored-office-monitor` | KayKit "Furniture Bits" / `monitor.gltf` | Office computer monitor |
+| `public/assets/pass3/office/keyboard.gltf` (+ `.bin`, texture) | `authored-office-keyboard` | KayKit "Furniture Bits" / `keyboard.gltf` | Office keyboard detail |
+| `public/assets/pass3/office/mouse.gltf` (+ `.bin`, texture) | `authored-office-mouse` | KayKit "Furniture Bits" / `mouse.gltf` | Office mouse detail |
+| `public/assets/pass3/office/lamp_desk.gltf` (+ `.bin`, texture) | `authored-office-lamp` | KayKit "Furniture Bits" / `lamp_desk.gltf` | Office desk lamp detail |
+
+**Scale note:** every model above was authored at roughly 2x this game's real-world-meter convention (a "chunky stylized" house style common to both Tiny Treats and KayKit). Each registry entry below carries its own per-model `scale` correction (typically 0.3-0.55) computed from that model's glTF-reported bounding box against a real-world reference dimension for the object it represents, rather than one shared pack-wide scale.
+
+**Rejected after in-engine check:** KayKit "Furniture Bits" `cabinet_small.gltf` was originally planned as the office filing cabinet replacement. Once actually instantiated and screenshotted in-engine, it turned out to be a soft-furnishing ottoman/pouf shape (not obvious from the pack's own preview renders, which don't label individual meshes) - visibly wrong for a metal filing cabinet. It was removed from the vendored files and the registration; the office keeps its procedural gray steel file cabinet instead. This is exactly the "if it doesn't fit, don't force it" case the Pass 3 brief asked for.
+
 ## Approved source families
 
 ### Kenney Mini Market
