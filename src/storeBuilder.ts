@@ -76,6 +76,16 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   // docs/GRAPHICS_OVERHAUL_BASELINE.md.
   const floor = materials.getTiled('vinyl_floor', 20, 24);
   const ceiling = materials.getTiled('ceiling_tile', 20, 24);
+  // Tinted down from the raw texture (sampled at ~0.57/~0.77 average diffuse): the lighting audit
+  // for graphics overhaul Pass 2 found that at those native brightnesses, the store's existing bank
+  // of fill lights (visualPolishSystem.ts) blows the floor/ceiling out toward flat white instead of
+  // reading as "worn commercial vinyl" / "acoustic ceiling tile" at night. Tinting the shared diffuseMap
+  // (rather than replacing it with a flat color) keeps the seam/tile texture detail visible while
+  // landing back in the same dark, night-appropriate brightness range the store was designed around.
+  floor.diffuse = new pc.Color(0.20, 0.20, 0.19);
+  floor.update();
+  ceiling.diffuse = new pc.Color(0.155, 0.16, 0.155);
+  ceiling.update();
   const wallLR = materials.getTiled('off_white_wall', 24, 4.1);
   const wallBack = materials.getTiled('off_white_wall', 20, 4.1);
   const wallFront = materials.getTiled('off_white_wall', 5.6, 4.1);
@@ -85,7 +95,12 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   // countertop, brushed steel for register/ATM/cooler hardware.
   const steel = materials.get('brushed_steel');
   const shelfMetal = materials.getTiled('painted_metal_shelving', 2.15, 2.85, 1.2);
-  const darkSteel = mat(new pc.Color(0.055, 0.06, 0.06), 0.7, 0.30);
+  // Lifted from (0.055,0.06,0.06): the lighting audit for this pass confirmed that at the fixture
+  // intensities used across the sales floor, that albedo was low enough to crush to a flat black
+  // silhouette on anything not directly under a fixture (the checkout counter's cash drawer, candy
+  // rack and register housing all read as a pure-black dead zone). This keeps the "dark steel"
+  // read while leaving enough diffuse response for ambient/fixture light to actually show form.
+  const darkSteel = mat(new pc.Color(0.11, 0.115, 0.115), 0.7, 0.30);
   const counter = materials.getTiled('painted_metal_shelving', 6.2, 1.24, 1.0);
   const laminate = materials.getTiled('laminate_counter', 6.45, 1.48);
   const coffeeLaminate = materials.getTiled('laminate_counter', 4.7, 1.32);
@@ -147,6 +162,18 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   addBox(app, 'BagStandFrame', new pc.Vec3(-4.15, 1.55, 7.70), new pc.Vec3(0.05, 0.42, 0.05), materials.get('brushed_steel'));
   addBox(app, 'BagStandRing', new pc.Vec3(-4.15, 1.42, 7.70), new pc.Vec3(0.30, 0.02, 0.24), darkSteel);
   addBox(app, 'PaperBag', new pc.Vec3(-4.15, 1.60, 7.70), new pc.Vec3(0.26, 0.34, 0.20), materials.get('cardboard'));
+
+  // A small non-shadow fill at counter height: the nearest ceiling fixture sits almost directly
+  // above the counter, but its light falls mostly onto the counter TOP - the customer-facing front
+  // (cash drawer, candy rack, POS housing) was reading as a near-black dead zone in the lighting
+  // audit for this pass. This is a practical fixture change (an under-fixture task light, not a
+  // scene-wide ambient bump) that fills just that front face without adding a new shadow caster.
+  const checkoutFill = new pc.Entity('CheckoutFillLight');
+  checkoutFill.addComponent('light', {
+    type: 'omni', color: new pc.Color(0.80, 0.84, 0.84), intensity: 1.1, range: 3.4, castShadows: false
+  });
+  checkoutFill.setPosition(-4.6, 1.95, 8.9);
+  app.root.addChild(checkoutFill);
 
   interactables.push({
     id: 'register', label: 'clock in', position: new pc.Vec3(-5.0, 1.7, 7.4), radius: 2.7,

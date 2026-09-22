@@ -134,11 +134,16 @@ export class RestroomSystem {
     light.addComponent('light', {
       type: 'omni',
       color: new pc.Color(0.82, 0.90, 0.88),
-      // Boosted from 0.88: at that intensity the enclosed restroom rendered as crushed-black despite
-      // the fixture being present, a confirmed human-playtest complaint. See staffAreaBuilder.ts for
-      // the same empirically-verified intensity/range scale used across the staff area.
-      intensity: 3.6,
-      range: 5.0,
+      // Was 3.6 (boosted from an original 0.88 to fix a crushed-black room under the old flat-color
+      // materials - see staffAreaBuilder.ts for the same era of fix). Graphics overhaul Pass 2 swapped
+      // the walls/floor to the off_white_wall/restroom_tile textures, which measured ~0.72-0.82 average
+      // diffuse reflectance (sampled directly from the generated PNGs) - much brighter than the old
+      // ~0.36 flat gray. Direct pixel sampling during the lighting audit showed this room's own ceiling
+      // light was only one of several contributors - see visualPolishSystem.ts's RestroomReadableFill
+      // and staffAreaBuilder.ts's StockRoomFrontLight/StockRoomRearLight, all of which leak into this
+      // small room since none of them are shadow-casting. All were cut together.
+      intensity: 0.32,
+      range: 2.6,
       castShadows: false
     });
     light.setPosition(cx, 2.72, -10.0);

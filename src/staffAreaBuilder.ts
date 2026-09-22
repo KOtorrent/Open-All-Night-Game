@@ -144,10 +144,15 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld, materials
   // present: PlayCanvas omni-light falloff at the intensity scale used elsewhere in this file (under
   // ~1.0) is nearly invisible on these mid-gray diffuse walls. Empirically verified in-engine that an
   // intensity around 4 on a ~6m range is what actually reads as "lit room" without blowing out.
-  addFixtureLight(app, 'ManagerOfficeCeilingLight', -7.65, -9.65, 4.0, 6.0, fixtureMat, true);
+  // Graphics overhaul Pass 2 re-tune: that 4.0/1.6 pair was tuned against flat single-color walls and
+  // laminate. Once those swapped to the drywall_office/laminate_counter textures (notably brighter
+  // than the old flat colors), the same intensities blew the desk and walls out to near-white in the
+  // lighting audit for this pass. Pulled both down to the level that reads correctly against the new
+  // materials without going back to the original crushed-black problem.
+  addFixtureLight(app, 'ManagerOfficeCeilingLight', -7.65, -9.65, 2.5, 5.6, fixtureMat, true);
   const deskLamp = new pc.Entity('ManagerDeskLamp');
   deskLamp.addComponent('light', {
-    type: 'omni', color: new pc.Color(0.94, 0.74, 0.48), intensity: 1.6, range: 3.4,
+    type: 'omni', color: new pc.Color(0.94, 0.74, 0.48), intensity: 1.0, range: 3.2,
     castShadows: false
   });
   deskLamp.setPosition(-7.45, 1.72, -10.35);
@@ -164,8 +169,14 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld, materials
     rearDoor.aimRadius = 0.52;
   }
 
-  addFixtureLight(app, 'StockRoomFrontLight', -4.25, -8.45, 2.8, 5.6, fixtureMat, false);
-  addFixtureLight(app, 'StockRoomRearLight', -3.65, -10.65, 2.4, 5.2, fixtureMat, false);
+  // Ranges pulled in from 5.6/5.2: these are non-shadow-casting lights, so (like every other omni
+  // light in this codebase) they pass straight through walls with no occlusion. At the old range
+  // they reached well into the restroom next door (only ~2.5-3.5m away) and were a major
+  // contributor to that room blowing out under Pass 2's brighter wall/tile textures - confirmed via
+  // an in-engine light-distance dump during the lighting audit for this pass. Shortening the range
+  // keeps these two lighting their own stockroom/corridor nook without flooding the room next door.
+  addFixtureLight(app, 'StockRoomFrontLight', -4.25, -8.45, 2.8, 4.0, fixtureMat, false);
+  addFixtureLight(app, 'StockRoomRearLight', -3.65, -10.65, 2.4, 3.6, fixtureMat, false);
 
   const oldBackLight = app.root.findByName('BackHallLight') as pc.Entity | null;
   if (oldBackLight?.light) oldBackLight.light.intensity = 0.18;

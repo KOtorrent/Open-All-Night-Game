@@ -65,15 +65,12 @@ export class VisualPolishSystem {
     // not from making the player stare into crushed black pixels.
     this.app.scene.ambientLight = new pc.Color(0.135, 0.142, 0.145);
 
-    const floor = this.app.root.findByName('Floor') as pc.Entity | null;
-    if (floor?.render) {
-      floor.render.material = material(new pc.Color(0.105, 0.11, 0.115), 0.02, 0.28);
-    }
-
-    const ceiling = this.app.root.findByName('Ceiling') as pc.Entity | null;
-    if (ceiling?.render) {
-      ceiling.render.material = material(new pc.Color(0.115, 0.12, 0.118), 0, 0.12);
-    }
+    // Graphics overhaul Pass 2 fix: this used to unconditionally replace the Floor/Ceiling entities'
+    // materials with flat colors here, which ran right after storeBuilder.ts set them to the shared
+    // vinyl_floor/ceiling_tile textures - silently discarding that material work every time the scene
+    // loaded (confirmed in-engine: the live Floor material had no diffuseMap at all). storeBuilder.ts
+    // now tints those textured materials directly to the same dark target this method used to hard-set,
+    // so the floor/ceiling keep their tile/seam texture detail instead of being flat single colors.
   }
 
   private polishFloor(): void {
@@ -231,9 +228,19 @@ export class VisualPolishSystem {
     // confirmed human-playtest complaint, not just a stylistic choice. These extend readable fill
     // into the staff area interior at the same empirically-verified brightness used in
     // staffAreaBuilder.ts's primary fixtures, just dialed back since fills are meant to be secondary.
-    addFillLight(this.app, 'CorridorReadableFill', new pc.Vec3(-4.5, 2.5, -10.2), coolRetail, 1.4, 5.6);
-    addFillLight(this.app, 'OfficeReadableFill', new pc.Vec3(-7.75, 2.5, -9.9), warmCounter, 1.6, 5.8);
-    addFillLight(this.app, 'RestroomReadableFill', new pc.Vec3(-1.25, 2.5, -10.0), coolRetail, 1.4, 5.2);
+    // Range pulled in from 5.6 alongside staffAreaBuilder.ts's StockRoomFrontLight/StockRoomRearLight
+    // - same non-shadow wall-leak into the restroom next door, found in the same lighting audit.
+    addFillLight(this.app, 'CorridorReadableFill', new pc.Vec3(-4.5, 2.5, -10.2), coolRetail, 1.4, 4.2);
+    // OfficeReadableFill/RestroomReadableFill were tuned (1.6/1.4) against the office/restroom's old
+    // flat-color wall materials. Graphics overhaul Pass 2 swapped those to the drywall_office/
+    // off_white_wall/restroom_tile textures, which measured ~0.72-0.82 average diffuse reflectance -
+    // notably brighter than the old flat colors - and the lighting audit for this pass found these two
+    // small, enclosed rooms were blowing out to flat white even after cutting each room's own dedicated
+    // fixture light substantially (see staffAreaBuilder.ts / restroomSystem.ts). Since these fills sit
+    // near the room center with no shadow occlusion, they were the dominant source and needed the same
+    // re-tune.
+    addFillLight(this.app, 'OfficeReadableFill', new pc.Vec3(-7.75, 2.5, -9.9), warmCounter, 0.55, 5.8);
+    addFillLight(this.app, 'RestroomReadableFill', new pc.Vec3(-1.25, 2.5, -10.0), coolRetail, 0.28, 4.2);
 
     // Exterior sign/facade wash. This is subtle enough to keep the road dark but makes the store
     // itself unmistakable when the player turns around from the pumps.
