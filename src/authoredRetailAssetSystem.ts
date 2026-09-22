@@ -16,11 +16,15 @@ const PASS3_BASE = '/assets/pass3';
  * overridden in-engine with one of these dark, low-gloss commercial materials, keeping the
  * authored mesh/silhouette but discarding the original diffuse map entirely.
  */
-function retint(entity: pc.Entity, color: pc.Color, metalness: number, gloss: number): void {
+function retint(entity: pc.Entity, color: pc.Color, metalness: number, gloss: number, emissive?: pc.Color): void {
   const material = new pc.StandardMaterial();
   material.diffuse = color;
   material.metalness = metalness;
   material.gloss = gloss;
+  if (emissive) {
+    material.emissive = emissive;
+    material.emissiveIntensity = 1;
+  }
   material.update();
   const renders = entity.findComponents('render') as pc.RenderComponent[];
   for (const render of renders) {
@@ -150,11 +154,14 @@ export class AuthoredRetailAssetSystem {
         rotation: new pc.Vec3(0, 90, 0)
       });
       mirror.name = 'AuthoredBathroomMirror';
-      // A dark, high-metalness tint read as a flat black disc under this room's restrained lighting
-      // (confirmed via screenshot) - a mirror has no real-time reflection in this engine anyway, so
-      // a light, low-metalness "frosted glass" tint that stays legible regardless of light angle
-      // reads better than chasing a physically-accurate reflective look that this renderer can't do.
-      retint(mirror, new pc.Color(0.58, 0.62, 0.62), 0.1, 0.7);
+      // A plain diffuse tint - even a light, low-metalness one - still rendered as a near-black
+      // disc up close (confirmed via screenshot): this restroom's restrained lighting (Pass 2) just
+      // doesn't put enough direct light on a wall-mounted oval facing across the room. The same
+      // "dark hero prop needs a bit of its own glow" problem the coffee machine hit in Pass 2 -
+      // solved the same way here: a small self-lit emissive tint keeps the mirror reading as a pale
+      // reflective surface regardless of scene lighting, instead of chasing physically-accurate
+      // reflections this renderer can't do anyway.
+      retint(mirror, new pc.Color(0.30, 0.33, 0.34), 0, 0.6, new pc.Color(0.34, 0.38, 0.40));
       this.setNamedVisualsEnabled(['RestroomMirror'], false);
     } catch (error) {
       console.warn('Authored restroom fixtures unavailable; keeping primitive fallback.', error);
