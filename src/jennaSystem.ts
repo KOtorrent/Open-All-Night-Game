@@ -2,6 +2,7 @@ import * as pc from 'playcanvas';
 import type { BuiltWorld } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
+import { buildLowPolyHuman } from './characterBuilder';
 
 type Phase = 'entering' | 'shopping' | 'waiting' | 'leaving' | 'done';
 
@@ -68,26 +69,22 @@ export class JennaSystem {
     this.spawned = true;
     this.state.addTask('jenna-sale', 'Serve Jenna');
     const root = new pc.Entity('Jenna');
-    const skin = mat(new pc.Color(0.58, 0.43, 0.34));
-    const jacket = mat(new pc.Color(0.17, 0.22, 0.29), 0.12);
-    const jeans = mat(new pc.Color(0.07, 0.10, 0.16), 0.10);
-    const hair = mat(new pc.Color(0.07, 0.045, 0.03), 0.10);
-    part(root, 'Torso', 'capsule', new pc.Vec3(0, 1.12, 0), new pc.Vec3(0.62, 0.78, 0.42), jacket);
-    part(root, 'Head', 'sphere', new pc.Vec3(0, 1.82, 0), new pc.Vec3(0.39, 0.45, 0.39), skin);
-    part(root, 'Hair', 'sphere', new pc.Vec3(0, 1.98, 0.02), new pc.Vec3(0.41, 0.24, 0.41), hair);
-    part(root, 'LegL', 'capsule', new pc.Vec3(-0.18, 0.48, 0), new pc.Vec3(0.21, 0.60, 0.21), jeans);
-    part(root, 'LegR', 'capsule', new pc.Vec3(0.18, 0.48, 0), new pc.Vec3(0.21, 0.60, 0.21), jeans);
-    part(root, 'ArmL', 'capsule', new pc.Vec3(-0.39, 1.15, 0), new pc.Vec3(0.16, 0.58, 0.16), jacket);
-    part(root, 'ArmR', 'capsule', new pc.Vec3(0.39, 1.15, 0), new pc.Vec3(0.16, 0.58, 0.16), jacket);
-    // Every other Night 1 customer (Earl, LateNightTraveler, Dale, Marcus) applies a ~0.86-0.88
-    // root scale to land at normal adult height; Jenna was missing this, so she rendered noticeably
-    // taller than every other customer — the "accidental asset scaling" VISUAL_TARGET.md's character
-    // rule explicitly calls out as unacceptable, confirmed by comparing her un-scaled head-top height
-    // against the others' scaled height.
-    root.setLocalScale(0.86, 0.86, 0.86);
+    this.app.root.addChild(root);
+    buildLowPolyHuman(root, {
+      build: 'slim',
+      skinTone: new pc.Color(0.58, 0.43, 0.34),
+      hairColor: new pc.Color(0.07, 0.045, 0.03),
+      hairStyle: 'long',
+      shirtColor: new pc.Color(0.40, 0.39, 0.36),
+      pantsColor: new pc.Color(0.07, 0.10, 0.16),
+      pantsStyle: 'jeans',
+      shoeStyle: 'sneaker',
+      outerLayer: 'jacket',
+      jacketColor: new pc.Color(0.17, 0.22, 0.29),
+      gloss: 0.13
+    });
     root.setPosition(0, 0, 14.0);
     root.setEulerAngles(0, 180, 0);
-    this.app.root.addChild(root);
     this.actor = {
       root,
       phase: 'entering',

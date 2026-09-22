@@ -2,6 +2,7 @@ import * as pc from 'playcanvas';
 import type { BuiltWorld, Interactable } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
+import { buildLowPolyHuman } from './characterBuilder';
 
 type Phase = 'entering' | 'wandering' | 'waiting' | 'leaving' | 'done';
 
@@ -84,24 +85,23 @@ export class DaleSystem {
     this.state.addTask('dale-sale', 'Serve Dale');
 
     const root = new pc.Entity('Dale');
-    const skin = mat(new pc.Color(0.42, 0.31, 0.23), 0.12);
-    const flannel = mat(new pc.Color(0.19, 0.045, 0.035), 0.10);
-    const vest = mat(new pc.Color(0.10, 0.105, 0.09), 0.10);
-    const denim = mat(new pc.Color(0.055, 0.08, 0.12), 0.10);
-    const cap = mat(new pc.Color(0.025, 0.027, 0.025), 0.08);
-
-    part(root, 'Torso', 'capsule', new pc.Vec3(0, 1.12, 0), new pc.Vec3(0.76, 0.86, 0.50), flannel);
-    part(root, 'Vest', 'box', new pc.Vec3(0, 1.20, -0.18), new pc.Vec3(0.58, 0.70, 0.16), vest);
-    part(root, 'Head', 'sphere', new pc.Vec3(0, 1.90, 0), new pc.Vec3(0.44, 0.49, 0.44), skin);
-    part(root, 'Cap', 'cylinder', new pc.Vec3(0, 2.09, 0), new pc.Vec3(0.45, 0.12, 0.45), cap);
-    part(root, 'LegL', 'capsule', new pc.Vec3(-0.20, 0.48, 0), new pc.Vec3(0.24, 0.62, 0.24), denim);
-    part(root, 'LegR', 'capsule', new pc.Vec3(0.20, 0.48, 0), new pc.Vec3(0.24, 0.62, 0.24), denim);
-    part(root, 'ArmL', 'capsule', new pc.Vec3(-0.46, 1.18, 0), new pc.Vec3(0.19, 0.64, 0.19), flannel);
-    part(root, 'ArmR', 'capsule', new pc.Vec3(0.46, 1.18, 0), new pc.Vec3(0.19, 0.64, 0.19), flannel);
-    root.setLocalScale(0.88, 0.88, 0.88);
+    this.app.root.addChild(root);
+    buildLowPolyHuman(root, {
+      heightScale: 1.01,
+      build: 'heavy',
+      skinTone: new pc.Color(0.42, 0.31, 0.23),
+      hairColor: new pc.Color(0.025, 0.027, 0.025),
+      hairStyle: 'trucker_cap',
+      shirtColor: new pc.Color(0.19, 0.045, 0.035),
+      pantsColor: new pc.Color(0.055, 0.08, 0.12),
+      pantsStyle: 'jeans',
+      shoeStyle: 'boot',
+      outerLayer: 'vest',
+      jacketColor: new pc.Color(0.10, 0.105, 0.09),
+      gloss: 0.11
+    });
     root.setPosition(0, 0, 14.0);
     root.setEulerAngles(0, 180, 0);
-    this.app.root.addChild(root);
 
     this.actor = {
       root,

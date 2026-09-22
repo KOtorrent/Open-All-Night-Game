@@ -2,6 +2,7 @@ import * as pc from 'playcanvas';
 import type { BuiltWorld } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
+import { buildLowPolyHuman } from './characterBuilder';
 
 type Phase = 'entering' | 'shopping' | 'waiting' | 'leaving' | 'done';
 
@@ -84,22 +85,24 @@ export class MarcusSystem {
     this.state.addTask('marcus-sale', 'Serve Marcus');
 
     const root = new pc.Entity('Marcus-Regular');
-    const skin = mat(new pc.Color(0.43, 0.32, 0.23), 0.12);
-    const workShirt = mat(new pc.Color(0.16, 0.25, 0.19), 0.10);
-    const pants = mat(new pc.Color(0.055, 0.065, 0.07), 0.10);
-    const cap = mat(new pc.Color(0.08, 0.08, 0.07), 0.08);
-
-    part(root, 'Torso', 'capsule', new pc.Vec3(0, 1.12, 0), new pc.Vec3(0.72, 0.84, 0.48), workShirt);
-    part(root, 'Head', 'sphere', new pc.Vec3(0, 1.88, 0), new pc.Vec3(0.42, 0.48, 0.42), skin);
-    part(root, 'Cap', 'cylinder', new pc.Vec3(0, 2.08, 0), new pc.Vec3(0.44, 0.12, 0.44), cap);
-    part(root, 'LegL', 'capsule', new pc.Vec3(-0.19, 0.48, 0), new pc.Vec3(0.23, 0.62, 0.23), pants);
-    part(root, 'LegR', 'capsule', new pc.Vec3(0.19, 0.48, 0), new pc.Vec3(0.23, 0.62, 0.23), pants);
-    part(root, 'ArmL', 'capsule', new pc.Vec3(-0.43, 1.17, 0), new pc.Vec3(0.18, 0.62, 0.18), workShirt);
-    part(root, 'ArmR', 'capsule', new pc.Vec3(0.43, 1.17, 0), new pc.Vec3(0.18, 0.62, 0.18), workShirt);
-    root.setLocalScale(0.87, 0.87, 0.87);
+    this.app.root.addChild(root);
+    buildLowPolyHuman(root, {
+      heightScale: 0.99,
+      build: 'average',
+      skinTone: new pc.Color(0.43, 0.32, 0.23),
+      hairColor: new pc.Color(0.08, 0.06, 0.05),
+      hairStyle: 'trucker_cap',
+      shirtColor: new pc.Color(0.16, 0.25, 0.19),
+      pantsColor: new pc.Color(0.055, 0.065, 0.07),
+      pantsStyle: 'jeans',
+      shoeStyle: 'boot',
+      outerLayer: 'workshirt',
+      jacketColor: new pc.Color(0.16, 0.25, 0.19),
+      accentColor: new pc.Color(0.08, 0.08, 0.07),
+      gloss: 0.11
+    });
     root.setPosition(0, 0, 14.0);
     root.setEulerAngles(0, 180, 0);
-    this.app.root.addChild(root);
 
     this.actor = {
       root,

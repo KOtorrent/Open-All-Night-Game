@@ -96,9 +96,12 @@ export class LateCustomerSystem {
       posture: 'stooped',
       skinTone: new pc.Color(0.44, 0.33, 0.25),
       hairColor: new pc.Color(0.025, 0.028, 0.03),
-      hairStyle: 'cap',
+      hairStyle: 'beanie',
       shirtColor: new pc.Color(0.28, 0.26, 0.24),
       pantsColor: new pc.Color(0.07, 0.11, 0.16),
+      pantsStyle: 'jeans',
+      shoeStyle: 'boot',
+      outerLayer: 'coat',
       jacketColor: new pc.Color(0.18, 0.12, 0.075),
       gloss: 0.13
     });

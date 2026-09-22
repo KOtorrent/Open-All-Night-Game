@@ -42,10 +42,14 @@ function createCustomer(app: pc.Application, name: string, coat: pc.Color, pale 
     build: isEarl ? 'heavy' : 'average',
     skinTone: pale ? new pc.Color(0.72, 0.70, 0.64) : new pc.Color(0.50, 0.39, 0.30),
     hairColor: pale ? new pc.Color(0.62, 0.60, 0.56) : new pc.Color(0.14, 0.10, 0.08),
-    hairStyle: isEarl ? 'cap' : 'short',
+    hairStyle: isEarl ? 'trucker_cap' : 'short',
     shirtColor: new pc.Color(0.30, 0.31, 0.33),
     pantsColor: new pc.Color(0.10, 0.11, 0.13),
+    pantsStyle: 'jeans',
+    shoeStyle: isEarl ? 'boot' : 'sneaker',
+    outerLayer: isEarl ? 'flannel' : 'jacket',
     jacketColor: coat,
+    accentColor: isEarl ? new pc.Color(0.15, 0.10, 0.06) : undefined,
     gloss: 0.14,
     posture: isEarl ? 'stooped' : 'upright'
   });

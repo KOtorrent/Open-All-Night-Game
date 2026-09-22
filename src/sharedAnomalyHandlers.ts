@@ -3,6 +3,7 @@ import type { BuiltWorld } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
 import type { AnomalyRuntime } from './anomalyRuntime';
+import { buildLowPolyHuman } from './characterBuilder';
 
 interface Context {
   app: pc.Application;
@@ -98,48 +99,72 @@ export class SharedAnomalyHandlers {
   private spawnPresence(id: string, position: pc.Vec3, color: pc.Color, text: string, seconds = 14): void {
     this.transient?.destroy();
 
-    // Used to be a single bare capsule with no head or limbs - functionally fine (it appears,
-    // times out, sets its flags) but visually undercut every one of these anomalies: "the woman in
-    // the yellow coat keeps smiling" pointed at a faceless blob that cannot smile. Built out with
-    // the same torso/head/hair/legs/arms construction the named characters use so each presence
-    // reads as an actual figure. tall-man keeps an exaggerated, elongated build - a stretched
-    // person is more unsettling than a scaled-up blob, and still reads as "impossibly tall" rather
-    // than just a bigger shapeless mass.
-    const mat = (c: pc.Color, gloss = 0.1): pc.StandardMaterial => {
-      const m = new pc.StandardMaterial();
-      m.diffuse = c;
-      m.gloss = gloss;
-      m.update();
-      return m;
-    };
-    const part = (parent: pc.Entity, name: string, type: 'sphere' | 'capsule', pos: pc.Vec3, scale: pc.Vec3, material: pc.StandardMaterial): pc.Entity => {
-      const e = new pc.Entity(name);
-      e.addComponent('render', { type });
-      e.setLocalPosition(pos);
-      e.setLocalScale(scale);
-      if (e.render) e.render.material = material;
-      parent.addChild(e);
-      return e;
-    };
-
+    // Used to be a single bare capsule with no head or limbs, then (Pass 1) a segmented figure with
+    // a uniform non-uniform Y-scale hack for tall-man that stretched the head into a distorted egg
+    // shape along with everything else. Now built with the shared low-poly human builder
+    // (characterBuilder.ts): each presence gets real facial planes, clothing, and - for tall-man -
+    // the dedicated `stretch` control, which elongates only the neck/arms/legs (not the head or
+    // torso), so an ordinary-sized head sits atop unnaturally long limbs. That reads as deliberately
+    // wrong rather than a scaling bug, per the horror-presence direction: uncanny-human, not
+    // creature-heavy.
     const isTall = id === 'tall-man';
-    const skin = mat(new pc.Color(0.42, 0.36, 0.32));
-    const cloth = mat(color, 0.10);
-    const dark = mat(new pc.Color(0.035, 0.04, 0.045));
+    const isSmilingWoman = id === 'smiling-woman';
 
     const root = new pc.Entity(`AnomalyPresence-${id}`);
     const body = new pc.Entity('body');
-    part(body, 'Torso', 'capsule', new pc.Vec3(0, 1.12, 0), new pc.Vec3(0.66, 0.80, 0.44), cloth);
-    part(body, 'Head', 'sphere', new pc.Vec3(0, 1.84, 0), new pc.Vec3(0.40, 0.46, 0.40), skin);
-    part(body, 'Hair', 'sphere', new pc.Vec3(0, 2.00, -0.01), new pc.Vec3(0.41, 0.20, 0.41), dark);
-    part(body, 'LegL', 'capsule', new pc.Vec3(-0.18, 0.47, 0), new pc.Vec3(0.22, 0.60, 0.22), dark);
-    part(body, 'LegR', 'capsule', new pc.Vec3(0.18, 0.47, 0), new pc.Vec3(0.22, 0.60, 0.22), dark);
-    part(body, 'ArmL', 'capsule', new pc.Vec3(-0.41, 1.16, 0), new pc.Vec3(0.17, 0.60, 0.17), cloth);
-    part(body, 'ArmR', 'capsule', new pc.Vec3(0.41, 1.16, 0), new pc.Vec3(0.17, 0.60, 0.17), cloth);
-    // A uniform build stretched taller (not wider) keeps every limb anatomically connected while
-    // still reading as "impossible height", rather than independently resizing individual parts.
-    body.setLocalScale(isTall ? 0.72 : 0.87, isTall ? 1.55 : 0.87, isTall ? 0.72 : 0.87);
     root.addChild(body);
+
+    if (isTall) {
+      buildLowPolyHuman(body, {
+        heightScale: 1.0,
+        stretch: 1.42,
+        build: 'slim',
+        skinTone: new pc.Color(0.40, 0.35, 0.33),
+        hairColor: new pc.Color(0.03, 0.032, 0.035),
+        hairStyle: 'bald',
+        shirtColor: color,
+        pantsColor: new pc.Color(0.035, 0.04, 0.045),
+        pantsStyle: 'slacks',
+        shoeStyle: 'sneaker',
+        outerLayer: 'coat',
+        jacketColor: new pc.Color(0.045, 0.05, 0.055),
+        gloss: 0.08,
+        minimalFace: true
+      });
+    } else if (isSmilingWoman) {
+      buildLowPolyHuman(body, {
+        heightScale: 1.0,
+        build: 'average',
+        skinTone: new pc.Color(0.58, 0.46, 0.40),
+        hairColor: new pc.Color(0.10, 0.06, 0.04),
+        hairStyle: 'long',
+        shirtColor: new pc.Color(0.42, 0.35, 0.10),
+        pantsColor: new pc.Color(0.10, 0.09, 0.08),
+        pantsStyle: 'slacks',
+        shoeStyle: 'sneaker',
+        // The yellow coat is the point of this anomaly - a bright, ordinary color that stands out
+        // precisely because it does not try to blend into the store or the dark.
+        outerLayer: 'coat',
+        jacketColor: color,
+        gloss: 0.16
+      });
+    } else {
+      buildLowPolyHuman(body, {
+        heightScale: 1.0,
+        build: 'average',
+        skinTone: new pc.Color(0.42, 0.36, 0.32),
+        hairColor: new pc.Color(0.035, 0.04, 0.045),
+        hairStyle: 'short',
+        shirtColor: color,
+        pantsColor: new pc.Color(0.035, 0.04, 0.045),
+        pantsStyle: 'jeans',
+        shoeStyle: 'sneaker',
+        outerLayer: 'jacket',
+        jacketColor: color,
+        gloss: 0.10
+      });
+    }
+
     root.setPosition(position);
     this.ctx.app.root.addChild(root);
 
