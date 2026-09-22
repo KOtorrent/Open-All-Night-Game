@@ -10,6 +10,8 @@ interface Context {
   world: BuiltWorld;
   state: GameState;
   ui: GameUI;
+  /** Optional: lets the duplicate-player anomaly show an authored visual clone, not just text. */
+  authoredCharacters?: { spawnDuplicatePlayer(seconds?: number): Promise<void> };
 }
 
 /**
@@ -65,7 +67,10 @@ export class SharedAnomalyHandlers {
     runtime.register('smiling-woman', () => this.spawnPresence('smiling-woman', new pc.Vec3(3.8, 1.0, 7.4), new pc.Color(0.63, 0.48, 0.10), 'The woman in the yellow coat keeps smiling.'));
     runtime.register('tall-man', () => this.spawnPresence('tall-man', new pc.Vec3(4.6, 1.7, 13.4), new pc.Color(0.08, 0.09, 0.10), 'Something much too tall is standing beneath the canopy.', 18));
     runtime.register('window-reflection', () => this.spawnPresence('window-reflection', new pc.Vec3(-4.5, 1.3, 11.9), new pc.Color(0.15, 0.17, 0.16), 'The front window reflection contains one extra person.', 11));
-    runtime.register('duplicate-player', () => this.triggerMessage('duplicate-player', 'Camera 4 shows you in Aisle 3 while you are standing somewhere else.'));
+    runtime.register('duplicate-player', () => {
+      this.triggerMessage('duplicate-player', 'Camera 4 shows you in Aisle 3 while you are standing somewhere else.');
+      void this.ctx.authoredCharacters?.spawnDuplicatePlayer();
+    });
     runtime.register('missing-aisle', () => this.triggerMessage('missing-aisle', 'For several seconds, Aisle 2 ends at a blank wall.'));
     runtime.register('extra-door', () => this.triggerMessage('extra-door', 'A narrow black door is standing where the back wall should be.'));
 

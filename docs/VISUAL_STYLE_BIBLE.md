@@ -56,18 +56,36 @@ unless a specific story beat calls for it.
 
 ## Character style
 
+Named characters (Earl, Jenna, Marcus, Dale, Traveler, Larry, Silent Customer, Smiling Woman, Tall
+Man, the player avatar) now render as authored, rigged, animated low-poly humans (Quaternius CC0
+models — see `docs/QUATERNIUS_CHARACTER_INTEGRATION.md`), attached over the original procedural
+rig which stays as an automatic fallback (`src/characterBuilder.ts`, used automatically if an
+authored model fails to load, and directly by any not-yet-migrated actor). The authored layer:
+
+- Believable adult proportions, feet flat on the floor, real neck/head/torso/limb relationships —
+  the same target the procedural system was already tuned for (~7.5-8 heads tall, ~1.7-1.8m).
+- Chunky, intentional low-poly geometry with a genuine rig and idle/walk animation, not static
+  smooth/subdivided or hyper-real models.
+- Recognizable clothing silhouette: jackets, shirts, jeans/work pants, shoes, read from ordinary
+  rural-late-night-customer wardrobes — not costumes. Each named character uses a distinct base
+  outfit model (never two characters sharing one mesh), not just a palette swap of one mesh.
+- Variation comes from clothing color (selective per-material retinting, skin/hair/eyes always
+  left alone), base model choice, and small silhouette accents (a cap, a jacket layer).
+- Uncanny effect, where called for (Silent Customer, Smiling Woman, Tall Man), comes from
+  **lighting, behavior, and (for Tall Man only) a modest ~12% height increase** — never monster
+  anatomy. These are still humans.
+
+The procedural rig described below remains the actual fallback implementation and the reference
+for any character not yet migrated to an authored model:
+
 - Believable adult proportions: **~7.5-8 heads tall**, normal shoulder width, normal limb length,
   feet flat on the floor, an actual neck/head/torso relationship (see `src/characterBuilder.ts`).
 - Low-poly, primitive-composed geometry — chunky but intentional, not smooth/subdivided.
 - Simple low-poly faces are fine: shadowed eye sockets (material/AO only, no eye geometry needed),
   simplified jaw/cheek planes, a hair silhouette. No detailed facial rigging.
-- Recognizable clothing silhouette: jackets, shirts, jeans/work pants, shoes, read from ordinary
-  rural-late-night-customer wardrobes — not costumes.
 - Variation comes from clothing color, hair, body build (slim/average/heavy/lanky), posture
   (upright/stooped), and small silhouette accents (a cap, a jacket layer) — not from new meshes
   per character.
-- Uncanny effect, where called for (Silent Customer, Smiling Woman, Tall Man), comes from
-  **lighting and behavior**, not monster anatomy. These are still humans.
 
 ## Exterior style
 

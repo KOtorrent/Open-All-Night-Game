@@ -198,7 +198,7 @@ const shiftEnd = session.config.night === 1 && !session.isEndless()
   ? new ShiftEndSystem(app, world, state, ui, session.progression)
   : undefined;
 const campaignCompletion = new CampaignCompletionSystem(world, state, session, ui);
-const sharedAnomalies = new SharedAnomalyHandlers({ app, world, state, ui }, anomalyRuntime);
+const sharedAnomalies = new SharedAnomalyHandlers({ app, world, state, ui, authoredCharacters }, anomalyRuntime);
 const nightTwoRuntime = session.isCampaignNight(2) ? new NightTwoRuntime(world, state, ui, session.progression) : undefined;
 const nightThreeRuntime = session.isCampaignNight(3) ? new NightThreeRuntime(app, world, state, ui, session.progression, camera) : undefined;
 const nightFourRuntime = session.isCampaignNight(4) ? new NightFourRuntime(world, state, ui, session.progression) : undefined;
@@ -230,7 +230,7 @@ app.on('update', (dt: number) => {
   playerAvatar.update();
   frontDoor.update(safeDt);
   state.update(dt);
-  authoredCharacters.update();
+  authoredCharacters.update(safeDt);
   achievements.update();
   cctvPolish.update(safeDt);
   sharedAnomalies.update(safeDt);

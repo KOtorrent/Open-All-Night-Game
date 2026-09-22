@@ -2,6 +2,34 @@
 
 Open All Night prefers real authored 3D assets for hero props. This file records provenance before any external asset enters the repository.
 
+## Character overhaul — Quaternius Ultimate Modular Men/Women
+
+Full detail (inventory, per-character model mapping, scale math, material overrides, animation
+wiring): `docs/QUATERNIUS_CHARACTER_INTEGRATION.md`. Summary for provenance purposes:
+
+- Packs: *Ultimate Modular Men* and *Ultimate Modular Women* by Quaternius
+- Creator: Quaternius (https://quaternius.com)
+- License: Creative Commons Zero (CC0) 1.0 Universal, Public Domain Dedication
+  (https://creativecommons.org/publicdomain/zero/1.0/) — permits commercial use, modification and
+  redistribution with no attribution required
+- Official source pages: https://quaternius.com/packs/ultimatemodularcharacters.html and
+  https://quaternius.com/packs/ultimatemodularwomen.html
+- Access note: `quaternius.com` is blocked by this session's network egress policy (confirmed
+  during Pass 3's character search). These two packs were provided to this session directly by
+  the user as file uploads (`Claude_Ready_Quaternius_Men.zip`, `Claude_Ready_Quaternius_Women.zip`)
+  rather than fetched by this session, with the license/source stated explicitly by the user and
+  independently confirmed against each pack's own bundled `License.txt`, which reproduces the CC0
+  1.0 dedication text verbatim.
+- Vendored: 10 of the 21 available "Individual Character" `.gltf` files (8 male, 2 female) — see
+  `docs/QUATERNIUS_CHARACTER_INTEGRATION.md` for the full character-to-file mapping and why each
+  unused file was left out. Local paths: `public/assets/characters/quaternius/male/*.gltf` and
+  `public/assets/characters/quaternius/female/*.gltf`, plus each pack's own `License.txt`.
+- Format: self-contained `.gltf` with a base64-embedded binary buffer and no external texture
+  files (flat PBR materials only) — no separate `.bin`/`.png` to vendor.
+- Modifications made: none to mesh/skin/animation data. Per-character material color overrides
+  are applied at runtime by material-name matching (`retintByMaterialName()` in
+  `src/authoredCharacterSystem.ts`), never by editing the source file.
+
 ## Graphics Overhaul Pass 3 — new source family
 
 ### Tiny Treats & KayKit (via series-ai/jam-ready-assets mirror)
@@ -76,9 +104,18 @@ The two models the shipped game actually loads by default are vendored locally i
 Every other model the codebase references is still loaded from the `intellicia-public/parastore` mirror and is **not** part of the shipped game:
 
 - Retail (`authoredRetailAssetSystem.ts`, behind `?dev=1&experimentalAssets=1`): `freezers-standing.glb` (explicitly rejected after the graphics playtest - "the unexplained gray object in front of the freezer wall" - never to be vendored as-is), `shelf-boxes.glb`, `shelf-bags.glb`, `display-bread.glb`, `display-fruit.glb`, `bottle-return.glb`, `shelf-end.glb`, `freezer.glb` (pending individual in-game visual approval).
-- Characters (`authoredCharacterSystem.ts`, behind `?dev=1&characters=1` or `?dev=1&experimentalCharacters=1`): `character-male-a.glb`, `character-male-c.glb`, `character-male-d.glb`, `character-male-f.glb`, `character-female-b.glb`, `character-female-f.glb` - the whole Kenney Mini Character layer, rejected as "too toy-like/chibi" for this game and disabled by default; normal-proportioned primitive actors ship instead.
 
-Both systems now also require `?dev=1` (previously `?characters=1`/`?experimentalAssets=1` alone were enough), so a normal player can never trigger a request to the third-party mirror just by guessing a query parameter - only an explicit dev/test session can. Before any of these are approved for shipping, follow the same process as the register/rug above: verify the file against the mirror's license, copy only that file into `public/assets/...`, and repoint its registry entry to the local path.
+**Characters are no longer part of this remote/unapproved list.** The Kenney Mini Character layer
+this bullet used to describe (`character-male-a.glb` etc., rejected as "too toy-like/chibi") has
+been fully replaced: `authoredCharacterSystem.ts` was rewritten to load the locally-vendored,
+CC0-licensed Quaternius character set instead (see "Character overhaul — Quaternius Ultimate
+Modular Men/Women" above and `docs/QUATERNIUS_CHARACTER_INTEGRATION.md`), which **ships enabled
+by default** — `?characters=0` (or `?assets=0`) instantly reverts to the primitive fallback for
+comparison, rather than an opt-in flag being required to see it.
+
+Before any *retail* item above is approved for shipping, follow the same process as the
+register/rug above: verify the file against the mirror's license, copy only that file into
+`public/assets/...`, and repoint its registry entry to the local path.
 
 ## Import rule
 Before committing a binary model, verify its original source and license, keep only the models actually used by the game, and register them through `AssetRegistry`. Do not pull giant asset packs wholesale into the game repository.

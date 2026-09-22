@@ -30,6 +30,11 @@ export class AssetRegistry {
     return this.specs.has(id);
   }
 
+  /** Raw loaded asset (e.g. to reach `resource.animations` on a glTF container). */
+  getAsset(id: string): pc.Asset | undefined {
+    return this.assets.get(id);
+  }
+
   async preload(id: string): Promise<void> {
     if (this.assets.get(id)?.loaded) return;
     const pending = this.loading.get(id);

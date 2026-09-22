@@ -1,85 +1,277 @@
 import * as pc from 'playcanvas';
 import { AssetRegistry } from './assetRegistry';
 
-const CHARACTER_BASE = 'https://raw.githubusercontent.com/intellicia-public/parastore/main/frontend/public/assets/characters';
+const BASE = '/assets/characters/quaternius';
+const IDLE_CLIP = 'Idle';
+const WALK_CLIP = 'Walk';
+const WALK_SPEED_THRESHOLD = 0.08; // m/s - below this, treat the actor as stationary (idle)
 
 interface CharacterBinding {
+  /** Name of the existing procedural NPC/player root entity to attach to. */
   rootName: string;
   assetId: string;
+  /** Path relative to BASE, e.g. 'male/Casual_2.gltf'. */
   file: string;
+  /** Uniform world-space scale applied to the authored mesh (bbox-height-derived; see docs/QUATERNIUS_CHARACTER_INTEGRATION.md). */
   scale: number;
-  y?: number;
   yaw?: number;
+  /** Extra local Z offset applied only to the player avatar so the FPS camera clears the skull mesh. */
+  offsetZ?: number;
+  /** Selective per-material-name-substring diffuse color override (skin/hair/eyes are left alone). */
+  overrides: Record<string, pc.Color>;
+}
+
+interface AnimatedModel extends pc.Entity {
+  __idleTrack?: pc.AnimTrack;
+  __walkTrack?: pc.AnimTrack;
+  __animState?: 'idle' | 'walk';
+  __lastX?: number;
+  __lastZ?: number;
 }
 
 /**
- * Optional authored-character experiment. The current Kenney mini-character set is deliberately
- * NOT enabled in the normal game because the first graphics playtest proved the proportions are
- * too toy-like/chibi for Open All Night. The normal-proportioned primitive actors stay active
- * until a better human asset set is selected and visually approved.
+ * Authored, rigged, CC0 Quaternius character models (see docs/QUATERNIUS_CHARACTER_INTEGRATION.md)
+ * replacing the procedural primitive-composed actors as the game's visual foundation for humans.
+ * Discovers each named NPC/player root by name every frame (whatever spawned it, whenever it
+ * spawned), attaches the authored mesh as a child of that same root, and hides the primitive
+ * fallback siblings in place rather than destroying them - so a failed/slow load always leaves the
+ * normal-proportioned primitive actor visible instead of an empty gap.
  */
 export class AuthoredCharacterSystem {
   private readonly registry: AssetRegistry;
-  private readonly attached = new Set<string>();
-  private readonly loading = new Set<string>();
+  private readonly loadingGuids = new Set<string>();
   private readonly disabled: boolean;
 
   private readonly bindings: CharacterBinding[] = [
-    { rootName: 'Earl-Regular-Customer', assetId: 'character-earl', file: 'character-male-a.glb', scale: 2.22, yaw: 180 },
-    { rootName: 'Silent-Customer', assetId: 'character-silent', file: 'character-female-f.glb', scale: 2.18, yaw: 180 },
-    { rootName: 'Jenna', assetId: 'character-jenna', file: 'character-female-b.glb', scale: 2.16, yaw: 180 },
-    { rootName: 'LateNightTraveler', assetId: 'character-traveler', file: 'character-male-c.glb', scale: 2.22, yaw: 180 },
-    { rootName: 'Dale', assetId: 'character-dale', file: 'character-male-f.glb', scale: 2.28, yaw: 180 },
-    { rootName: 'Marcus-Regular', assetId: 'character-marcus', file: 'character-male-d.glb', scale: 2.24, yaw: 180 }
+    // Earl: older regular, plain casual clothes, muted browns/grays.
+    {
+      rootName: 'Earl-Regular-Customer', assetId: 'q-earl', file: 'male/Casual_2.gltf', scale: 0.955, yaw: 180,
+      overrides: {
+        LightBrown: new pc.Color(0.22, 0.20, 0.17),
+        Red_Dark: new pc.Color(0.16, 0.15, 0.14),
+        White: new pc.Color(0.30, 0.29, 0.26),
+        Skin_Darker: new pc.Color(0.42, 0.30, 0.20)
+      }
+    },
+    // Jenna: casual adult woman, restrained navy/gray.
+    {
+      rootName: 'Jenna', assetId: 'q-jenna', file: 'female/Casual.gltf', scale: 0.93, yaw: 180,
+      overrides: {
+        White: new pc.Color(0.20, 0.22, 0.26),
+        Grey: new pc.Color(0.10, 0.10, 0.11),
+        Orange: new pc.Color(0.30, 0.17, 0.07)
+      }
+    },
+    // Marcus: distinct from Earl - hoodie/jacket silhouette, charcoal not purple.
+    {
+      rootName: 'Marcus-Regular', assetId: 'q-marcus', file: 'male/Casual_Hoodie.gltf', scale: 0.965, yaw: 180,
+      overrides: {
+        Purple: new pc.Color(0.09, 0.10, 0.12),
+        White: new pc.Color(0.26, 0.25, 0.23),
+        LightBlue: new pc.Color(0.09, 0.11, 0.13)
+      }
+    },
+    // Dale: suspicious-looking but harmless - heavier darker workwear, not construction-bright.
+    {
+      rootName: 'Dale', assetId: 'q-dale', file: 'male/Worker.gltf', scale: 0.965, yaw: 180,
+      overrides: {
+        Worker_Yellow: new pc.Color(0.14, 0.13, 0.11),
+        Worker_Vest: new pc.Color(0.20, 0.09, 0.08),
+        LightBrown: new pc.Color(0.16, 0.15, 0.14)
+      }
+    },
+    // Traveler: road-weary, dark olive/charcoal travel jacket, no adventurer gold accents.
+    {
+      rootName: 'LateNightTraveler', assetId: 'q-traveler', file: 'male/Adventurer.gltf', scale: 0.955, yaw: 180,
+      overrides: {
+        Green: new pc.Color(0.10, 0.11, 0.09),
+        LightGreen: new pc.Color(0.14, 0.15, 0.12),
+        Gold: new pc.Color(0.16, 0.15, 0.13),
+        Brown: new pc.Color(0.14, 0.11, 0.08),
+        Brown2: new pc.Color(0.10, 0.08, 0.06)
+      }
+    },
+    // Silent Customer: plain, nondescript suit - ordinary base, no red tie.
+    {
+      rootName: 'Silent-Customer', assetId: 'q-silent', file: 'male/Suit.gltf', scale: 0.955, yaw: 180,
+      overrides: {
+        Suit: new pc.Color(0.05, 0.05, 0.055),
+        Tie: new pc.Color(0.05, 0.05, 0.055),
+        DarkBrown: new pc.Color(0.08, 0.075, 0.07),
+        White: new pc.Color(0.28, 0.27, 0.25)
+      }
+    },
+    // Larry: older, tired, subdued cardigan-over-workshirt in brown/gray/green.
+    {
+      rootName: 'LarryCase', assetId: 'q-larry', file: 'male/Farmer.gltf', scale: 0.935, yaw: 180,
+      overrides: {
+        LightBlue: new pc.Color(0.16, 0.17, 0.15),
+        Brown: new pc.Color(0.18, 0.17, 0.13),
+        Beige: new pc.Color(0.24, 0.23, 0.19),
+        Brown2: new pc.Color(0.13, 0.12, 0.10),
+        Red: new pc.Color(0.14, 0.14, 0.13)
+      }
+    },
+    // Smiling Woman: mandatory yellow coat via the Suit blazer material.
+    {
+      rootName: 'AnomalyPresence-smiling-woman', assetId: 'q-smiling-woman', file: 'female/Suit.gltf', scale: 0.935, yaw: 180,
+      overrides: {
+        Black: new pc.Color(0.63, 0.48, 0.10),
+        White: new pc.Color(0.30, 0.28, 0.20),
+        Hair_Brown: new pc.Color(0.05, 0.03, 0.02),
+        Hair_Blond: new pc.Color(0.05, 0.03, 0.02)
+      }
+    },
+    // Tall Man: narrow dark clothing; scaled ~12% taller at spawn time (see spawnPresence caller).
+    {
+      rootName: 'AnomalyPresence-tall-man', assetId: 'q-tall-man', file: 'male/Swat.gltf', scale: 0.955 * 1.12, yaw: 180,
+      overrides: {
+        Swat: new pc.Color(0.045, 0.05, 0.055),
+        Swat_Black: new pc.Color(0.02, 0.02, 0.022),
+        Black: new pc.Color(0.02, 0.02, 0.022),
+        Grey: new pc.Color(0.04, 0.04, 0.045),
+        Visor: new pc.Color(0.02, 0.02, 0.022)
+      }
+    },
+    // Player avatar / Duplicate Player: neutral employee look, same model+overrides for both so the
+    // duplicate genuinely resembles the player.
+    {
+      rootName: 'Player-World-Avatar', assetId: 'q-player', file: 'male/Beach.gltf', scale: 0.945, yaw: 180, offsetZ: 0.18,
+      overrides: {
+        Red_Dark: new pc.Color(0.09, 0.13, 0.10),
+        LightBrown: new pc.Color(0.16, 0.15, 0.14),
+        White: new pc.Color(0.26, 0.26, 0.24),
+        Earrings: new pc.Color(0.10, 0.10, 0.10)
+      }
+    }
   ];
 
   constructor(private readonly app: pc.Application) {
     this.registry = new AssetRegistry(app);
     const params = new URLSearchParams(window.location.search);
-    // Rejected content (see class comment) that still lives on the temporary remote mirror - also
-    // require ?dev=1 so a normal player can never trigger a request to that third-party host just
-    // by guessing a query param, the way ?characters=1 alone used to allow.
-    const explicitlyEnabled = params.get('dev') === '1' &&
-      (params.get('characters') === '1' || params.get('experimentalCharacters') === '1');
-    this.disabled = params.get('assets') === '0' || !explicitlyEnabled;
+    // Authored Quaternius characters are this pass's visual foundation and ship enabled by default;
+    // ?characters=0 (or ?assets=0, matching the retail hero-prop kill switch) instantly reverts to
+    // the normal-proportioned primitive actors for direct human before/after comparison.
+    this.disabled = params.get('characters') === '0' || params.get('assets') === '0';
 
     for (const binding of this.bindings) {
-      this.registry.register({ id: binding.assetId, url: `${CHARACTER_BASE}/${binding.file}`, scale: binding.scale });
+      this.registry.register({ id: binding.assetId, url: `${BASE}/${binding.file}` });
     }
 
     if (this.disabled) {
-      console.info('OPEN ALL NIGHT authored mini-character layer disabled; using normal-proportioned fallback actors.');
+      console.info('OPEN ALL NIGHT authored Quaternius character layer disabled; using primitive fallback actors.');
     }
   }
 
-  update(): void {
+  update(dt: number): void {
     if (this.disabled) return;
     for (const binding of this.bindings) {
-      if (this.attached.has(binding.rootName) || this.loading.has(binding.rootName)) continue;
-      const node = this.app.root.findByName(binding.rootName);
-      if (!(node instanceof pc.Entity) || !node.enabled) continue;
-      this.loading.add(binding.rootName);
-      void this.attach(node, binding);
+      const root = this.app.root.findByName(binding.rootName) as pc.Entity | null;
+      if (!root || !root.enabled) continue;
+
+      const modelName = `${binding.rootName}-AuthoredModel`;
+      const existing = root.findByName(modelName) as AnimatedModel | null;
+      if (existing) {
+        this.driveAnimation(root, existing, dt);
+        continue;
+      }
+
+      const guid = root.getGuid();
+      if (this.loadingGuids.has(guid)) continue;
+      this.loadingGuids.add(guid);
+      void this.attach(root, binding, modelName, guid);
     }
   }
 
-  private async attach(root: pc.Entity, binding: CharacterBinding): Promise<void> {
+  private async attach(root: pc.Entity, binding: CharacterBinding, modelName: string, guid: string): Promise<void> {
     try {
-      root.setLocalScale(1, 1, 1);
+      await this.registry.preload(binding.assetId);
       const model = await this.registry.instantiate(binding.assetId, root, {
-        position: new pc.Vec3(0, binding.y ?? 0, 0),
+        position: new pc.Vec3(0, 0, binding.offsetZ ?? 0),
         rotation: new pc.Vec3(0, binding.yaw ?? 180, 0),
         scale: binding.scale
-      });
-      model.name = `${binding.rootName}-AuthoredModel`;
+      }) as AnimatedModel;
+      model.name = modelName;
+
+      this.retintByMaterialName(model, binding.overrides);
+
+      const asset = this.registry.getAsset(binding.assetId);
+      const container = asset?.resource as pc.ContainerResource | undefined;
+      this.setupAnimation(model, container);
+
       this.hidePrimitiveChildren(root, model);
-      this.attached.add(binding.rootName);
-      console.info(`OPEN ALL NIGHT experimental authored character attached: ${binding.rootName}`);
+      console.info(`OPEN ALL NIGHT authored Quaternius character attached: ${binding.rootName}`);
     } catch (error) {
       console.warn(`Authored character unavailable for ${binding.rootName}; keeping primitive fallback.`, error);
     } finally {
-      this.loading.delete(binding.rootName);
+      this.loadingGuids.delete(guid);
     }
+  }
+
+  /** Overrides diffuse color on meshInstances whose glTF material name contains a bound key, leaving skin/hair/eyes untouched. */
+  private retintByMaterialName(model: pc.Entity, overrides: Record<string, pc.Color>): void {
+    if (!Object.keys(overrides).length) return;
+    const cache = new Map<string, pc.StandardMaterial>();
+    const renders = model.findComponents('render') as pc.RenderComponent[];
+    for (const render of renders) {
+      for (const meshInstance of render.meshInstances) {
+        const sourceName = meshInstance.material?.name ?? '';
+        for (const key of Object.keys(overrides)) {
+          if (!sourceName.includes(key)) continue;
+          let mat = cache.get(key);
+          if (!mat) {
+            mat = new pc.StandardMaterial();
+            mat.diffuse = overrides[key];
+            mat.metalness = 0;
+            mat.gloss = 0.32;
+            mat.update();
+            cache.set(key, mat);
+          }
+          meshInstance.material = mat;
+          break;
+        }
+      }
+    }
+  }
+
+  private setupAnimation(model: AnimatedModel, container: pc.ContainerResource | undefined): void {
+    // Not in the engine's .d.ts (glTF containers only), but present on GlbContainerResource at
+    // runtime - see node_modules/playcanvas/build/playcanvas.mjs GlbContainerResource constructor.
+    const animAssets = (container as unknown as { animations?: pc.Asset[] } | undefined)?.animations;
+    if (!animAssets?.length) return;
+    const trackName = (asset: pc.Asset): string | undefined => (asset.resource as pc.AnimTrack | undefined)?.name;
+    const idle = animAssets.find((a) => trackName(a) === IDLE_CLIP);
+    if (!idle?.resource) return;
+    const walk = animAssets.find((a) => trackName(a) === WALK_CLIP);
+
+    try {
+      const anim = model.addComponent('anim', { activate: true }) as pc.AnimComponent;
+      anim.assignAnimation('Base', idle.resource as pc.AnimTrack, undefined, 1, true);
+      model.__idleTrack = idle.resource as pc.AnimTrack;
+      model.__walkTrack = (walk?.resource as pc.AnimTrack | undefined) ?? (idle.resource as pc.AnimTrack);
+      model.__animState = 'idle';
+      const pos = model.parent!.getPosition();
+      model.__lastX = pos.x;
+      model.__lastZ = pos.z;
+    } catch (error) {
+      console.warn('Authored character animation unavailable; using static pose.', error);
+    }
+  }
+
+  private driveAnimation(root: pc.Entity, model: AnimatedModel, dt: number): void {
+    if (!model.anim || !model.__idleTrack || !model.__walkTrack || dt <= 0) return;
+    const pos = root.getPosition();
+    const lastX = model.__lastX ?? pos.x;
+    const lastZ = model.__lastZ ?? pos.z;
+    const speed = Math.hypot(pos.x - lastX, pos.z - lastZ) / dt;
+    model.__lastX = pos.x;
+    model.__lastZ = pos.z;
+
+    const shouldWalk = speed > WALK_SPEED_THRESHOLD;
+    const nextState = shouldWalk ? 'walk' : 'idle';
+    if (model.__animState === nextState) return;
+    model.__animState = nextState;
+    model.anim.assignAnimation('Base', shouldWalk ? model.__walkTrack : model.__idleTrack, undefined, 1, true);
   }
 
   private hidePrimitiveChildren(root: pc.Entity, keep: pc.Entity): void {
@@ -100,5 +292,30 @@ export class AuthoredCharacterSystem {
       current = current.parent;
     }
     return false;
+  }
+
+  /**
+   * Transient CCTV-flavored visual for the duplicate-player anomaly (Night 4's "Camera 4 shows you
+   * in Aisle 3" line): a static clone using the exact same model/material as the player avatar
+   * binding above, spawned briefly in an aisle so the anomaly has something to actually show, not
+   * just tell. Called from sharedAnomalyHandlers.ts alongside its existing text trigger - it does
+   * not touch routing, collision or any existing anomaly state.
+   */
+  async spawnDuplicatePlayer(seconds = 6): Promise<void> {
+    if (this.disabled) return;
+    const binding = this.bindings.find((b) => b.rootName === 'Player-World-Avatar');
+    if (!binding) return;
+    try {
+      await this.registry.preload(binding.assetId);
+      const root = new pc.Entity('DuplicatePlayerFigure');
+      root.setPosition(-3.6, 0, 3.3);
+      root.setEulerAngles(0, 40, 0);
+      this.app.root.addChild(root);
+      const model = await this.registry.instantiate(binding.assetId, root, { scale: binding.scale });
+      this.retintByMaterialName(model, binding.overrides);
+      window.setTimeout(() => root.destroy(), seconds * 1000);
+    } catch (error) {
+      console.warn('Duplicate-player visual unavailable; text-only anomaly still fired.', error);
+    }
   }
 }
