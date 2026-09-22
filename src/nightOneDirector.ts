@@ -215,6 +215,17 @@ export class NightOneDirector {
     const root = createCustomer(this.app, 'Silent-Customer', new pc.Color(0.055, 0.055, 0.065), true);
     root.setPosition(0, 0, 13.8);
     root.setEulerAngles(0, 180, 0);
+    // Restrained horror-presence upgrade (Pass 2, Phase 6): this shares createCustomer with Earl, the
+    // regular customer, so it reads as an ordinary person by default - correct, since Rule 2 is about
+    // the missing chime, not a monstrous appearance. A held, slightly averted head tilt (never looking
+    // straight at the player) and a faint cool, desaturated glow - just enough to read as a shade off
+    // from the store's warm fluorescents - are the only differences from an ordinary customer.
+    const head = root.findByName('Head') as pc.Entity | null;
+    head?.setLocalEulerAngles(6, -10, 0);
+    const chill = new pc.Entity('SilentCustomerChill');
+    chill.addComponent('light', { type: 'omni', color: new pc.Color(0.42, 0.46, 0.48), intensity: 0.5, range: 2.0, castShadows: false });
+    chill.setLocalPosition(0, 1.1, 0.2);
+    root.addChild(chill);
     this.silentVisitor = {
       root,
       phase: 'entering',

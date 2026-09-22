@@ -131,6 +131,17 @@ export class SharedAnomalyHandlers {
         gloss: 0.08,
         minimalFace: true
       });
+      // Restrained horror-presence upgrade (Pass 2, Phase 6): an abnormally tall figure that stares
+      // straight ahead reads as a scaling bug. A deliberate, exaggerated downward head tilt reads as
+      // "looking down at you" - a choice, not a glitch. A dim, cool uplight from near the floor (the
+      // opposite of how the store's own fixtures light everything else from above) throws his lower
+      // half into a slightly wrong shadow without any creature-anatomy tricks.
+      const head = body.findByName('Head') as pc.Entity | null;
+      head?.setLocalEulerAngles(16, -5, 2);
+      const uplight = new pc.Entity('TallManUplight');
+      uplight.addComponent('light', { type: 'omni', color: new pc.Color(0.30, 0.36, 0.46), intensity: 0.75, range: 2.4, castShadows: false });
+      uplight.setLocalPosition(0, 0.15, 0.25);
+      body.addChild(uplight);
     } else if (isSmilingWoman) {
       buildLowPolyHuman(body, {
         heightScale: 1.0,
@@ -148,6 +159,16 @@ export class SharedAnomalyHandlers {
         jacketColor: color,
         gloss: 0.16
       });
+      // A slight, held head tilt reads as an expression frozen a beat too long, rather than a body
+      // pose. A faint warm glow keyed to the coat's own color (not a spotlight) makes her read as
+      // slightly lit wrong for the room - brighter than the ambient store light should allow at this
+      // distance from any real fixture - without any obvious light source explaining it.
+      const head = body.findByName('Head') as pc.Entity | null;
+      head?.setLocalEulerAngles(-3, 9, 6);
+      const glow = new pc.Entity('SmilingWomanGlow');
+      glow.addComponent('light', { type: 'omni', color: new pc.Color(0.66, 0.52, 0.20), intensity: 0.55, range: 2.0, castShadows: false });
+      glow.setLocalPosition(0, 1.15, 0.15);
+      body.addChild(glow);
     } else {
       buildLowPolyHuman(body, {
         heightScale: 1.0,
