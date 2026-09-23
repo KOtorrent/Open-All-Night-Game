@@ -44,6 +44,7 @@ import { AchievementSystem } from './achievementSystem';
 import { NightOneAtmosphereSystem } from './nightOneAtmosphereSystem';
 import { ClosingChoreSystem } from './closingChoreSystem';
 import { AuthoredRetailAssetSystem } from './authoredRetailAssetSystem';
+import { MerchandiseAssetSystem, applyMerchandiseVisuals } from './merchandiseAssetSystem';
 import { AuthoredCharacterSystem } from './authoredCharacterSystem';
 import { StoreSignageSystem } from './storeSignageSystem';
 import { StaffDetailSystem } from './staffDetailSystem';
@@ -109,6 +110,14 @@ if (performanceProfile.low) console.info(`OPEN ALL NIGHT low-performance profile
 
 const authoredAssets = new AuthoredRetailAssetSystem(app);
 void authoredAssets.start();
+// Graphics overhaul Pass 5: swaps storeBuilder.ts's registered box/carton/bag/bottle primitives
+// for authored meshes once this finishes loading - see docs/PASS5_MERCHANDISE_ASSET_REVIEW.md.
+// Fully optional: if loading fails, world.merchandiseSlots' primitives simply stay as they are.
+const merchandiseAssets = new MerchandiseAssetSystem(app);
+void merchandiseAssets.start().then(() => {
+  const swapped = applyMerchandiseVisuals(app, world.merchandiseSlots, merchandiseAssets);
+  console.info(`OPEN ALL NIGHT: authored merchandise applied to ${swapped}/${world.merchandiseSlots.length} eligible slots`);
+});
 const authoredCharacters = new AuthoredCharacterSystem(app);
 
 const camera = new pc.Entity('PlayerCamera');

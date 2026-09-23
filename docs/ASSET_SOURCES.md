@@ -99,11 +99,37 @@ The two models the shipped game actually loads by default are vendored locally i
 
 `AuthoredRetailAssetSystem` now registers these two ids against the local `/assets/market/...` paths; `vite build` copies everything under `public/` into `dist/` unchanged, so the same local paths resolve correctly in both dev and production builds with zero requests to any external asset host.
 
+## Pass 5 — vendored authored merchandise assets
+
+Graphics overhaul Pass 5 (`docs/PASS5_MERCHANDISE_ASSET_REVIEW.md` has the full candidate review)
+vendored 4 more files from the same `intellicia-public/parastore` mirror, same license basis as
+above (Kenney *Mini Market*, CC0 1.0, mirrored through an MIT-licensed repository whose own README
+states the 3D assets are CC0 with no attribution required):
+
+| Local path | Source file | Individual product meshes inside (by glTF node name) | Used for |
+| --- | --- | --- | --- |
+| `public/assets/merchandise/kenney-mini-market/shelf-boxes.glb` | `shelf-boxes.glb` | 6× `carton`, 4× `box` | boxed goods, cartons across all 4 aisles + endcaps |
+| `public/assets/merchandise/kenney-mini-market/shelf-bags.glb` | `shelf-bags.glb` | 8× `bag` | snack bags (Aisle 1) |
+| `public/assets/merchandise/kenney-mini-market/shelf-end.glb` | `shelf-end.glb` | 3× `bottle`, 3× `carton` | bottles (Aisle 4, cooler, household), a second carton variant |
+| `public/assets/merchandise/kenney-mini-market/display-bread.glb` | `display-bread.glb` | 2× `bread` | occasional snack/bakery variant on Aisle 1 |
+| `public/assets/merchandise/kenney-mini-market/Textures/colormap.png` | `Textures/colormap.png` | (shared texture) | shared colormap all 4 files above reference by relative URI |
+
+**Modifications:** none to the mesh geometry itself. `MerchandiseAssetSystem` (`src/merchandiseAssetSystem.ts`)
+loads each file once, finds the named child entities inside, and clones them per shelf slot - the
+per-instance color variety ("recolor into multiple fictional variants" per the brief) is applied
+as a material tint override on each clone, the same `retint()`-style pattern already used
+throughout `authoredRetailAssetSystem.ts`, not a modification to the vendored files themselves.
+
+**Not vendored:** `display-fruit.glb` and `bottle-return.glb` were reviewed and held/rejected - see
+`docs/PASS5_MERCHANDISE_ASSET_REVIEW.md` for why. No can-shaped Kenney asset was available in the
+reachable mirror subset; cans keep their existing Pass 4 primitive presentation, documented as an
+honest gap rather than a placeholder swap.
+
 ## Remaining remote-mirror assets (experimental / unapproved, not shipped)
 
 Every other model the codebase references is still loaded from the `intellicia-public/parastore` mirror and is **not** part of the shipped game:
 
-- Retail (`authoredRetailAssetSystem.ts`, behind `?dev=1&experimentalAssets=1`): `freezers-standing.glb` (explicitly rejected after the graphics playtest - "the unexplained gray object in front of the freezer wall" - never to be vendored as-is), `shelf-boxes.glb`, `shelf-bags.glb`, `display-bread.glb`, `display-fruit.glb`, `bottle-return.glb`, `shelf-end.glb`, `freezer.glb` (pending individual in-game visual approval).
+- Retail (`authoredRetailAssetSystem.ts`, behind `?dev=1&experimentalAssets=1`): `freezers-standing.glb` (explicitly rejected after the graphics playtest - "the unexplained gray object in front of the freezer wall" - never to be vendored as-is), `display-fruit.glb`, `bottle-return.glb`, `freezer.glb` (pending individual in-game visual approval). `shelf-boxes.glb`, `shelf-bags.glb`, `display-bread.glb` and `shelf-end.glb` are no longer in this experimental-only list - see "Pass 5" above, they are now vendored locally and shipped.
 
 **Characters are no longer part of this remote/unapproved list.** The Kenney Mini Character layer
 this bullet used to describe (`character-male-a.glb` etc., rejected as "too toy-like/chibi") has

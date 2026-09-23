@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import type { BuiltWorld, Collider2D, Interactable } from './gameTypes';
+import type { BuiltWorld, Collider2D, Interactable, MerchandiseSlot } from './gameTypes';
 import type { GameState } from './gameState';
 import type { GameUI } from './ui';
 import type { MaterialLibrary } from './materialLibrary';
@@ -65,6 +65,11 @@ function colliderFromBox(colliders: Collider2D[], x: number, z: number, sx: numb
 export function buildStore(app: pc.Application, state: GameState, ui: GameUI, materials: MaterialLibrary): BuiltWorld {
   const colliders: Collider2D[] = [];
   const interactables: Interactable[] = [];
+  // Graphics overhaul Pass 5: primitives below still get built exactly as before (instant,
+  // synchronous, always-present fallback); box/carton/bag/bottle items also register a slot here
+  // so MerchandiseAssetSystem can swap them for an authored mesh once its async load finishes -
+  // see main.ts. Cans stay primitive-only (no can-shaped asset was available to vendor).
+  const merchandiseSlots: MerchandiseSlot[] = [];
 
   // Wall/floor/ceiling now use the shared tiled texture set (docs/VISUAL_STYLE_BIBLE.md) instead of
   // flat single colors - this also covers the storefront facade (FrontWallL/R below), since PlayCanvas
@@ -349,16 +354,32 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
             addCylinder(app, `A${aisleIndex + 1}-Cap-${side}-${tier}-${item}`, new pc.Vec3(px, y + h + 0.075, pz), new pc.Vec3(0.10, 0.06, 0.10), capMat);
             addCylinder(app, `A${aisleIndex + 1}-CanLabel-${side}-${tier}-${item}`, new pc.Vec3(px, y + h * 0.38 + 0.035, pz), new pc.Vec3(0.226, h * 0.34, 0.226), productLabels[(item + tier + aisleIndex) % productLabels.length]);
           } else if (kind === 1) {
-            addBox(app, `A${aisleIndex + 1}-Box-${side}-${tier}-${item}`, new pc.Vec3(px, y + h / 2 + 0.035, pz), new pc.Vec3(0.28, h, 0.20), pm);
-            addBox(app, `A${aisleIndex + 1}-Label-${side}-${tier}-${item}`, new pc.Vec3(px - side * 0.145, y + h / 2 + 0.035, pz), new pc.Vec3(0.008, h * 0.5, 0.14), productLabels[(item + tier + aisleIndex) % productLabels.length]);
+            const boxEntity = addBox(app, `A${aisleIndex + 1}-Box-${side}-${tier}-${item}`, new pc.Vec3(px, y + h / 2 + 0.035, pz), new pc.Vec3(0.28, h, 0.20), pm);
+            const labelEntity = addBox(app, `A${aisleIndex + 1}-Label-${side}-${tier}-${item}`, new pc.Vec3(px - side * 0.145, y + h / 2 + 0.035, pz), new pc.Vec3(0.008, h * 0.5, 0.14), productLabels[(item + tier + aisleIndex) % productLabels.length]);
+            merchandiseSlots.push({
+              entity: boxEntity, secondaryEntity: labelEntity, kind: 'box',
+              variantIndex: item + tier, color: pm.diffuse, yaw: side > 0 ? 90 : -90, scale: h / 0.30
+            });
           } else if (kind === 3) {
             // Bottle: narrower/taller body + a distinct narrow neck so it reads differently from a
             // can silhouette at a glance, still 2 primitives (same cost as the can+cap pair).
             const bh = h * 1.15;
-            addCylinder(app, `A${aisleIndex + 1}-Bottle-${side}-${tier}-${item}`, new pc.Vec3(px, y + bh / 2 + 0.035, pz), new pc.Vec3(0.16, bh, 0.16), pm);
-            addCylinder(app, `A${aisleIndex + 1}-Neck-${side}-${tier}-${item}`, new pc.Vec3(px, y + bh + 0.05, pz), new pc.Vec3(0.07, 0.10, 0.07), capMat);
+            const bottleEntity = addCylinder(app, `A${aisleIndex + 1}-Bottle-${side}-${tier}-${item}`, new pc.Vec3(px, y + bh / 2 + 0.035, pz), new pc.Vec3(0.16, bh, 0.16), pm);
+            const neckEntity = addCylinder(app, `A${aisleIndex + 1}-Neck-${side}-${tier}-${item}`, new pc.Vec3(px, y + bh + 0.05, pz), new pc.Vec3(0.07, 0.10, 0.07), capMat);
+            merchandiseSlots.push({
+              entity: bottleEntity, secondaryEntity: neckEntity, kind: 'bottle',
+              variantIndex: item + tier, color: pm.diffuse, yaw: side > 0 ? 90 : -90, scale: bh / 0.272
+            });
           } else {
-            addBox(app, `A${aisleIndex + 1}-Bag-${side}-${tier}-${item}`, new pc.Vec3(px, y + h * 0.42 + 0.035, pz), new pc.Vec3(0.34, h * 0.82, 0.24), pm);
+            const bagEntity = addBox(app, `A${aisleIndex + 1}-Bag-${side}-${tier}-${item}`, new pc.Vec3(px, y + h * 0.42 + 0.035, pz), new pc.Vec3(0.34, h * 0.82, 0.24), pm);
+            // A bread loaf occasionally in place of a bag - Aisle 1 only, since bread reads as a
+            // bakery/snack item there and would look out of place among household/grocery stock.
+            const useBread = aisleIndex === 0 && (item + tier) % 5 === 0;
+            merchandiseSlots.push({
+              entity: bagEntity, kind: useBread ? 'bread' : 'bag',
+              variantIndex: item + tier, color: pm.diffuse, yaw: side > 0 ? 90 : -90,
+              scale: useBread ? h / 0.334 : 0.9 + ((h - 0.27) / 0.16) * 0.4
+            });
           }
         }
       }
@@ -382,7 +403,13 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
     for (let i = 0; i < 5; i++) {
       const row = i % 3;
       const col = Math.floor(i / 3);
-      addBox(app, `Endcap${aisleIndex + 1}-Box-${i}`, new pc.Vec3(x - 0.28 + col * 0.56, 0.34 + row * 0.30, backZ + 0.24), new pc.Vec3(0.42, 0.28, 0.36), materials.get('cardboard'));
+      const endcapBoxEntity = addBox(app, `Endcap${aisleIndex + 1}-Box-${i}`, new pc.Vec3(x - 0.28 + col * 0.56, 0.34 + row * 0.30, backZ + 0.24), new pc.Vec3(0.42, 0.28, 0.36), materials.get('cardboard'));
+      const endcapKind: 'box' | 'carton' = i % 2 === 0 ? 'box' : 'carton';
+      merchandiseSlots.push({
+        entity: endcapBoxEntity, kind: endcapKind, variantIndex: i,
+        color: profile.mats[i % profile.mats.length].diffuse, yaw: 0,
+        scale: endcapKind === 'box' ? 0.28 / 0.30 : 0.28 / 0.286
+      });
     }
     addBox(app, `Endcap${aisleIndex + 1}-PromoTray`, new pc.Vec3(x, 1.62, backZ + 0.20), new pc.Vec3(0.9, 0.05, 0.40), darkSteel);
     for (let i = 0; i < 4; i++) {
@@ -414,8 +441,13 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
         const dh = 0.27 + ((door + tier + item) % 3) * 0.055;
         const isCarton = (door + tier + item) % 6 === 5;
         if (isCarton) {
-          addBox(app, `CoolerDrink-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh / 2 + 0.025, -10.30), new pc.Vec3(0.20, dh, 0.16), white);
-          addBox(app, `CoolerDrinkCap-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh - 0.02, -10.30), new pc.Vec3(0.12, 0.06, 0.16), white).setEulerAngles(0, 45, 0);
+          const cartonEntity = addBox(app, `CoolerDrink-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh / 2 + 0.025, -10.30), new pc.Vec3(0.20, dh, 0.16), white);
+          const cartonCapEntity = addBox(app, `CoolerDrinkCap-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh - 0.02, -10.30), new pc.Vec3(0.12, 0.06, 0.16), white);
+          cartonCapEntity.setEulerAngles(0, 45, 0);
+          merchandiseSlots.push({
+            entity: cartonEntity, secondaryEntity: cartonCapEntity, kind: 'carton',
+            variantIndex: door + tier + item, color: white.diffuse, yaw: 0, scale: dh / 0.286
+          });
         } else {
           const dw = 0.13 + ((door + item) % 2) * 0.04;
           addCylinder(app, `CoolerDrink-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh / 2 + 0.025, -10.30), new pc.Vec3(dw, dh, dw), productMats[(door + tier + item) % productMats.length]);
@@ -488,6 +520,7 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
     colliders,
     interactables,
     spawn: new pc.Vec3(0, 1.72, 10.0),
-    spawnYaw: 180
+    spawnYaw: 180,
+    merchandiseSlots
   };
 }
