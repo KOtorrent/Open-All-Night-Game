@@ -264,34 +264,62 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   });
 
   // Four central aisles with thinner retail fixtures and deliberately varied merchandise.
+  // Visual pass 4, Phase 2/3: each aisle now reads as a distinct category mix matching its own
+  // overhead sign (storeSignageSystem.ts's AisleSign1-4: SNACKS/CANDY, HOUSEHOLD, GROCERIES, COLD
+  // DRINKS) rather than every aisle cycling through the exact same material/shape sequence. Still
+  // just 4 shared primitive silhouettes (can, box, bag, bottle) and shared flat-color materials -
+  // no new textures, no per-product unique materials, no geometry beyond one extra thin "label
+  // band" cylinder per can (matching the existing per-item cap cost).
   const aisleXs = [-5.1, -1.7, 1.7, 5.1];
   const productMats = [red, cream, blue, green, mat(new pc.Color(0.42, 0.22, 0.06)), mat(new pc.Color(0.15, 0.35, 0.22))];
   const capMat = mat(new pc.Color(0.62, 0.63, 0.60), 0.3, 0.35);
+  const householdMats = [mat(new pc.Color(0.16, 0.42, 0.40)), cream, mat(new pc.Color(0.58, 0.60, 0.56)), blue];
+  const snackMats = [red, mat(new pc.Color(0.62, 0.36, 0.04)), mat(new pc.Color(0.15, 0.35, 0.22)), cream];
+  const groceryMats = [green, mat(new pc.Color(0.42, 0.22, 0.06)), red, blue];
+  const drinkMats = [blue, red, cream, mat(new pc.Color(0.15, 0.35, 0.22))];
+  // kind order per shelf position: 0=can 1=box 2=bag 3=bottle. Each aisle's own short cycle biases
+  // toward its category's typical packaging (e.g. Household leans boxed/bottle, Snacks leans bag).
+  interface AisleProfile { label: string; mats: pc.StandardMaterial[]; kinds: number[]; }
+  const aisleProfiles: AisleProfile[] = [
+    { label: 'Snacks/Candy', mats: snackMats, kinds: [2, 2, 1, 2, 0, 2] },
+    { label: 'Household', mats: householdMats, kinds: [1, 1, 3, 1, 3, 1] },
+    { label: 'Groceries', mats: groceryMats, kinds: [0, 1, 0, 1, 0, 2] },
+    { label: 'Cold Drinks', mats: drinkMats, kinds: [3, 0, 3, 0, 3, 2] }
+  ];
   aisleXs.forEach((x, aisleIndex) => {
     const z = 0.4;
+    const profile = aisleProfiles[aisleIndex];
     addBox(app, `Aisle${aisleIndex + 1}-Base`, new pc.Vec3(x, 0.12, z), new pc.Vec3(2.15, 0.24, 8.3), darkSteel);
     addBox(app, `Aisle${aisleIndex + 1}-Back`, new pc.Vec3(x, 1.55, z), new pc.Vec3(0.08, 2.85, 8.2), shelfMetal);
     for (let side of [-1, 1]) {
       for (let tier = 0; tier < 4; tier++) {
         const shelfX = x + side * 0.55;
         const y = 0.43 + tier * 0.66;
+        const eyeLevel = tier === 1 || tier === 2;
         addBox(app, `A${aisleIndex + 1}-Shelf-${side}-${tier}`, new pc.Vec3(shelfX, y, z), new pc.Vec3(1.0, 0.055, 8.15), shelfMetal);
         for (let item = 0; item < 9; item++) {
-          if ((item + tier + aisleIndex) % 7 === 0) continue;
+          // Fuller eye-level shelves, rarer gaps there; top/bottom tiers keep the old gap rate -
+          // "used, stocked store" rather than a perfectly uniform grid or a half-empty one.
+          const gapMod = eyeLevel ? 11 : 6;
+          if ((item + tier + aisleIndex) % gapMod === 0) continue;
           const pz = -3.25 + item * 0.80;
-          const pm = productMats[(item + tier * 2 + aisleIndex) % productMats.length];
+          const pm = profile.mats[(item + tier * 2 + aisleIndex) % profile.mats.length];
           const h = 0.27 + ((item + tier + aisleIndex) % 3) * 0.08;
           const px = shelfX - side * 0.06;
-          const kind = (item + aisleIndex) % 3;
-          // Three repeated low-poly silhouettes (bottle/can, boxed good, bagged good) cycling by
-          // shelf position instead of one plain box shape everywhere - still just two primitive
-          // types and the same shared materials, no new geometry cost per item.
+          const kind = profile.kinds[(item + tier) % profile.kinds.length];
           if (kind === 0) {
             addCylinder(app, `A${aisleIndex + 1}-Can-${side}-${tier}-${item}`, new pc.Vec3(px, y + h / 2 + 0.035, pz), new pc.Vec3(0.22, h, 0.22), pm);
             addCylinder(app, `A${aisleIndex + 1}-Cap-${side}-${tier}-${item}`, new pc.Vec3(px, y + h + 0.075, pz), new pc.Vec3(0.10, 0.06, 0.10), capMat);
+            addCylinder(app, `A${aisleIndex + 1}-CanLabel-${side}-${tier}-${item}`, new pc.Vec3(px, y + h * 0.38 + 0.035, pz), new pc.Vec3(0.226, h * 0.34, 0.226), productLabels[(item + tier + aisleIndex) % productLabels.length]);
           } else if (kind === 1) {
             addBox(app, `A${aisleIndex + 1}-Box-${side}-${tier}-${item}`, new pc.Vec3(px, y + h / 2 + 0.035, pz), new pc.Vec3(0.28, h, 0.20), pm);
             addBox(app, `A${aisleIndex + 1}-Label-${side}-${tier}-${item}`, new pc.Vec3(px - side * 0.145, y + h / 2 + 0.035, pz), new pc.Vec3(0.008, h * 0.5, 0.14), productLabels[(item + tier + aisleIndex) % productLabels.length]);
+          } else if (kind === 3) {
+            // Bottle: narrower/taller body + a distinct narrow neck so it reads differently from a
+            // can silhouette at a glance, still 2 primitives (same cost as the can+cap pair).
+            const bh = h * 1.15;
+            addCylinder(app, `A${aisleIndex + 1}-Bottle-${side}-${tier}-${item}`, new pc.Vec3(px, y + bh / 2 + 0.035, pz), new pc.Vec3(0.16, bh, 0.16), pm);
+            addCylinder(app, `A${aisleIndex + 1}-Neck-${side}-${tier}-${item}`, new pc.Vec3(px, y + bh + 0.05, pz), new pc.Vec3(0.07, 0.10, 0.07), capMat);
           } else {
             addBox(app, `A${aisleIndex + 1}-Bag-${side}-${tier}-${item}`, new pc.Vec3(px, y + h * 0.42 + 0.035, pz), new pc.Vec3(0.34, h * 0.82, 0.24), pm);
           }
@@ -299,6 +327,30 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
       }
     }
     colliderFromBox(colliders, x, z, 2.15, 8.3, `Aisle ${aisleIndex + 1}`);
+  });
+
+  // Endcaps: a small stacked-box display at the front of each aisle (visible from the entrance
+  // approach, z~4.55, clear of the AisleSign overhead signage at z=5.0) - promo/overstock presence
+  // without adding to the walkable aisle interior itself. Built like the aisle's own shelving (thin
+  // back panel + a base + items stacked in the open space in front of it) rather than one thick
+  // solid box, which was found in-engine to swallow the stacked boxes inside its own geometry.
+  aisleXs.forEach((x, aisleIndex) => {
+    const profile = aisleProfiles[aisleIndex];
+    // Back panel at z=4.05 (thin, like Aisle-Back), boxes stacked toward the entrance up to z~4.50
+    // - stays inside the aisle's own collider edge at z=4.55 (colliderFromBox above), so no extra
+    // collider is needed for the display itself.
+    const backZ = 4.05;
+    addBox(app, `Endcap${aisleIndex + 1}-Back`, new pc.Vec3(x, 0.95, backZ), new pc.Vec3(1.05, 1.9, 0.06), shelfMetal);
+    addBox(app, `Endcap${aisleIndex + 1}-BaseShelf`, new pc.Vec3(x, 0.14, backZ + 0.20), new pc.Vec3(1.05, 0.05, 0.44), shelfMetal);
+    for (let i = 0; i < 5; i++) {
+      const row = i % 3;
+      const col = Math.floor(i / 3);
+      addBox(app, `Endcap${aisleIndex + 1}-Box-${i}`, new pc.Vec3(x - 0.28 + col * 0.56, 0.34 + row * 0.30, backZ + 0.24), new pc.Vec3(0.42, 0.28, 0.36), materials.get('cardboard'));
+    }
+    addBox(app, `Endcap${aisleIndex + 1}-PromoTray`, new pc.Vec3(x, 1.62, backZ + 0.20), new pc.Vec3(0.9, 0.05, 0.40), darkSteel);
+    for (let i = 0; i < 4; i++) {
+      addCylinder(app, `Endcap${aisleIndex + 1}-Promo-${i}`, new pc.Vec3(x - 0.32 + i * 0.21, 1.82, backZ + 0.20), new pc.Vec3(0.13, 0.17, 0.13), profile.mats[i % profile.mats.length]);
+    }
   });
 
   // Aisle 4 / rear cooler wall: dark frames, repeated doors, internal shelves and emissive-ish strips.
