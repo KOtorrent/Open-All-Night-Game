@@ -3,16 +3,21 @@ import type { MerchandiseAssetSystem, ProductKind } from './merchandiseAssetSyst
 
 const HAND_BONE = 'Wrist.R';
 /** Maps a carried-item kind to the authored mesh kind that best matches it, where one exists.
- * 'can' and 'cup' have no matching authored asset (see docs/PASS5_MERCHANDISE_ASSET_REVIEW.md) and
- * keep their existing primitive presentation. */
+ * 'cup' has no matching authored asset and keeps its existing primitive presentation. 'can' gained
+ * a match in Pass 6 (kenney-food's soda-can.glb - see docs/PASS6_PACKAGING_ATLAS.md), so it now
+ * also carries real fictional packaging art instead of a flat-colored cylinder. */
 const CARRIED_ITEM_TO_MERCHANDISE_KIND: Partial<Record<ShoppingStopProp, ProductKind>> = {
-  snack: 'bag', box: 'box', bottle: 'bottle'
+  snack: 'bag', box: 'box', bottle: 'bottle', can: 'can'
 };
 type ShoppingStopProp = 'snack' | 'box' | 'bottle' | 'can' | 'cup';
 /** Scales the authored mesh's own natural size down to roughly the same hand-held size the
  * primitive it replaces used (measured against each source mesh's own bounding box - see
- * docs/PASS5_MERCHANDISE_ASSET_REVIEW.md). */
-const CARRIED_ITEM_AUTHORED_SCALE: Record<ProductKind, number> = { bag: 0.5, box: 0.55, bottle: 0.74, carton: 0.5, bread: 0.4 };
+ * docs/PASS5_MERCHANDISE_ASSET_REVIEW.md and, for 'can'/'candyBar', docs/PASS6_PACKAGING_ATLAS.md).
+ * 'candyBar' has no ShoppingStopProp mapping into it above, but the Record still needs an entry for
+ * every ProductKind. */
+const CARRIED_ITEM_AUTHORED_SCALE: Record<ProductKind, number> = {
+  bag: 0.5, box: 0.55, bottle: 0.74, carton: 0.5, bread: 0.4, can: 0.34, candyBar: 0.5
+};
 const TURN_DEGREES_PER_SECOND = 420; // completes a ~180 deg turn in well under the brief's 0.2-0.5s window
 
 interface ShoppingStop {

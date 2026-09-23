@@ -45,6 +45,7 @@ import { NightOneAtmosphereSystem } from './nightOneAtmosphereSystem';
 import { ClosingChoreSystem } from './closingChoreSystem';
 import { AuthoredRetailAssetSystem } from './authoredRetailAssetSystem';
 import { MerchandiseAssetSystem, applyMerchandiseVisuals } from './merchandiseAssetSystem';
+import { PackagingLabelSystem } from './packagingLabelSystem';
 import { AuthoredCharacterSystem } from './authoredCharacterSystem';
 import { StoreSignageSystem } from './storeSignageSystem';
 import { StaffDetailSystem } from './staffDetailSystem';
@@ -110,13 +111,31 @@ if (performanceProfile.low) console.info(`OPEN ALL NIGHT low-performance profile
 
 const authoredAssets = new AuthoredRetailAssetSystem(app);
 void authoredAssets.start();
+// Graphics overhaul Pass 6: fictional packaging label atlases - see docs/PASS6_PACKAGING_ATLAS.md.
+// Started in parallel with MerchandiseAssetSystem and awaited together below, so authored products
+// never swap in with their Pass 5 flat tint just because the atlas hadn't finished loading yet.
+const packagingLabels = new PackagingLabelSystem(app);
+const packagingReady = packagingLabels.start();
 // Graphics overhaul Pass 5: swaps storeBuilder.ts's registered box/carton/bag/bottle primitives
 // for authored meshes once this finishes loading - see docs/PASS5_MERCHANDISE_ASSET_REVIEW.md.
 // Fully optional: if loading fails, world.merchandiseSlots' primitives simply stay as they are.
-const merchandiseAssets = new MerchandiseAssetSystem(app);
-void merchandiseAssets.start().then(() => {
+const merchandiseAssets = new MerchandiseAssetSystem(app, packagingLabels);
+void Promise.all([merchandiseAssets.start(), packagingReady]).then(() => {
   const swapped = applyMerchandiseVisuals(app, world.merchandiseSlots, merchandiseAssets);
   console.info(`OPEN ALL NIGHT: authored merchandise applied to ${swapped}/${world.merchandiseSlots.length} eligible slots`);
+
+  // Pass 6 Phase 9: checkout candy/gum primitives never get an authored-mesh swap (no candy-bar
+  // mesh exists for the rack itself, only the carried candy-bar-wrapper item) - they get a direct
+  // packaging-label material instead, same atlas, so the register-side impulse rack matches the
+  // rest of the store's new packaging art.
+  if (packagingLabels.isReady()) {
+    world.checkoutCandyEntities.forEach((entity, i) => {
+      packagingLabels.applyToPrimitive(entity, packagingLabels.pickCandyBrand(i));
+    });
+    world.checkoutGumEntities.forEach((entity, i) => {
+      packagingLabels.applyToPrimitive(entity, packagingLabels.pickCandyBrand(i + world.checkoutCandyEntities.length));
+    });
+  }
 });
 const authoredCharacters = new AuthoredCharacterSystem(app);
 

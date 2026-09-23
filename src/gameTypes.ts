@@ -29,13 +29,19 @@ export interface MerchandiseSlot {
   entity: pc.Entity;
   /** A second primitive (e.g. a box's label plane, a bottle's cap) to also disable, if any. */
   secondaryEntity?: pc.Entity;
-  kind: 'box' | 'carton' | 'bag' | 'bottle' | 'bread';
+  /** Any further primitives (e.g. a can's separate cap + label band) to also disable, if any. */
+  extraEntities?: pc.Entity[];
+  kind: 'box' | 'carton' | 'bag' | 'bottle' | 'bread' | 'can' | 'candyBar';
   variantIndex: number;
   color: pc.Color;
   /** Local yaw so the authored mesh faces the same way the primitive it replaces did. */
   yaw: number;
   /** Uniform scale applied to the authored mesh to roughly match the primitive's footprint. */
   scale: number;
+  /** Graphics overhaul Pass 6: which fictional-brand family this slot draws from (see
+   * docs/PASS6_PACKAGING_ATLAS.md). Undefined slots fall back to PackagingLabelSystem's own
+   * per-kind default brand list. */
+  category?: 'snack' | 'boxed' | 'drink' | 'household' | 'candy';
 }
 
 export interface BuiltWorld {
@@ -44,4 +50,9 @@ export interface BuiltWorld {
   spawn: pc.Vec3;
   spawnYaw: number;
   merchandiseSlots: MerchandiseSlot[];
+  /** Graphics overhaul Pass 6 Phase 9: checkout candy/gum primitives (register-side impulse rack) -
+   * these never get an authored-mesh swap, just a direct packaging-label material once the atlas is
+   * ready, applied in main.ts via PackagingLabelSystem.applyToPrimitive(). */
+  checkoutCandyEntities: pc.Entity[];
+  checkoutGumEntities: pc.Entity[];
 }

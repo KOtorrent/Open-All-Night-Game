@@ -1,12 +1,19 @@
 import * as pc from 'playcanvas';
 import { AssetRegistry } from './assetRegistry';
 import type { MerchandiseSlot } from './gameTypes';
+import { PackagingLabelSystem } from './packagingLabelSystem';
 
 // Graphics overhaul Pass 5: authored low-poly product meshes (box/carton/bag/bottle/bread),
 // vendored locally from Kenney's CC0 "Mini Market" pack - see docs/ASSET_SOURCES.md and
 // docs/PASS5_MERCHANDISE_ASSET_REVIEW.md for full provenance/license record. No runtime dependency
 // on any third-party host: these ship in public/assets/ and load same-origin in production.
 const MERCHANDISE_BASE = '/assets/merchandise/kenney-mini-market';
+// Graphics overhaul Pass 6: fills the Pass 5-documented can-shaped gap. Kenney's Mini Market pack
+// genuinely has no can model (confirmed against the FULL original pack this time, not just a
+// mirrored subset - see docs/PASS5_MERCHANDISE_ASSET_REVIEW.md's Phase 5 update), but Kenney's
+// separate "Food Kit" (same CC0 license, same shorepine/kenney mirror) has `soda-can.glb` and
+// `candy-bar-wrapper.glb` - both single-object files, vendored the same way as the Pass 5 assets.
+const FOOD_BASE = '/assets/merchandise/kenney-food';
 
 /** Same pattern as authoredRetailAssetSystem.ts's retint() - discards the source pack's own bright
  * shared-atlas coloring and replaces it with one of this game's own dark commercial materials,
@@ -25,7 +32,7 @@ function retint(entity: pc.Entity, color: pc.Color, metalness: number, gloss: nu
   }
 }
 
-export type ProductKind = 'box' | 'carton' | 'bag' | 'bottle' | 'bread';
+export type ProductKind = 'box' | 'carton' | 'bag' | 'bottle' | 'bread' | 'can' | 'candyBar';
 
 interface HarvestSpec {
   assetId: string;
@@ -38,7 +45,9 @@ const SPECS: HarvestSpec[] = [
   { assetId: 'merch-shelf-boxes', url: `${MERCHANDISE_BASE}/shelf-boxes.glb`, nodes: [['carton', 'carton'], ['box', 'box']] },
   { assetId: 'merch-shelf-bags', url: `${MERCHANDISE_BASE}/shelf-bags.glb`, nodes: [['bag', 'bag']] },
   { assetId: 'merch-shelf-end', url: `${MERCHANDISE_BASE}/shelf-end.glb`, nodes: [['bottle', 'bottle'], ['carton', 'carton']] },
-  { assetId: 'merch-display-bread', url: `${MERCHANDISE_BASE}/display-bread.glb`, nodes: [['bread', 'bread']] }
+  { assetId: 'merch-display-bread', url: `${MERCHANDISE_BASE}/display-bread.glb`, nodes: [['bread', 'bread']] },
+  { assetId: 'merch-soda-can', url: `${FOOD_BASE}/soda-can.glb`, nodes: [['soda-can', 'can']] },
+  { assetId: 'merch-candy-wrapper', url: `${FOOD_BASE}/candy-bar-wrapper.glb`, nodes: [['candy-bar-wrapper', 'candyBar']] }
 ];
 
 /**
@@ -56,9 +65,11 @@ export class MerchandiseAssetSystem {
   private readonly templates = new Map<ProductKind, pc.Entity[]>();
   private ready = false;
   private failed = false;
+  private readonly packaging?: PackagingLabelSystem;
 
-  constructor(app: pc.Application) {
+  constructor(app: pc.Application, packaging?: PackagingLabelSystem) {
     this.app = app;
+    this.packaging = packaging;
     this.registry = new AssetRegistry(app);
     for (const spec of SPECS) this.registry.register({ id: spec.assetId, url: spec.url });
   }
@@ -108,13 +119,30 @@ export class MerchandiseAssetSystem {
    * `variantIndex` cycles deterministically through the available source nodes for that kind
    * (matches the rest of the codebase's modulo-cycling convention rather than randomizing).
    */
-  createProduct(kind: ProductKind, variantIndex: number, color: pc.Color, metalness = 0, gloss = 0.22): pc.Entity | null {
+  createProduct(
+    kind: ProductKind,
+    variantIndex: number,
+    color: pc.Color,
+    metalness = 0,
+    gloss = 0.22,
+    category?: string
+  ): pc.Entity | null {
     const list = this.templates.get(kind);
     if (!list || list.length === 0) return null;
     const template = list[((variantIndex % list.length) + list.length) % list.length];
     const clone = template.clone() as pc.Entity;
     clone.enabled = true;
-    retint(clone, color, metalness, gloss);
+
+    // Graphics overhaul Pass 6: prefer real fictional packaging art over the Pass 5 flat tint
+    // whenever the atlas system is ready and has a brand for this product kind/category. Falls
+    // back to the original flat-color retint() for kinds the packaging system doesn't cover
+    // (currently 'bread') or if the atlas failed to load - never a broken/untextured product.
+    const brand = this.packaging?.isReady() ? this.packaging.pickBrand(kind, category, variantIndex) : null;
+    if (brand && this.packaging) {
+      this.packaging.applyToAuthoredProduct(clone, kind, brand);
+    } else {
+      retint(clone, color, metalness, gloss);
+    }
     return clone;
   }
 }
@@ -131,7 +159,7 @@ export function applyMerchandiseVisuals(app: pc.Application, slots: MerchandiseS
   let swapped = 0;
   for (const slot of slots) {
     if (merch.hasNothingFor(slot.kind)) continue;
-    const clone = merch.createProduct(slot.kind, slot.variantIndex, slot.color);
+    const clone = merch.createProduct(slot.kind, slot.variantIndex, slot.color, 0, 0.22, slot.category);
     if (!clone) continue;
 
     // The harvested Kenney nodes are all modeled with their local origin at the mesh's own BASE
@@ -150,6 +178,7 @@ export function applyMerchandiseVisuals(app: pc.Application, slots: MerchandiseS
     }
     slot.entity.enabled = false;
     if (slot.secondaryEntity) slot.secondaryEntity.enabled = false;
+    if (slot.extraEntities) for (const extra of slot.extraEntities) extra.enabled = false;
 
     clone.setPosition(worldPos);
     clone.setEulerAngles(0, slot.yaw, 0);
