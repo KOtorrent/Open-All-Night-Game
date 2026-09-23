@@ -232,6 +232,26 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   addBox(app, 'EmployeeBoxA', new pc.Vec3(-7.1, 0.52, 8.35), new pc.Vec3(0.55, 0.40, 0.45), mat(new pc.Color(0.33, 0.20, 0.09), 0, 0.06));
   addBox(app, 'EmployeeBoxB', new pc.Vec3(-6.3, 0.48, 8.35), new pc.Vec3(0.45, 0.32, 0.42), mat(new pc.Color(0.30, 0.18, 0.08), 0, 0.06));
 
+  // Visual pass 4, Phase 4: a bit more believable small retail clutter around the counter - none of
+  // it overlaps the register/notebook interactable positions or radii above (register -5.0,7.4 r2.7;
+  // notebook -6.78,7.6 r2.5), and it stays clear of the bagging stand and POS cluster.
+  // z=7.35 (front edge of the counter, clear of CandyRackFrame's own z=8.15-8.45 footprint even
+  // though this shares similar x-range).
+  const gumMats = [red, green, blue];
+  for (let i = 0; i < 5; i++) {
+    addBox(app, `GumRow-${i}`, new pc.Vec3(-2.55 - i * 0.155, counterTopY + 0.045, 7.35), new pc.Vec3(0.14, 0.09, 0.16), gumMats[i % gumMats.length]);
+  }
+  addCylinder(app, 'ReceiptRoll', new pc.Vec3(-5.55, counterTopY + 0.05, 7.45), new pc.Vec3(0.06, 0.10, 0.06), cream).setEulerAngles(0, 0, 90);
+  // A short stack of plastic bags behind the paper-bag stand (BagStandFrame is at -4.15,7.70).
+  for (let i = 0; i < 4; i++) {
+    addBox(app, `PlasticBagStack-${i}`, new pc.Vec3(-4.40, counterTopY + 0.02 + i * 0.028, 7.85), new pc.Vec3(0.22, 0.02, 0.17), white).setEulerAngles(0, (i % 2) * 6 - 3, 0);
+  }
+  // Small standing "NO CHECKS" policy card, propped against the lottery panel base.
+  addBox(app, 'NoChecksCard', new pc.Vec3(-7.55, counterTopY + 0.10, 8.05), new pc.Vec3(0.16, 0.11, 0.01), darkSteel).setEulerAngles(-18, -20, 0);
+  // Worn/stained countertop patch near the register - a flat, low-opacity dark smudge rather than
+  // new geometry, reusing the same opacity/blend pattern as coolerGlass above.
+  addBox(app, 'CounterWearPatch', new pc.Vec3(-5.15, counterTopY + 0.002, 7.75), new pc.Vec3(0.55, 0.003, 0.42), mat(new pc.Color(0.05, 0.05, 0.045), 0, 0.06, undefined, 0.30));
+
   // Coffee station, front-right.
   addBox(app, 'CoffeeCounter', new pc.Vec3(6.5, 0.62, 8.8), new pc.Vec3(4.5, 1.24, 1.15), counter);
   addBox(app, 'CoffeeTop', new pc.Vec3(6.5, 1.30, 8.8), new pc.Vec3(4.7, 0.12, 1.32), coffeeLaminate);
@@ -255,6 +275,23 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   for (let i = 0; i < 3; i++) {
     addBox(app, `CondimentPacket-${i}`, new pc.Vec3(8.30 + (i % 2) * 0.09, 1.365 + 0.008 + Math.floor(i / 2) * 0.016, 8.50 - (i % 2) * 0.09), new pc.Vec3(0.08, 0.016, 0.05), condimentColors[i]).setEulerAngles(0, i * 25, 0);
   }
+
+  // Visual pass 4, Phase 5: sugar/creamer caddy, a small handwritten-style price card and a subtle
+  // ring of counter stains - clear of the brewer/pot/coffee interactable (id 'coffee', position
+  // 6.1,8.15) so the Coffee Rule and player's own brewing interaction stay visually unobstructed.
+  addBox(app, 'SugarCaddy', new pc.Vec3(8.05, 1.44, 9.00), new pc.Vec3(0.20, 0.14, 0.14), white);
+  const sugarPacketColors = [white, mat(new pc.Color(0.70, 0.42, 0.10)), cream];
+  for (let i = 0; i < 3; i++) {
+    addBox(app, `SugarPacket-${i}`, new pc.Vec3(8.02 + (i % 2) * 0.05, 1.53, 8.96 + Math.floor(i / 2) * 0.05), new pc.Vec3(0.055, 0.012, 0.035), sugarPacketColors[i]).setEulerAngles(0, i * 30, 0);
+  }
+  for (let i = 0; i < 3; i++) {
+    addCylinder(app, `CreamerCup-${i}`, new pc.Vec3(4.75 + i * 0.11, 1.395, 9.05), new pc.Vec3(0.045, 0.045, 0.045), cream);
+  }
+  addBox(app, 'CoffeePriceCard', new pc.Vec3(6.85, 1.395 + 0.01, 8.30), new pc.Vec3(0.16, 0.004, 0.10), cream).setEulerAngles(0, -4, 0);
+  // Faint dark rings under the pot/cup-stack positions - reused low-opacity flat pattern, not a new
+  // texture, matching CounterWearPatch's approach near the register.
+  addBox(app, 'CoffeeCounterStain', new pc.Vec3(6.1, 1.395 + 0.001, 8.47), new pc.Vec3(0.50, 0.002, 0.50), mat(new pc.Color(0.10, 0.07, 0.04), 0, 0.05, undefined, 0.24));
+  addBox(app, 'TrashSlot', new pc.Vec3(4.55, 1.395 + 0.001, 8.85), new pc.Vec3(0.30, 0.006, 0.22), mat(new pc.Color(0.03, 0.03, 0.03), 0, 0.10));
   interactables.push({
     id: 'coffee', label: 'brew coffee', position: new pc.Vec3(6.1, 1.65, 8.15), radius: 2.5,
     onInteract: () => {
@@ -368,10 +405,23 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
       const y = 0.60 + tier * 0.63;
       addBox(app, `CoolerShelf-${door}-${tier}`, new pc.Vec3(x, y, -10.47), new pc.Vec3(1.45, 0.045, 0.62), steel);
       for (let item = 0; item < 5; item++) {
+        // Visual pass 4, Phase 6: occasional empty slot (a real cooler is never perfectly full),
+        // a milk-carton silhouette mixed in among the round bottles/cans, and width variation so
+        // the row doesn't read as one item repeated 5x - stock presentation only, no new geometry
+        // budget beyond what a can+cap pair already cost.
+        if ((door + tier * 2 + item) % 9 === 0) continue;
         const px = x - 0.54 + item * 0.27;
         const dh = 0.27 + ((door + tier + item) % 3) * 0.055;
-        addCylinder(app, `CoolerDrink-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh / 2 + 0.025, -10.30), new pc.Vec3(0.15, dh, 0.15), productMats[(door + tier + item) % productMats.length]);
-        addCylinder(app, `CoolerDrinkCap-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh + 0.06, -10.30), new pc.Vec3(0.075, 0.05, 0.075), capMat);
+        const isCarton = (door + tier + item) % 6 === 5;
+        if (isCarton) {
+          addBox(app, `CoolerDrink-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh / 2 + 0.025, -10.30), new pc.Vec3(0.20, dh, 0.16), white);
+          addBox(app, `CoolerDrinkCap-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh - 0.02, -10.30), new pc.Vec3(0.12, 0.06, 0.16), white).setEulerAngles(0, 45, 0);
+        } else {
+          const dw = 0.13 + ((door + item) % 2) * 0.04;
+          addCylinder(app, `CoolerDrink-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh / 2 + 0.025, -10.30), new pc.Vec3(dw, dh, dw), productMats[(door + tier + item) % productMats.length]);
+          addCylinder(app, `CoolerDrinkCap-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh + 0.06, -10.30), new pc.Vec3(dw * 0.5, 0.05, dw * 0.5), capMat);
+          addCylinder(app, `CoolerDrinkLabel-${door}-${tier}-${item}`, new pc.Vec3(px, y + dh * 0.4 + 0.025, -10.30), new pc.Vec3(dw + 0.01, dh * 0.3, dw + 0.01), productLabels[(door + tier + item) % productLabels.length]);
+        }
       }
     }
   }
