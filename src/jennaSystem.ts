@@ -42,6 +42,12 @@ export class JennaSystem {
     this.wrapRegister();
   }
 
+  /** Read-only route/waypoint peek for CustomerShoppingSystem's presentation-only turn-back logic. */
+  getShoppingRouteInfo(rootName: string): { route: pc.Vec3[]; waypoint: number } | null {
+    if (rootName !== 'Jenna' || !this.actor) return null;
+    return { route: this.actor.route, waypoint: this.actor.waypoint };
+  }
+
   update(dt: number): void {
     const minute = this.state.getGameMinutes();
     if (!this.spawned && minute >= 24 * 60 + 55 && !this.state.isComplete('jenna-sale')) this.spawn();

@@ -28,6 +28,7 @@ import { JennaSystem } from './jennaSystem';
 import { DaleSystem } from './daleSystem';
 import { MarcusSystem } from './marcusSystem';
 import { CustomerRouteSafetySystem } from './customerRouteSafetySystem';
+import { CustomerShoppingSystem } from './customerShoppingSystem';
 import { PumpSevenSystem } from './pumpSevenSystem';
 import { WindowWatcherSystem } from './windowWatcherSystem';
 import { StorePhoneSystem } from './storePhoneSystem';
@@ -166,6 +167,13 @@ const lateCustomer = new LateCustomerSystem(app, world, state, ui);
 const dale = new DaleSystem(app, world, state, ui);
 const marcus = new MarcusSystem(app, world, state, ui);
 const customerRouteSafety = new CustomerRouteSafetySystem([nightOne, jenna, lateCustomer, dale, marcus]);
+const customerShopping = new CustomerShoppingSystem(app, (rootName) =>
+  nightOne.getShoppingRouteInfo(rootName) ??
+  jenna.getShoppingRouteInfo(rootName) ??
+  marcus.getShoppingRouteInfo(rootName) ??
+  dale.getShoppingRouteInfo(rootName) ??
+  lateCustomer.getShoppingRouteInfo(rootName)
+);
 const receipts = new ReceiptSystem(app, world, state);
 const transactions = new TransactionFeedbackSystem(state);
 const achievements = new AchievementSystem(state, session.progression);
@@ -251,6 +259,7 @@ app.on('update', (dt: number) => {
     dale.update(safeDt);
     marcus.update(safeDt);
     customerRouteSafety.update();
+    customerShopping.update(safeDt);
     receipts.update();
     transactions.update();
     atmosphere.update(safeDt);

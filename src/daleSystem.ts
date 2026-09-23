@@ -12,6 +12,9 @@ interface DaleActor {
   route: pc.Vec3[];
   waypoint: number;
   speed: number;
+  /** Optional scripted shopping pause: waypoint index -> dwell seconds, consumed on arrival. */
+  dwellAt?: Map<number, number>;
+  dwellRemaining?: number;
 }
 
 function mat(color: pc.Color, gloss = 0.16): pc.StandardMaterial {
@@ -52,6 +55,12 @@ export class DaleSystem {
     this.state = state;
     this.ui = ui;
     this.wrapRegister();
+  }
+
+  /** Read-only route/waypoint peek for CustomerShoppingSystem's presentation-only turn-back logic. */
+  getShoppingRouteInfo(rootName: string): { route: pc.Vec3[]; waypoint: number } | null {
+    if (rootName !== 'Dale' || !this.actor) return null;
+    return { route: this.actor.route, waypoint: this.actor.waypoint };
   }
 
   update(dt: number): void {
@@ -112,10 +121,16 @@ export class DaleSystem {
         new pc.Vec3(-5.0, 0, -4.8),
         new pc.Vec3(4.9, 0, -7.1),
         new pc.Vec3(4.9, 0, -8.3),
+        // Short cooler detour from the existing near-cooler waypoint above (~2.4m short of the
+        // cooler front) - fits Dale's "browse longer, look around" personality. See
+        // docs/CUSTOMER_SHOPPING_BEHAVIOR.md for the distance/timing math.
+        new pc.Vec3(4.9, 0, -8.9),
+        new pc.Vec3(4.74, 0, -9.55),
         new pc.Vec3(-2.40, 0, 7.45)
       ],
       waypoint: 0,
-      speed: 1.45
+      speed: 1.45,
+      dwellAt: new Map([[6, 3.2]])
     };
 
     this.chime();
@@ -140,12 +155,24 @@ export class DaleSystem {
       return;
     }
 
+    if (actor.dwellRemaining !== undefined) {
+      actor.dwellRemaining -= dt;
+      if (actor.dwellRemaining <= 0) { actor.dwellRemaining = undefined; actor.waypoint += 1; }
+      return;
+    }
+
     const pos = actor.root.getPosition().clone();
     const target = actor.route[actor.waypoint];
     const delta = new pc.Vec3().sub2(target, pos);
     delta.y = 0;
     const distance = delta.length();
     if (distance < 0.08) {
+      const dwell = actor.dwellAt?.get(actor.waypoint);
+      if (dwell) {
+        actor.dwellAt!.delete(actor.waypoint);
+        actor.dwellRemaining = dwell;
+        return;
+      }
       actor.waypoint += 1;
       return;
     }

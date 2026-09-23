@@ -12,6 +12,9 @@ interface Actor {
   route: pc.Vec3[];
   waypoint: number;
   speed: number;
+  /** Optional scripted shopping pause: waypoint index -> dwell seconds, consumed on arrival. */
+  dwellAt?: Map<number, number>;
+  dwellRemaining?: number;
 }
 
 function mat(color: pc.Color, gloss = 0.18): pc.StandardMaterial {
@@ -52,6 +55,12 @@ export class LateCustomerSystem {
     this.state = state;
     this.ui = ui;
     this.wrapRegister();
+  }
+
+  /** Read-only route/waypoint peek for CustomerShoppingSystem's presentation-only turn-back logic. */
+  getShoppingRouteInfo(rootName: string): { route: pc.Vec3[]; waypoint: number } | null {
+    if (rootName !== 'LateNightTraveler' || !this.actor) return null;
+    return { route: this.actor.route, waypoint: this.actor.waypoint };
   }
 
   update(dt: number): void {
@@ -115,11 +124,16 @@ export class LateCustomerSystem {
       speed: 1.72,
       route: [
         new pc.Vec3(0, 0, 10.3),
-        new pc.Vec3(5.8, 0, 7.0),
+        // Coffee stop moved to right after entering - matches a traveler grabbing coffee on the
+        // way in, and keeps the detour cheap since it's near the entrance/checkout end of the
+        // store rather than deep inside it. See docs/CUSTOMER_SHOPPING_BEHAVIOR.md.
+        new pc.Vec3(6.6, 0, 9.6),
+        new pc.Vec3(6.3, 0, 9.0),
         new pc.Vec3(5.0, 0, 1.5),
         new pc.Vec3(1.8, 0, -4.2),
         new pc.Vec3(-2.90, 0, 7.45)
-      ]
+      ],
+      dwellAt: new Map([[2, 2.0]])
     };
 
     this.chime();
@@ -144,12 +158,24 @@ export class LateCustomerSystem {
       return;
     }
 
+    if (actor.dwellRemaining !== undefined) {
+      actor.dwellRemaining -= dt;
+      if (actor.dwellRemaining <= 0) { actor.dwellRemaining = undefined; actor.waypoint += 1; }
+      return;
+    }
+
     const pos = actor.root.getPosition().clone();
     const target = actor.route[actor.waypoint];
     const delta = new pc.Vec3().sub2(target, pos);
     delta.y = 0;
     const distance = delta.length();
     if (distance < 0.08) {
+      const dwell = actor.dwellAt?.get(actor.waypoint);
+      if (dwell) {
+        actor.dwellAt!.delete(actor.waypoint);
+        actor.dwellRemaining = dwell;
+        return;
+      }
       actor.waypoint += 1;
       return;
     }

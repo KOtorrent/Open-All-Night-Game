@@ -13,6 +13,9 @@ interface CustomerActor {
   route: pc.Vec3[];
   speed: number;
   served: boolean;
+  /** Optional scripted shopping pause: waypoint index -> dwell seconds, consumed on arrival. */
+  dwellAt?: Map<number, number>;
+  dwellRemaining?: number;
 }
 
 function makeMat(color: pc.Color, gloss = 0.22): pc.StandardMaterial {
@@ -89,6 +92,12 @@ export class NightOneDirector {
     this.buildCoolerLighting();
   }
 
+  /** Read-only route/waypoint peek for CustomerShoppingSystem's presentation-only turn-back logic. */
+  getShoppingRouteInfo(rootName: string): { route: pc.Vec3[]; waypoint: number } | null {
+    if (rootName !== 'Earl-Regular-Customer' || !this.customer) return null;
+    return { route: this.customer.route, waypoint: this.customer.waypoint };
+  }
+
   update(dt: number): void {
     this.elapsed += dt;
     this.updateEntranceSensor();
@@ -150,10 +159,13 @@ export class NightOneDirector {
       route: [
         new pc.Vec3(0, 0, 10.2),
         new pc.Vec3(2.3, 0, 5.6),
+        // Index 2 (2.3, 2.4) already sits inside aisle 3's own interior - a real shelf browse
+        // stop with zero added path distance, per docs/CUSTOMER_SHOPPING_BEHAVIOR.md.
         new pc.Vec3(2.3, 0, 2.4),
         new pc.Vec3(-2.8, 0, 5.2),
         new pc.Vec3(-3.90, 0, 7.45)
-      ]
+      ],
+      dwellAt: new Map([[2, 2.2]])
     };
     this.playChime();
     this.ui.showMessage('DING-DONG. Someone comes in from the pumps.', 3200);
@@ -306,12 +318,23 @@ export class NightOneDirector {
   }
 
   private moveActor(c: CustomerActor, dt: number): void {
+    if (c.dwellRemaining !== undefined) {
+      c.dwellRemaining -= dt;
+      if (c.dwellRemaining <= 0) { c.dwellRemaining = undefined; c.waypoint += 1; }
+      return;
+    }
     const pos = c.root.getPosition().clone();
     const target = c.route[c.waypoint];
     const delta = new pc.Vec3().sub2(target, pos);
     delta.y = 0;
     const distance = delta.length();
     if (distance < 0.08) {
+      const dwell = c.dwellAt?.get(c.waypoint);
+      if (dwell) {
+        c.dwellAt!.delete(c.waypoint);
+        c.dwellRemaining = dwell;
+        return;
+      }
       c.waypoint += 1;
       return;
     }
