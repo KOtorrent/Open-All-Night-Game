@@ -67,20 +67,24 @@ All meshes share one small texture atlas (`Textures/colormap.png`, 8.7KB) sample
 | `bread` (from `display-bread.glb`) | Kenney | same | CC0 1.0 | Yes | None | 132 | shared | Distinct loaf silhouette, useful as a bonus snack/bakery item on Aisle 1 | **ACCEPT** — used as an occasional snack variant |
 | `display-fruit` | Kenney | same | CC0 1.0 | Yes | None | (combined) | shared | Single fused mesh, not separable into individual reusable items without model editing this session can't do | **HOLD** — not integrated this pass |
 | `bottle-return` | Kenney | same | CC0 1.0 | Yes | None | (combined) | shared | A return-bin fixture, not a stockable product | **REJECT** — wrong category |
-| Kenney "can" (soda/energy-drink) | Kenney | kenney.nl Mini Market (full pack) | CC0 1.0 (expected) | Expected yes | Expected none | unknown | unknown | The full Kenney Mini Market pack very likely includes a can-shaped object (Kenney's grocery kits typically do), but **the mirrored subset in `parastore` does not include one** — `kenney.nl` itself is blocked so the full pack can't be verified or fetched | **HOLD** — see "Uncompleted category" below |
+| Kenney "can" (soda/energy-drink) | Kenney | kenney.nl Mini Market (full pack) | CC0 1.0 (expected) | Expected yes | Expected none | unknown | unknown | The full Kenney Mini Market pack very likely includes a can-shaped object (Kenney's grocery kits typically do), but **the mirrored subset in `parastore` does not include one** — `kenney.nl` itself is blocked so the full pack can't be verified or fetched | **RESOLVED in Pass 6** — see update below |
 
-## Uncompleted category: cans
+## Uncompleted category: cans — RESOLVED in Pass 6
 
-No can-shaped mesh was available through any reachable channel this pass. Per the brief's own
-"if network access is blocked" instructions, cans are **not** getting a bad placeholder swap —
-they keep the existing, already-upgraded (Pass 4) primitive cylinder+cap+label-band presentation,
-which is honestly documented as unchanged in the review package's weak-spots notes.
+Pass 6 re-checked this gap against `shorepine/kenney`, a full mirror of the entire Kenney asset
+library (all 49 3D kits, not just the Mini Market subset `parastore` mirrors) organized for a
+different asset service. Comparing its `3d/mini-market/` file listing against the files already
+vendored here confirmed they are IDENTICAL — the full original Mini Market pack genuinely has no
+can-shaped model. This closes the "maybe the full pack has one" question definitively rather than
+leaving it open.
 
-**If you can reach it:** the exact page to check is `https://kenney.nl/assets/mini-market` (the
-full original pack, not the subset mirrored here). If it contains a can-shaped model, download the
-pack `.zip` from that page (Kenney always ships CC0 1.0, no account required) and upload the
-extracted can `.glb`/`.gltf` file here — I can wire it into the same clone-and-retint system this
-pass built for box/carton/bag/bottle with no further asset-sourcing work needed.
+The gap was filled from a **different** Kenney kit in the same mirror/license: `3d/food/`
+("Food Kit"), which has `soda-can.glb` (a real can silhouette, 164 tris) and, as a bonus,
+`candy-bar-wrapper.glb` (48 tris, used for the checkout candy rack). Both are CC0 1.0 per the same
+blanket license the whole `shorepine/kenney` repo ships under (its own `LICENSE.txt`/`README.md`).
+Vendored to `public/assets/merchandise/kenney-food/` and wired into
+`src/merchandiseAssetSystem.ts`'s harvest system exactly like the Pass 5 box/carton/bag/bottle
+assets - see `docs/PASS6_PACKAGING_ATLAS.md` for the packaging-label side of this work.
 
 ## Rejected sources (not pursued further)
 

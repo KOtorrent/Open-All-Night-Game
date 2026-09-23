@@ -122,8 +122,36 @@ throughout `authoredRetailAssetSystem.ts`, not a modification to the vendored fi
 
 **Not vendored:** `display-fruit.glb` and `bottle-return.glb` were reviewed and held/rejected - see
 `docs/PASS5_MERCHANDISE_ASSET_REVIEW.md` for why. No can-shaped Kenney asset was available in the
-reachable mirror subset; cans keep their existing Pass 4 primitive presentation, documented as an
-honest gap rather than a placeholder swap.
+reachable mirror subset at the time; cans kept their existing Pass 4 primitive presentation,
+documented as an honest gap - **resolved in Pass 6, see below.**
+
+## Pass 6 — vendored can/candy-wrapper assets + original packaging label art
+
+Graphics overhaul Pass 6 (`docs/PASS6_PACKAGING_ATLAS.md` has the full label-atlas documentation)
+closed the Pass 5 can-shaped gap and added fictional packaging art:
+
+| Local path | Source file | Provenance | Used for |
+| --- | --- | --- | --- |
+| `public/assets/merchandise/kenney-food/soda-can.glb` | `soda-can.glb` | Kenney *Food Kit* (CC0 1.0), mirrored via `shorepine/kenney` (`3d/food/`) | Can-shaped shelf/cooler/carried-item product mesh |
+| `public/assets/merchandise/kenney-food/candy-bar-wrapper.glb` | `candy-bar-wrapper.glb` | same | Checkout candy-rack product mesh |
+| `public/assets/merchandise/kenney-food/Textures/colormap.png` | `Textures/colormap.png` | same | Shared colormap both files above reference by relative URI |
+
+**Provenance:** `shorepine/kenney` is a full mirror of Kenney's entire asset library (all 49 3D
+kits), organized for a different first-party asset service, whose own `LICENSE.txt` and
+`README.md` state the entire repository is released under Creative Commons Zero. This is the same
+license family as the `kenney.nl`/`parastore` assets already vendored above, just reached through a
+different mirror once `kenney.nl` itself and the `parastore` mirror's own subset were confirmed not
+to contain a can-shaped model (see `docs/PASS5_MERCHANDISE_ASSET_REVIEW.md`'s "Uncompleted
+category: cans" section for the full comparison that ruled out the Mini Market pack specifically).
+
+| Local path | Purpose |
+| --- | --- |
+| `public/assets/merchandise/labels/merchandise_atlas_01.png` | Original art - fictional snack/boxed/candy/Case's packaging labels (not sourced/vendored) |
+| `public/assets/merchandise/labels/merchandise_atlas_02.png` | Original art - fictional drink/carton/household/Case's packaging labels (not sourced/vendored) |
+
+Both label atlases were authored for this repository during Pass 6 (Python + Pillow, system fonts)
+- same category as the procedurally-generated wall/floor textures from Pass 1, not a third-party
+asset. See `docs/PASS6_PACKAGING_ATLAS.md` for the full region map and how they're applied.
 
 ## Remaining remote-mirror assets (experimental / unapproved, not shipped)
 
