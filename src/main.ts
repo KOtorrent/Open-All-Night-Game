@@ -181,7 +181,8 @@ const customerShopping = new CustomerShoppingSystem(app, (rootName) =>
   jenna.getShoppingRouteInfo(rootName) ??
   marcus.getShoppingRouteInfo(rootName) ??
   dale.getShoppingRouteInfo(rootName) ??
-  lateCustomer.getShoppingRouteInfo(rootName)
+  lateCustomer.getShoppingRouteInfo(rootName),
+  merchandiseAssets
 );
 const receipts = new ReceiptSystem(app, world, state);
 const transactions = new TransactionFeedbackSystem(state);

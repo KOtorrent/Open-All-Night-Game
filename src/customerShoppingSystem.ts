@@ -1,6 +1,18 @@
 import * as pc from 'playcanvas';
+import type { MerchandiseAssetSystem, ProductKind } from './merchandiseAssetSystem';
 
 const HAND_BONE = 'Wrist.R';
+/** Maps a carried-item kind to the authored mesh kind that best matches it, where one exists.
+ * 'can' and 'cup' have no matching authored asset (see docs/PASS5_MERCHANDISE_ASSET_REVIEW.md) and
+ * keep their existing primitive presentation. */
+const CARRIED_ITEM_TO_MERCHANDISE_KIND: Partial<Record<ShoppingStopProp, ProductKind>> = {
+  snack: 'bag', box: 'box', bottle: 'bottle'
+};
+type ShoppingStopProp = 'snack' | 'box' | 'bottle' | 'can' | 'cup';
+/** Scales the authored mesh's own natural size down to roughly the same hand-held size the
+ * primitive it replaces used (measured against each source mesh's own bounding box - see
+ * docs/PASS5_MERCHANDISE_ASSET_REVIEW.md). */
+const CARRIED_ITEM_AUTHORED_SCALE: Record<ProductKind, number> = { bag: 0.5, box: 0.55, bottle: 0.74, carton: 0.5, bread: 0.4 };
 const TURN_DEGREES_PER_SECOND = 420; // completes a ~180 deg turn in well under the brief's 0.2-0.5s window
 
 interface ShoppingStop {
@@ -11,7 +23,7 @@ interface ShoppingStop {
   radius: number;
   dwellSeconds: number;
   facingTarget: pc.Vec3;
-  prop: 'snack' | 'box' | 'bottle' | 'can' | 'cup';
+  prop: ShoppingStopProp;
   coolerDoorIndex?: number;
 }
 
@@ -60,10 +72,16 @@ export class CustomerShoppingSystem {
   private readonly coolerDoorState = new Map<number, { pivot: pc.Entity; angle: number; target: number }>();
   private readonly propMaterials = new Map<string, pc.StandardMaterial>();
   private readonly getRouteInfo: (rootName: string) => { route: pc.Vec3[]; waypoint: number } | null;
+  private readonly merchandise?: MerchandiseAssetSystem;
 
-  constructor(app: pc.Application, getRouteInfo: (rootName: string) => { route: pc.Vec3[]; waypoint: number } | null) {
+  constructor(
+    app: pc.Application,
+    getRouteInfo: (rootName: string) => { route: pc.Vec3[]; waypoint: number } | null,
+    merchandise?: MerchandiseAssetSystem
+  ) {
     this.app = app;
     this.getRouteInfo = getRouteInfo;
+    this.merchandise = merchandise;
   }
 
   update(dt: number): void {
@@ -200,6 +218,23 @@ export class CustomerShoppingSystem {
   }
 
   private buildProp(prop: ShoppingStop['prop']): pc.Entity {
+    // Visual pass 5: if an authored mesh exists for this prop kind, use it instead of a primitive
+    // - this is the ONLY thing this function does differently; route/timing/hand-attachment logic
+    // above and below this function is untouched. Falls straight back to the original primitive
+    // path if the merchandise system isn't ready or has nothing for this kind.
+    const merchandiseKind = CARRIED_ITEM_TO_MERCHANDISE_KIND[prop];
+    if (merchandiseKind && this.merchandise && !this.merchandise.hasNothingFor(merchandiseKind)) {
+      const authored = this.merchandise.createProduct(merchandiseKind, 0, this.carriedItemColor(prop));
+      if (authored) {
+        authored.name = `CarriedItem-${prop}`;
+        const scale = CARRIED_ITEM_AUTHORED_SCALE[merchandiseKind];
+        authored.setLocalScale(scale, scale, scale);
+        authored.setLocalPosition(0.03, -0.14, 0.02);
+        authored.setLocalEulerAngles(0, 0, 0);
+        return authored;
+      }
+    }
+
     const entity = new pc.Entity(`CarriedItem-${prop}`);
     const render = (type: 'box' | 'cylinder', color: pc.Color, gloss: number) => {
       entity.addComponent('render', { type });
@@ -233,6 +268,18 @@ export class CustomerShoppingSystem {
     entity.setLocalPosition(0.03, -0.08, 0.02);
     entity.setLocalEulerAngles(0, 0, 0);
     return entity;
+  }
+
+  /** Same colors the primitive-path switch in buildProp() already used per prop kind, reused here
+   * so the authored-mesh path and the primitive fallback path always agree on color. */
+  private carriedItemColor(prop: ShoppingStop['prop']): pc.Color {
+    switch (prop) {
+      case 'snack': return new pc.Color(0.58, 0.15, 0.05);
+      case 'box': return new pc.Color(0.62, 0.55, 0.30);
+      case 'bottle': return new pc.Color(0.08, 0.34, 0.31);
+      case 'can': return new pc.Color(0.55, 0.08, 0.08);
+      case 'cup': return new pc.Color(0.78, 0.71, 0.54);
+    }
   }
 
   private getPropMaterial(key: string, color: pc.Color, gloss: number): pc.StandardMaterial {
