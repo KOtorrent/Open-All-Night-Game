@@ -29,6 +29,12 @@ export class StoreSignageSystem {
 
     this.createWallSign('CoffeeSign', new pc.Vec3(6.45, 2.75, 9.45), new pc.Vec2(1.8, 0.55), new pc.Vec3(0, 180, 0), 'FRESH COFFEE', '24 HOURS', serviceStyle);
 
+    // Visual pass 4, Phase 7: two restrained additions - a cooler-bank category header (above
+    // CoolerHeaderTrim, storeBuilder.ts, y=3.24) and a small free-standing checkout sign (same
+    // double-sign pattern as the aisle signs), instead of covering every open slot the brief lists.
+    this.createWallSign('CoolerHeaderSign', new pc.Vec3(4.8, 3.55, -10.68), new pc.Vec2(2.6, 0.42), new pc.Vec3(0, 0, 0), 'COLD DRINKS', '', aisleStyle);
+    this.createDoubleSign('CheckoutSign', new pc.Vec3(-5.6, 3.30, 7.4), new pc.Vec2(1.9, 0.5), 'CHECKOUT', 'PLEASE HAVE ID READY', serviceStyle);
+
     // There is exactly one employee entrance from the sales floor: the original central gap in the
     // back divider. Put its sign over THAT opening instead of over the office wall.
     this.createWallSign('EmployeesSign', new pc.Vec3(-3.10, 2.82, -7.10), new pc.Vec2(1.55, 0.46), new pc.Vec3(0, 0, 0), 'EMPLOYEES ONLY', '', serviceStyle);

@@ -140,6 +140,25 @@ export function buildStaffArea(app: pc.Application, world: BuiltWorld, materials
   box(app, 'OfficeKeyboard', -6.95, 0.825, -10.30, 0.42, 0.02, 0.16, trim).setEulerAngles(0, -6, 0);
   cylinder(app, 'OfficeMug', -6.85, 0.87, -10.55, 0.11, 0.14, 0.11, mat(new pc.Color(0.42, 0.06, 0.05), 0.15, 0.2));
 
+  // Visual pass 4, Phase 8: ambient office clutter, kept on the file-cabinet/right-desk side
+  // (x > -7.4) well clear of officeLoreSystem.ts's roster/incident-folder/terminal props (all at
+  // x <= -7.62) so the lore interactables stay visually distinct and easy to aim-target.
+  const folderColors = [mat(new pc.Color(0.30, 0.17, 0.08)), mat(new pc.Color(0.16, 0.25, 0.19)), mat(new pc.Color(0.30, 0.05, 0.05))];
+  for (let i = 0; i < 3; i++) {
+    box(app, `OfficeFolderStack-${i}`, -6.35, 1.66 + i * 0.03, -11.05 + i * 0.01, 0.42, 0.025, 0.58, folderColors[i]).setEulerAngles(0, i * 4 - 4, 0);
+  }
+  // Stuck to the file cabinet's own right-side face (a known-clear flat surface, thin box along x
+  // so it lies flush) rather than floating near the desk.
+  const stickyColors = [mat(new pc.Color(0.78, 0.72, 0.18)), mat(new pc.Color(0.75, 0.42, 0.10)), mat(new pc.Color(0.70, 0.72, 0.72))];
+  for (let i = 0; i < 3; i++) {
+    box(app, `OfficeStickyNote-${i}`, -5.965, 1.30 - i * 0.11, -11.15 + i * 0.06, 0.006, 0.09, 0.09, stickyColors[i]).setEulerAngles(0, 0, (i - 1) * 5);
+  }
+  box(app, 'OfficeWallCalendar', -5.85, 2.15, -10.80, 0.012, 0.46, 0.34, paper).setEulerAngles(0, 90, 0);
+  // Left wall, front portion - clear of the bulletin board's own spot at z=-10.15.
+  box(app, 'OfficeMaintenanceClipboard', -9.65, 1.55, -9.15, 0.02, 0.34, 0.24, mat(new pc.Color(0.38, 0.22, 0.06), 0, 0.3));
+  // Front-right corner of the room, clear of the desk/chair/cabinet/bulletin cluster (all z<=-9.6).
+  box(app, 'OfficeStorageBox', -6.0, 0.28, -8.6, 0.55, 0.52, 0.48, materials.get('cardboard'));
+
   // Human playtesting confirmed the staff area reads as crushed-black despite these fixtures being
   // present: PlayCanvas omni-light falloff at the intensity scale used elsewhere in this file (under
   // ~1.0) is nearly invisible on these mid-gray diffuse walls. Empirically verified in-engine that an
