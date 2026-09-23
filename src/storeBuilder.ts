@@ -140,6 +140,19 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
   colliderFromBox(colliders, -7.2, 12, 5.6, 0.18, 'Front wall L');
   colliderFromBox(colliders, 7.2, 12, 5.6, 0.18, 'Front wall R');
 
+  // Restrained floor/corner wall grime (visual pass 4, Phase 1): a thin dark strip at the actual
+  // floor-wall junction, not baked into the repeating off_white_wall texture itself - a directional
+  // feature in a texture tiled 2x vertically would reappear as a visible seam partway up the wall
+  // (confirmed while authoring the new texture). This reads as scuffed baseboard/mop-line wear
+  // without needing new geometry beyond a thin box per wall run, reusing darkSteel so no new
+  // material/draw call is introduced.
+  const baseboardH = 0.16;
+  addBox(app, 'BaseboardLeft', new pc.Vec3(-9.90, baseboardH / 2, 0), new pc.Vec3(0.05, baseboardH, 24), darkSteel);
+  addBox(app, 'BaseboardRight', new pc.Vec3(9.90, baseboardH / 2, 0), new pc.Vec3(0.05, baseboardH, 24), darkSteel);
+  addBox(app, 'BaseboardBack', new pc.Vec3(0, baseboardH / 2, -11.90), new pc.Vec3(20, baseboardH, 0.05), darkSteel);
+  addBox(app, 'BaseboardFrontL', new pc.Vec3(-7.2, baseboardH / 2, 11.90), new pc.Vec3(5.6, baseboardH, 0.05), darkSteel);
+  addBox(app, 'BaseboardFrontR', new pc.Vec3(7.2, baseboardH / 2, 11.90), new pc.Vec3(5.6, baseboardH, 0.05), darkSteel);
+
   // Checkout counter, front-left.
   addBox(app, 'CounterBase', new pc.Vec3(-5.6, 0.62, 8.0), new pc.Vec3(6.2, 1.24, 1.25), counter);
   addBox(app, 'CounterTop', new pc.Vec3(-5.6, 1.30, 8.0), new pc.Vec3(6.45, 0.13, 1.48), laminate);

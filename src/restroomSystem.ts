@@ -130,6 +130,14 @@ export class RestroomSystem {
     box(this.app, 'TrashCan', new pc.Vec3(-0.35, 0.28, -9.15), new pc.Vec3(0.34, 0.56, 0.34), mat(new pc.Color(0.16, 0.17, 0.16), 0.3, 0.2));
     cylinder(this.app, 'SoapDispenser', new pc.Vec3(-0.30, 1.02, -10.12), new pc.Vec3(0.09, 0.20, 0.09), mat(new pc.Color(0.62, 0.66, 0.30), 0, 0.4));
 
+    // Visual pass 4, Phase 9: restrained baseboard wear (matches the same treatment added to the
+    // main sales-floor walls) plus a worn rubber floor mat by the sink so the room reads as used-
+    // but-operational rather than either pristine or filthy.
+    const baseboard = mat(new pc.Color(0.11, 0.115, 0.115), 0.2, 0.2);
+    box(this.app, 'RestroomBaseboardRight', new pc.Vec3(rightX - 0.09, 0.08, -10.18), new pc.Vec3(0.04, 0.16, 3.28), baseboard);
+    box(this.app, 'RestroomBaseboardBack', new pc.Vec3(cx, 0.08, backZ + 0.09), new pc.Vec3(2.40, 0.16, 0.04), baseboard);
+    box(this.app, 'RestroomFloorMat', new pc.Vec3(-0.62, 0.021, -9.70), new pc.Vec3(0.62, 0.01, 0.42), mat(new pc.Color(0.10, 0.11, 0.115), 0, 0.10));
+
     const light = new pc.Entity('RestroomCeilingLight');
     light.addComponent('light', {
       type: 'omni',
