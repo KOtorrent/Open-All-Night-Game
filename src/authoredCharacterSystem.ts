@@ -37,7 +37,14 @@ interface CharacterBinding {
   /** Uniform world-space scale applied to the authored mesh (bbox-height-derived; see docs/QUATERNIUS_CHARACTER_INTEGRATION.md). */
   scale: number;
   yaw?: number;
-  /** Extra local Z offset applied only to the player avatar so the FPS camera clears the skull mesh. */
+  /**
+   * Extra local Z offset applied only to the player avatar so the FPS camera clears the mesh.
+   * The avatar root sits exactly under the camera every frame (see playerAvatar.ts), so this is
+   * the only thing keeping the camera from rendering from inside its own head/shoulders. 0.18 (the
+   * original primitive-era value, sized for a thin neck cylinder) was measured in-engine to leave
+   * ZERO clearance against the full authored mesh - 0.6 leaves ~0.31m, comfortably past the 0.05m
+   * near-clip plane. See docs/CUSTOMER_SHOPPING_BEHAVIOR.md Phase 1 for the measurement.
+   */
   offsetZ?: number;
   /** Selective per-material-name-substring diffuse color override (skin/hair/eyes are left alone). */
   overrides: Record<string, pc.Color>;
@@ -158,7 +165,7 @@ export class AuthoredCharacterSystem {
     // Player avatar / Duplicate Player: neutral employee look, same model+overrides for both so the
     // duplicate genuinely resembles the player.
     {
-      rootName: 'Player-World-Avatar', assetId: 'q-player', file: 'male/Beach.gltf', scale: (0.945) * SCALE_CORRECTION, yaw: 180, offsetZ: 0.18,
+      rootName: 'Player-World-Avatar', assetId: 'q-player', file: 'male/Beach.gltf', scale: (0.945) * SCALE_CORRECTION, yaw: 180, offsetZ: 0.6,
       overrides: {
         Red_Dark: new pc.Color(0.09, 0.13, 0.10),
         LightBrown: new pc.Color(0.16, 0.15, 0.14),
