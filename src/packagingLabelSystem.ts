@@ -82,6 +82,19 @@ const DECAL_LAYOUT: Partial<Record<ProductKind, { w: number; h: number; y: numbe
   candyBar: { w: 0.26, h: 0.075, y: 0.041, z: 0.059 }
 };
 
+// Graphics overhaul Pass 6, Phase 14: per-kind body material response, replacing a single flat
+// gloss value that made cardboard boxes and aluminum cans read identically. Kept subtle (max gloss
+// 0.5, max metalness 0.35) - the brief explicitly warns against a "glossy toy look".
+const BODY_MATERIAL_RESPONSE: Record<ProductKind, { metalness: number; gloss: number }> = {
+  box: { metalness: 0, gloss: 0.10 },
+  carton: { metalness: 0, gloss: 0.14 },
+  bread: { metalness: 0, gloss: 0.08 },
+  bag: { metalness: 0.04, gloss: 0.32 },
+  candyBar: { metalness: 0.04, gloss: 0.28 },
+  bottle: { metalness: 0, gloss: 0.42 },
+  can: { metalness: 0.30, gloss: 0.50 }
+};
+
 function retint(entity: pc.Entity, color: pc.Color, metalness: number, gloss: number): void {
   const material = new pc.StandardMaterial();
   material.diffuse = color;
@@ -180,7 +193,8 @@ export class PackagingLabelSystem {
    * plane on its front face sampling the brand's atlas cell. No-op (silently) if the atlas isn't
    * loaded yet or this product kind has no decal layout - the mesh keeps its Pass 5 flat tint. */
   applyToAuthoredProduct(entity: pc.Entity, kind: ProductKind, brand: Brand): void {
-    retint(entity, brand.baseColor, 0, 0.20);
+    const { metalness, gloss } = BODY_MATERIAL_RESPONSE[kind];
+    retint(entity, brand.baseColor, metalness, gloss);
     if (!this.ready) return;
     const layout = DECAL_LAYOUT[kind];
     if (!layout) return;

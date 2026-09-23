@@ -28,6 +28,12 @@ export class StoreSignageSystem {
     this.createDoubleSign('AisleSign4', new pc.Vec3(5.1, 3.35, 5.0), new pc.Vec2(1.65, 0.48), 'AISLE 4', 'COLD DRINKS', aisleStyle);
 
     this.createWallSign('CoffeeSign', new pc.Vec3(6.45, 2.75, 9.45), new pc.Vec2(1.8, 0.55), new pc.Vec3(0, 180, 0), 'FRESH COFFEE', '24 HOURS', serviceStyle);
+    // Graphics overhaul Pass 6, Phase 12: one small promo sign tying the coffee station to the same
+    // fictional brand language the packaging atlas uses (docs/PASS6_PACKAGING_ATLAS.md's Case's
+    // private label - Atlas 2, 1,1 "Case's House Coffee"), reusing the store's own established
+    // green/cream signage palette (aisleStyle) rather than inventing a new color scheme for it.
+    // Deliberately small and placed below the existing FRESH COFFEE sign, not a second big sign.
+    this.createWallSign('CoffeeBrandSign', new pc.Vec3(7.55, 2.25, 9.44), new pc.Vec2(1.15, 0.32), new pc.Vec3(0, 180, 0), "CASE'S HOUSE BLEND", '', aisleStyle, 0.58);
 
     // Visual pass 4, Phase 7: two restrained additions - a cooler-bank category header (above
     // CoolerHeaderTrim, storeBuilder.ts, y=3.24) and a small free-standing checkout sign (same
