@@ -188,7 +188,12 @@ export class PackagingLabelSystem {
     decal.addComponent('render', { type: 'plane' });
     decal.setLocalScale(layout.w, 1, layout.h);
     decal.setLocalPosition(0, layout.y, layout.z);
-    decal.setLocalEulerAngles(-90, 0, 0);
+    // A PlayCanvas 'plane' primitive's own +Y normal, rotated -90 about local X, ends up pointing
+    // toward local -Z (i.e. back into the product, away from the customer-facing +Z side the decal
+    // is offset toward via layout.z above) - confirmed via an in-engine screenshot showing every
+    // cooler-stock label's text mirrored/backwards. +90 instead points the decal's front at +Z,
+    // matching layout.z's own positive offset, and was re-verified to read correctly.
+    decal.setLocalEulerAngles(90, 0, 0);
     if (decal.render) decal.render.material = this.getAtlasMaterial(brand, 0.10);
     entity.addChild(decal);
   }

@@ -226,7 +226,17 @@ export function buildStore(app: pc.Application, state: GameState, ui: GameUI, ma
     const shelfY = counterTopY + 0.10 + tier * 0.20;
     addBox(app, `CandyRackShelf-${tier}`, new pc.Vec3(-3.05, shelfY, 8.20), new pc.Vec3(0.56, 0.02, 0.20), steel);
     for (let i = 0; i < 3; i++) {
-      checkoutCandyEntities.push(addBox(app, `CandyBar-${tier}-${i}`, new pc.Vec3(-3.24 + i * 0.19, shelfY + 0.09, 8.20), new pc.Vec3(0.15, 0.16, 0.03), candyColors[(tier + i) % candyColors.length]));
+      const candyEntity = addBox(app, `CandyBar-${tier}-${i}`, new pc.Vec3(-3.24 + i * 0.19, shelfY + 0.09, 8.20), new pc.Vec3(0.15, 0.16, 0.03), candyColors[(tier + i) % candyColors.length]);
+      checkoutCandyEntities.push(candyEntity);
+      // Graphics overhaul Pass 6 Phase 9/5: prefer the vendored kenney-food candy-bar-wrapper mesh
+      // (a real candy-bar silhouette) over the flat primitive box when it's available; falls back
+      // to the checkoutCandyEntities direct-material labeling above if the authored mesh fails to
+      // load, same optional-degrade pattern as every other merchandise slot.
+      merchandiseSlots.push({
+        entity: candyEntity, kind: 'candyBar', variantIndex: tier * 3 + i,
+        color: candyColors[(tier + i) % candyColors.length].diffuse, yaw: 0, scale: 0.48,
+        category: 'candy'
+      });
     }
   }
   addBox(app, 'LotteryPanel', new pc.Vec3(-7.85, counterTopY + 0.31, 7.85), new pc.Vec3(0.05, 0.62, 0.92), darkSteel).setEulerAngles(0, 8, 0);

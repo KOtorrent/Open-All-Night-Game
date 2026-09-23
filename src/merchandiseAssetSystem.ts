@@ -92,7 +92,16 @@ export class MerchandiseAssetSystem {
     for (const spec of SPECS) {
       const root = await this.registry.instantiate(spec.assetId, staging);
       for (const [nodeName, kind] of spec.nodes) {
-        const matches = root.find('name', nodeName) as pc.Entity[];
+        let matches = root.find('name', nodeName) as pc.Entity[];
+        // Pass 6: single-object glTF files (soda-can.glb, candy-bar-wrapper.glb) have exactly one
+        // scene node, and that node IS the container root - but AssetRegistry.instantiate() always
+        // renames the root entity to the asset id before this harvest runs, so the node's own name
+        // (which is what spec.nodes references) never survives to be found as a descendant. Multi-
+        // object files (shelf-boxes.glb etc.) are unaffected: their target nodes are children of the
+        // renamed root, not the root itself.
+        if (!matches.length && spec.nodes.length === 1 && root.findComponent('render')) {
+          matches = [root];
+        }
         if (!matches.length) continue;
         const list = this.templates.get(kind) ?? [];
         list.push(...matches);
