@@ -1,0 +1,7 @@
+{
+  "name": "open-all-night-playtest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OPEN ALL NIGHT - portable Windows playtest shell",
+  "main": "main.js"
+}

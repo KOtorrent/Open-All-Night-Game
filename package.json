@@ -12,6 +12,8 @@
     "playcanvas": "^2.22.2"
   },
   "devDependencies": {
+    "electron": "^44.4.5",
+    "electron-packager": "^17.1.2",
     "typescript": "^5.9.2",
     "vite": "^7.1.5"
   }

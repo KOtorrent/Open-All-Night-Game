@@ -3,3 +3,7 @@ dist/
 .vite/
 .DS_Store
 *.log
+# Playtest packaging build outputs (scripts/package-playtest-win64.sh) - generated, not source.
+electron/dist/
+release/
+*.zip

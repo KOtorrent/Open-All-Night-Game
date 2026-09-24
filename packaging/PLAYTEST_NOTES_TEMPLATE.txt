@@ -1,0 +1,21 @@
+OPEN ALL NIGHT — PLAYTEST BUG / FEEDBACK REPORT
+================================================
+(Copy this block for each separate issue)
+
+AREA / NIGHT:
+TIME:
+WHAT I WAS DOING:
+WHAT HAPPENED:
+WHAT I EXPECTED:
+CAN I REPRODUCE IT:
+SCREENSHOT / NOTES:
+
+VISUAL FEEDBACK
+---------------
+GRAPHICS:
+ANIMATION:
+LIGHTING:
+SCALE:
+UI:
+AUDIO:
+OTHER:
