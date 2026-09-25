@@ -34,6 +34,17 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
+// A fixed port, not an OS-assigned random one (`.listen(0, ...)`), is required here: the page's
+// origin is "http://127.0.0.1:<port>", and localStorage - which is how this game's own save data
+// persists - is scoped per origin. A random port every launch would put each session's save under
+// a different origin, silently discarding it on relaunch even though the same on-disk profile
+// directory is reused. Caught by an explicit two-launch persistence test against the packaged
+// build before shipping, not assumed. If this port is somehow already taken (another instance
+// already running, or a leftover process from a crash), fall back to an OS-assigned port with a
+// clear one-time warning - better a working game with no persistence that session than a game that
+// won't start at all.
+const FIXED_PORT = 47821;
+
 function startLocalServer() {
   return new Promise((resolve, reject) => {
     const server = http.createServer((req, res) => {
@@ -57,11 +68,24 @@ function startLocalServer() {
         res.end(data);
       });
     });
-    server.listen(0, '127.0.0.1', () => {
+    let fellBack = false;
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE' && !fellBack) {
+        fellBack = true;
+        console.warn(
+          `Port ${FIXED_PORT} is already in use - falling back to a random port. ` +
+          'Save data from a previous session on this machine will not be visible this run.'
+        );
+        server.listen(0, '127.0.0.1');
+        return;
+      }
+      reject(err);
+    });
+    server.on('listening', () => {
       const address = server.address();
       resolve(typeof address === 'object' && address ? address.port : 0);
     });
-    server.on('error', reject);
+    server.listen(FIXED_PORT, '127.0.0.1');
   });
 }
 
